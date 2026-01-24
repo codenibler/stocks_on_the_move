@@ -64,7 +64,7 @@ def plot_momentum_buckets(
         ax.grid(axis="y", linestyle="--", alpha=0.3)
         fig.tight_layout()
 
-        filename = os.path.join(charts_dir, f"momentum_{label}.png")
+        filename = os.path.join(charts_dir, f"{label}.png")
         fig.savefig(filename)
         plt.close(fig)
         logger.info("Saved momentum chart: %s", filename)

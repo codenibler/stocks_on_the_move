@@ -81,8 +81,13 @@ def build_buy_orders(
 ) -> Tuple[List[OrderRequest], float]:
     orders: List[OrderRequest] = []
     remaining_cash = cash
+    seen: set[str] = set()
 
     for stock in ranked[:top_n]:
+        if stock.ticker in seen:
+            logger.debug("Skipping duplicate ticker in buy list: %s", stock.ticker)
+            continue
+        seen.add(stock.ticker)
         target_qty = (risk_fraction * total_equity) / stock.atr20
         current_qty = positions_by_ticker.get(stock.ticker, 0.0)
         delta_qty = target_qty - current_qty
@@ -97,7 +102,7 @@ def build_buy_orders(
             required_cash = delta_qty * stock.current_price
         if delta_qty <= 0:
             break
-        orders.append(OrderRequest(ticker=stock.ticker, quantity=round(delta_qty, 6)))
+        orders.append(OrderRequest(ticker=stock.ticker, quantity=round(delta_qty, 3)))
         remaining_cash -= required_cash
         logger.info(
             "Scheduled buy for %s qty=%s price=%.4f cash_left=%.2f",

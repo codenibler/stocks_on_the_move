@@ -166,8 +166,32 @@ def analyze_universe(
             )
         )
 
-    ranked = sorted(results, key=lambda stock: stock.score, reverse=True)
+    unique_by_ticker: Dict[str, AnalyzedStock] = {}
+    duplicate_count = 0
+    for stock in results:
+        existing = unique_by_ticker.get(stock.ticker)
+        if existing is None or stock.score > existing.score:
+            if existing is not None:
+                duplicate_count += 1
+                logger.debug(
+                    "Replacing duplicate ticker %s in rankings (old_score=%.4f new_score=%.4f)",
+                    stock.ticker,
+                    existing.score,
+                    stock.score,
+                )
+            unique_by_ticker[stock.ticker] = stock
+        else:
+            duplicate_count += 1
+            logger.debug(
+                "Skipping duplicate ticker %s in rankings (score=%.4f)",
+                stock.ticker,
+                stock.score,
+            )
+
+    ranked = sorted(unique_by_ticker.values(), key=lambda stock: stock.score, reverse=True)
     logger.info("Momentum ranking complete. Kept %s stocks", len(ranked))
+    if duplicate_count:
+        logger.info("Removed %s duplicate tickers from rankings", duplicate_count)
     if drop_counts:
         logger.info("Drop summary: %s", drop_counts)
 
