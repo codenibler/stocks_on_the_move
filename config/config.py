@@ -39,6 +39,8 @@ class StrategyConfig:
     risk_fraction: float
     sp500_ticker: str
     sp500_lookback: str
+    rebalance_threshold: float
+    max_position_fraction: float
 
 
 @dataclass(frozen=True)
@@ -112,6 +114,8 @@ def get_strategy_config() -> StrategyConfig:
         risk_fraction=float(os.getenv("RISK_FRACTION", "0.02")),
         sp500_ticker=os.getenv("SP500_TICKER", "^GSPC"),
         sp500_lookback=os.getenv("SP500_LOOKBACK", "1y"),
+        rebalance_threshold=float(os.getenv("REBALANCE_THRESHOLD", "0.01")),
+        max_position_fraction=float(os.getenv("MAX_POSITION_FRACTION", "0.10")),
     )
 
 

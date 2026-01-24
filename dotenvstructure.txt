@@ -31,12 +31,14 @@ GAP_THRESHOLD=0.15          # Gap threshold for dropouts.
 GAP_LOOKBACK=90             # Gap lookback days for dropouts.
 TOP_N=100                   # Top ranked count considered for positions.
 CHART_BUCKET=25             # Number of stocks in each chart.
-RISK_FRACTION=0.001         # Risk factor. Used in position sizing formula.
+RISK_FRACTION=0.001         # Risk factor.
+REBALANCE_THRESHOLD=0.01    # Rebalance threshold.
+MAX_POSITION_FRACTION=0.10  # Max position fraction.
 SP500_TICKER=^GSPC          # S&P500 ticker on yfinance.
 SP500_LOOKBACK=1y           # S&P500 lookback for yfinance data fetch.
 
 # ============ Charting ============
-CHART_FONT=Montserrat       # I love this font.
+CHART_FONT=Cascadia       # I love this font. (You must add your own to venv/lib/python3.11/site_packages/matplotlib/mpl-data/fonts) if not pre-loaded.)
 
 # ============ Runtime Logging ============
 LOG_ROOT=logs               # Logs root.

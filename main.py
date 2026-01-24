@@ -133,10 +133,6 @@ def main() -> None:
     else:
         logger.info("No sell orders required")
 
-    if not risk_on:
-        logger.info("S&P500 below SMA%s. Exiting after sells.", strategy_config.sma_long)
-        return
-
     summary = client.get_account_summary()
     cash = None
     if isinstance(summary, dict):
@@ -149,7 +145,7 @@ def main() -> None:
     logger.info("Cash available=%.2f holdings value=%.2f total equity=%.2f", cash, holdings_value, total_equity)
 
     positions_map = portfolio.extract_position_map(positions, allowed_tickers=top_tickers)
-    buy_orders, remaining_cash = portfolio.build_buy_orders(
+    buy_orders, rebalance_sell_orders, remaining_cash = portfolio.build_rebalance_orders(
         ranked,
         positions_by_ticker=positions_map,
         cash=float(cash),
@@ -157,7 +153,18 @@ def main() -> None:
         risk_fraction=strategy_config.risk_fraction,
         top_n=strategy_config.top_n,
         gap_lookback_days=strategy_config.gap_lookback_days,
+        rebalance_threshold=strategy_config.rebalance_threshold,
+        max_position_fraction=strategy_config.max_position_fraction,
     )
+
+    if rebalance_sell_orders:
+        execute_orders(client, rebalance_sell_orders, extended_hours=trading_config.extended_hours)
+    else:
+        logger.info("No rebalance sell orders required")
+
+    if not risk_on:
+        logger.info("S&P500 below SMA%s. Exiting after sells/rebalance.", strategy_config.sma_long)
+        return
 
     if buy_orders:
         execute_orders(client, buy_orders, extended_hours=trading_config.extended_hours)
