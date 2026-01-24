@@ -5,8 +5,8 @@ import os
 
 from indicators import analytics
 from indicators import strategy
-from core.config import get_runtime_config, get_strategy_config, get_trading212_config
-from core.logging_utils import setup_logging
+from config.config import get_runtime_config, get_strategy_config, get_trading212_config
+from config.logging_utils import setup_logging
 from data_fetching import market_data
 from execution import portfolio
 from execution.trading212_client import Trading212Client, Trading212Error
@@ -38,7 +38,15 @@ def check_sp500_trend(strategy_config) -> bool:
         return False
     current_price = float(price_series.dropna().iloc[-1])
     logger.info("S&P500 last close %.2f vs SMA%s %.2f", current_price, strategy_config.sma_long, sma200)
-    return current_price > sma200
+    risk_on = current_price >= sma200
+    trend_label = "ABOVE" if risk_on else "BELOW"
+    logger.info(
+        "S&P500 trend: %s SMA%s (price %s SMA)",
+        trend_label,
+        strategy_config.sma_long,
+        ">= " if risk_on else "< ",
+    )
+    return risk_on
 
 
 def execute_orders(client: Trading212Client, orders, *, extended_hours: bool) -> None:
@@ -78,6 +86,8 @@ def main() -> None:
         api_secret=trading_config.api_secret,
         base_url=trading_config.base_url,
         timeout_seconds=trading_config.timeout_seconds,
+        retries=trading_config.retries,
+        retry_sleep_seconds=trading_config.retry_sleep_seconds,
     )
 
     links = constituents.load_constituent_links()

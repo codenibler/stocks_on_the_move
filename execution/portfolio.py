@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Dict, Iterable, List, Tuple
 
-from core.classes import AnalyzedStock, OrderRequest
+from config.classes import AnalyzedStock, OrderRequest
 
 logger = logging.getLogger(__name__)
 

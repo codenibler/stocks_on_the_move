@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import logging
+import time
 from typing import Any, Dict, Optional
 
 import requests
@@ -21,9 +22,13 @@ class Trading212Client:
         api_secret: str,
         base_url: str,
         timeout_seconds: float = 30.0,
+        retries: int = 3,
+        retry_sleep_seconds: float = 1.0,
     ) -> None:
         self.base_url = base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
+        self.retries = max(1, retries)
+        self.retry_sleep_seconds = max(0.0, retry_sleep_seconds)
         self.session = requests.Session()
         self.session.headers.update({
             "Authorization": self._build_auth_header(api_key, api_secret),
@@ -72,17 +77,36 @@ class Trading212Client:
         if not path.startswith("http"):
             url = f"{self.base_url}{path}"
 
-        try:
-            response = self.session.request(
-                method,
-                url,
-                params=params,
-                json=json,
-                timeout=self.timeout_seconds,
-            )
-        except requests.RequestException as exc:
-            logger.error("Trading212 request failed: %s %s (%s)", method, url, exc)
-            raise Trading212Error(str(exc)) from exc
+        for attempt in range(1, self.retries + 1):
+            try:
+                response = self.session.request(
+                    method,
+                    url,
+                    params=params,
+                    json=json,
+                    timeout=self.timeout_seconds,
+                )
+                break
+            except requests.RequestException as exc:
+                if attempt >= self.retries:
+                    logger.error(
+                        "Trading212 request failed: %s %s (%s)",
+                        method,
+                        url,
+                        exc,
+                    )
+                    raise Trading212Error(str(exc)) from exc
+                logger.warning(
+                    "Trading212 request failed: %s %s (%s) attempt=%s/%s retrying in %.1fs",
+                    method,
+                    url,
+                    exc,
+                    attempt,
+                    self.retries,
+                    self.retry_sleep_seconds,
+                )
+                time.sleep(self.retry_sleep_seconds)
+                continue
 
         if response.status_code >= 400:
             message = response.text.strip()

@@ -1,0 +1,44 @@
+## Structure for .env file that is needed in root dir.
+
+# ============ Trading212 API Configuration ============
+TRADING212_API_KEY=           # Trading212 API key.
+TRADING212_API_SECRET=        # Trading212 API secret.
+TRADING212_BASE_URL=https://demo.trading212.com  # Trading212 base URL.
+TRADING212_TIMEOUT_SECONDS=30 # Request timeout (seconds).
+TRADING212_EXTENDED_HOURS=false  # Trade during extended hours if true.
+TRADING212_ENV=demo           # practice / live account
+TRADING212_RETRIES=3          # Retry count for API requests
+TRADING212_RETRY_SLEEP=1      # Retry wait (seconds)
+
+# ============ Index Constituents ============
+SP500_CONSTITUENTS=https://en.wikipedia.org/wiki/List_of_S%26P_500_companies  
+SP400_CONSTITUENTS=https://en.wikipedia.org/wiki/List_of_S%26P_400_companies  
+SP600_CONSTITUENTS=https://en.wikipedia.org/wiki/List_of_S%26P_600_companies  
+WIKIPEDIA_USER_AGENT=sotm-constituents/0.1 (+https://example.com)               # Wikipedia user agent
+
+# ============ Strategy Parameters ============
+HISTORY_LOOKBACK=6mo        # Days requested from yfinance for tickers.
+MOMENTUM_LOOKBACK=3mo       # Window for momentum calculation.
+PRICE_INTERVAL=1d           # Candle interval.
+ANNUALIZATION_FACTOR=252    # Annualization factor (252 trading days in a year).
+YFINANCE_RETRIES=3          # yfinance retries, except for missing data responses, which auto-skip.
+YFINANCE_RETRY_SLEEP=1      # yfinance retry wait.
+YFINANCE_BATCH_SIZE=100     # Number of tickers included in each yfinance ticker request.
+ATR_PERIOD=20               # ATR period used for position sizing.
+SMA_SHORT=100               # Stock SMA period.
+SMA_LONG=200                # S&P500 regime check period.
+GAP_THRESHOLD=0.15          # Gap threshold for dropouts.
+GAP_LOOKBACK=90             # Gap lookback days for dropouts.
+TOP_N=100                   # Top ranked count considered for positions.
+CHART_BUCKET=25             # Number of stocks in each chart.
+RISK_FRACTION=0.001         # Risk factor. Used in position sizing formula.
+SP500_TICKER=^GSPC          # S&P500 ticker on yfinance.
+SP500_LOOKBACK=1y           # S&P500 lookback for yfinance data fetch.
+
+# ============ Charting ============
+CHART_FONT=Montserrat       # I love this font.
+
+# ============ Runtime Logging ============
+LOG_ROOT=logs               # Logs root.
+RUN_LOG_ROOT=run_logs       # Run log folder.
+LOG_LEVEL=INFO              # Log level.

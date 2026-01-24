@@ -16,6 +16,8 @@ class Trading212Config:
     base_url: str
     timeout_seconds: float
     extended_hours: bool
+    retries: int
+    retry_sleep_seconds: float
 
 
 @dataclass(frozen=True)
@@ -78,12 +80,16 @@ def get_trading212_config() -> Trading212Config:
 
     timeout_seconds = float(os.getenv("TRADING212_TIMEOUT_SECONDS", "30"))
     extended_hours = _env_bool("TRADING212_EXTENDED_HOURS", default=False)
+    retries = int(os.getenv("TRADING212_RETRIES", "3"))
+    retry_sleep_seconds = float(os.getenv("TRADING212_RETRY_SLEEP", "1"))
     return Trading212Config(
         api_key=api_key,
         api_secret=api_secret,
         base_url=_resolve_base_url(),
         timeout_seconds=timeout_seconds,
         extended_hours=extended_hours,
+        retries=retries,
+        retry_sleep_seconds=retry_sleep_seconds,
     )
 
 

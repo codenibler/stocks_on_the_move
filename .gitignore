@@ -1,16 +1,15 @@
-# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 *.egg-info/
 
-# Virtual environments
+api_docs/
+agents.md
+
 venv/
 .env
 
-# Logs and output
 logs/
 
-# OS
 .DS_Store

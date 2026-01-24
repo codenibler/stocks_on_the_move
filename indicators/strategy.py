@@ -8,8 +8,8 @@ import pandas as pd
 
 from . import analytics
 from . import charts
-from core.config import StrategyConfig
-from core.classes import AnalyzedStock
+from config.config import StrategyConfig
+from config.classes import AnalyzedStock
 from data_fetching import market_data
 from stock_universe.constituents import extract_trading212_base_symbol
 

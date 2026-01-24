@@ -7,12 +7,35 @@ from typing import List
 import matplotlib
 
 matplotlib.use("Agg")
+from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import font_manager
 
-from core.classes import AnalyzedStock
+from config.classes import AnalyzedStock
 
 logger = logging.getLogger(__name__)
+
+load_dotenv(override=True)
+
+
+def _configure_chart_font() -> None:
+    font_family = os.getenv("CHART_FONT", "Montserrat").strip()
+    font_path = os.getenv("CHART_FONT_PATH", "").strip()
+    if font_path and os.path.isfile(font_path):
+        try:
+            font_manager.fontManager.addfont(font_path)
+        except Exception as exc:
+            logger.warning("Failed to register chart font at %s: %s", font_path, exc)
+    if font_family:
+        try:
+            font_manager.findfont(font_family, fallback_to_default=False)
+        except ValueError:
+            logger.warning(
+                "Chart font '%s' not found; install it or set CHART_FONT_PATH to a .ttf.",
+                font_family,
+            )
+        matplotlib.rcParams["font.family"] = font_family
 
 
 def plot_momentum_buckets(
@@ -21,6 +44,7 @@ def plot_momentum_buckets(
     output_dir: str,
     bucket_size: int,
 ) -> None:
+    _configure_chart_font()
     if not ranked:
         logger.warning("No ranked stocks available for charting")
         return
@@ -53,9 +77,11 @@ def plot_momentum_buckets(
         fig, ax = plt.subplots(figsize=(12, 6))
         norm = plt.Normalize(min(scores), max(scores))
         cmap = color_maps[idx % len(color_maps)]
-        colors = cmap(norm(scores))
-        alphas = 0.5 + 0.5 * norm(scores)
-        colors[:, 3] = np.clip(alphas, 0.5, 1.0)
+        normalized = norm(scores)
+        cmap_scale = 0.35 + 0.65 * normalized
+        colors = cmap(cmap_scale)
+        alphas = 0.4 + 0.6 * normalized
+        colors[:, 3] = np.clip(alphas, 0.4, 1.0)
         ax.bar(range(len(scores)), scores, color=colors)
         ax.set_title(f"Momentum rankings {start + 1}-{min(end, len(ranked))}")
         ax.set_ylabel("Momentum score")
