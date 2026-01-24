@@ -7,7 +7,7 @@ from indicators import analytics
 from indicators import strategy
 from core.config import get_runtime_config, get_strategy_config, get_trading212_config
 from core.logging_utils import setup_logging
-from market_data_fetching import market_data
+from data_fetching import market_data
 from execution import portfolio
 from execution.trading212_client import Trading212Client, Trading212Error
 from stock_universe import constituents
@@ -101,7 +101,11 @@ def main() -> None:
         output_dir=symbols_dir,
     )
 
-    ranked = strategy.analyze_universe(matched, config=strategy_config, log_dir=log_dir)
+    ranked, duplicate_tickers = strategy.analyze_universe(
+        matched,
+        config=strategy_config,
+        log_dir=log_dir,
+    )
     top_ranked = ranked[: strategy_config.top_n]
     top_tickers = [stock.ticker for stock in top_ranked]
     logger.info("Top %s tickers selected", len(top_tickers))
@@ -142,6 +146,7 @@ def main() -> None:
         total_equity=total_equity,
         risk_fraction=strategy_config.risk_fraction,
         top_n=strategy_config.top_n,
+        gap_lookback_days=strategy_config.gap_lookback_days,
     )
 
     if buy_orders:

@@ -13,6 +13,7 @@ class AnalyzedStock:
     atr20: float
     current_price: float
     sma100: float
+    max_gap_percent: float | None
     slope: float
     r_squared: float
 

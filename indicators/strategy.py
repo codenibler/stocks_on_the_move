@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
 
@@ -10,7 +10,7 @@ from . import analytics
 from . import charts
 from core.config import StrategyConfig
 from core.classes import AnalyzedStock
-from market_data_fetching import market_data
+from data_fetching import market_data
 from stock_universe.constituents import extract_trading212_base_symbol
 
 logger = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ def analyze_universe(
     *,
     config: StrategyConfig,
     log_dir: str,
-) -> List[AnalyzedStock]:
+) -> Tuple[List[AnalyzedStock], List[str]]:
     logger.info("Analyzing %s instruments for momentum", len(instruments))
     results: List[AnalyzedStock] = []
     drop_counts: Dict[str, int] = {}
@@ -72,6 +72,7 @@ def analyze_universe(
     )
 
     for inst, base_symbol in symbol_entries:
+        ticker = inst.get("ticker", "")
         resolved = resolved_histories.get(base_symbol)
         if not resolved:
             logger.info("Dropping %s: no yfinance data", base_symbol)
@@ -129,25 +130,18 @@ def analyze_universe(
             drop_counts["below_sma"] = drop_counts.get("below_sma", 0) + 1
             continue
 
-        if analytics.has_large_gap(
+        gap_pct = analytics.find_max_gap_percent(
             df_full,
             lookback_days=config.gap_lookback_days,
-            threshold=config.gap_threshold,
-        ):
-            gap_pct = analytics.find_max_gap_percent(
-                df_full,
-                lookback_days=config.gap_lookback_days,
+        )
+        if gap_pct is not None and gap_pct >= (config.gap_threshold * 100.0):
+            logger.info(
+                "Dropping %s: max gap %.2f%% >= %.2f%% in last %s days",
+                base_symbol,
+                gap_pct,
+                config.gap_threshold * 100.0,
+                config.gap_lookback_days,
             )
-            if gap_pct is None:
-                logger.info("Dropping %s: gap >= %.2f in last %s days", base_symbol, config.gap_threshold, config.gap_lookback_days)
-            else:
-                logger.info(
-                    "Dropping %s: max gap %.2f%% >= %.2f in last %s days",
-                    base_symbol,
-                    gap_pct,
-                    config.gap_threshold,
-                    config.gap_lookback_days,
-                )
             drop_counts["gap"] = drop_counts.get("gap", 0) + 1
             continue
 
@@ -161,37 +155,32 @@ def analyze_universe(
                 atr20=atr20,
                 current_price=current_price,
                 sma100=sma100,
+                max_gap_percent=gap_pct,
                 slope=slope,
                 r_squared=r_squared,
             )
         )
 
+    ticker_counts: Dict[str, int] = {}
+    for stock in results:
+        ticker_counts[stock.ticker] = ticker_counts.get(stock.ticker, 0) + 1
+
+    duplicates = sorted(ticker for ticker, count in ticker_counts.items() if count > 1)
+    duplicate_count = sum(count - 1 for count in ticker_counts.values() if count > 1)
+
     unique_by_ticker: Dict[str, AnalyzedStock] = {}
-    duplicate_count = 0
     for stock in results:
         existing = unique_by_ticker.get(stock.ticker)
         if existing is None or stock.score > existing.score:
-            if existing is not None:
-                duplicate_count += 1
-                logger.debug(
-                    "Replacing duplicate ticker %s in rankings (old_score=%.4f new_score=%.4f)",
-                    stock.ticker,
-                    existing.score,
-                    stock.score,
-                )
             unique_by_ticker[stock.ticker] = stock
-        else:
-            duplicate_count += 1
-            logger.debug(
-                "Skipping duplicate ticker %s in rankings (score=%.4f)",
-                stock.ticker,
-                stock.score,
-            )
 
     ranked = sorted(unique_by_ticker.values(), key=lambda stock: stock.score, reverse=True)
     logger.info("Momentum ranking complete. Kept %s stocks", len(ranked))
     if duplicate_count:
         logger.info("Removed %s duplicate tickers from rankings", duplicate_count)
+        logger.info("Duplicate tickers detected: %s", len(duplicates))
+        for ticker in duplicates:
+            logger.info("Duplicate ticker: %s", ticker)
     if drop_counts:
         logger.info("Drop summary: %s", drop_counts)
 
@@ -200,4 +189,10 @@ def analyze_universe(
         output_dir=log_dir,
         bucket_size=config.chart_bucket,
     )
-    return ranked
+    return ranked, duplicates
+
+
+def _chunked_list(items: List[str], size: int) -> List[List[str]]:
+    if size <= 0:
+        return [items]
+    return [items[idx : idx + size] for idx in range(0, len(items), size)]

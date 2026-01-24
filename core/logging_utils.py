@@ -11,7 +11,7 @@ def setup_logging(log_root: str, run_log_root: str, log_level: str) -> str:
     log_dir = os.path.join(log_root, today)
     os.makedirs(log_dir, exist_ok=True)
 
-    run_log_dir = os.path.join(run_log_root, today)
+    run_log_dir = os.path.join(log_dir, run_log_root)
     os.makedirs(run_log_dir, exist_ok=True)
 
     timestamp = datetime.now().strftime("%H%M%S")

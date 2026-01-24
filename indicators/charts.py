@@ -54,8 +54,8 @@ def plot_momentum_buckets(
         norm = plt.Normalize(min(scores), max(scores))
         cmap = color_maps[idx % len(color_maps)]
         colors = cmap(norm(scores))
-        alphas = 0.25 + 0.75 * norm(scores)
-        colors[:, 3] = np.clip(alphas, 0.25, 1.0)
+        alphas = 0.5 + 0.5 * norm(scores)
+        colors[:, 3] = np.clip(alphas, 0.5, 1.0)
         ax.bar(range(len(scores)), scores, color=colors)
         ax.set_title(f"Momentum rankings {start + 1}-{min(end, len(ranked))}")
         ax.set_ylabel("Momentum score")
