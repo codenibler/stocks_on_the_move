@@ -1,0 +1,1944 @@
+14:23:03 INFO root - Logging initialized. Log file: run_logs/2026-01-24/run_142303.log
+14:23:03 INFO __main__ - Run configuration: base_url=https://demo.trading212.com top_n=100 risk_fraction=0.02
+14:23:03 INFO __main__ - Lookbacks: history=6mo momentum=3mo sp500=1y
+14:23:03 INFO execution.trading212_client - Trading212 client configured for https://demo.trading212.com
+14:23:03 INFO __main__ - Scraping constituents from 3 wikipedia pages
+14:23:03 INFO stock_universe.constituents - Fetching constituents from https://en.wikipedia.org/wiki/List_of_S%26P_400_companies
+14:23:04 INFO stock_universe.constituents - Extracted 400 symbols from https://en.wikipedia.org/wiki/List_of_S%26P_400_companies
+14:23:04 INFO stock_universe.constituents - Fetching constituents from https://en.wikipedia.org/wiki/List_of_S%26P_500_companies
+14:23:04 INFO stock_universe.constituents - Extracted 503 symbols from https://en.wikipedia.org/wiki/List_of_S%26P_500_companies
+14:23:04 INFO stock_universe.constituents - Fetching constituents from https://en.wikipedia.org/wiki/List_of_S%26P_600_companies
+14:23:05 INFO stock_universe.constituents - Extracted 603 symbols from https://en.wikipedia.org/wiki/List_of_S%26P_600_companies
+14:23:05 INFO stock_universe.constituents - Total unique symbols collected: 1506
+14:23:06 INFO stock_universe.constituents - Filtered tradable instruments: 4994/13773 (missing_ticker=0, non_stock=5759, missing_currency=0, non_usd=3020)
+14:23:06 INFO stock_universe.constituents - Cross-referencing 1506 wiki symbols against 4994 instruments
+14:23:06 INFO stock_universe.constituents - Matched 1159 symbols via normalized base tickers.
+14:23:06 INFO stock_universe.constituents - Matched 0 symbols via dot/slash variants.
+14:23:06 INFO stock_universe.constituents - Matched 88 symbols via shortName metadata.
+14:23:06 INFO stock_universe.constituents - Matched 1247 Trading212 instruments to S&P constituents.
+14:23:06 INFO stock_universe.constituents - Saved unmatched symbols: logs/2026-01-24/symbols/unmatched_stocks.csv
+14:23:06 INFO indicators.strategy - Analyzing 1247 instruments for momentum
+14:23:06 INFO market_data_fetching.market_data - Fetching batch of tickers 1-100 (A:ARES)
+14:23:37 INFO market_data_fetching.market_data - Batch result: 92 succeeded, 8 failed
+14:23:37 INFO market_data_fetching.market_data - Retrying AAN individually after batch miss
+14:23:38 WARNING market_data_fetching.market_data - Empty yfinance data for AAN; skipping retries
+14:23:38 INFO market_data_fetching.market_data - Retrying AAXN individually after batch miss
+14:23:38 WARNING market_data_fetching.market_data - Empty yfinance data for AAXN; skipping retries
+14:23:38 INFO market_data_fetching.market_data - Retrying ABC individually after batch miss
+14:23:44 WARNING market_data_fetching.market_data - Empty yfinance data for ABC; skipping retries
+14:23:44 INFO market_data_fetching.market_data - Retrying ADS individually after batch miss
+14:23:45 WARNING market_data_fetching.market_data - Empty yfinance data for ADS; skipping retries
+14:23:45 INFO market_data_fetching.market_data - Retrying AHCO individually after batch miss
+14:23:46 INFO market_data_fetching.market_data - Retrying ALTM individually after batch miss
+14:23:46 WARNING market_data_fetching.market_data - Empty yfinance data for ALTM; skipping retries
+14:23:46 INFO market_data_fetching.market_data - Retrying AMEH individually after batch miss
+14:23:47 WARNING market_data_fetching.market_data - Empty yfinance data for AMEH; skipping retries
+14:23:47 INFO market_data_fetching.market_data - Retrying ANTM individually after batch miss
+14:23:53 WARNING market_data_fetching.market_data - Empty yfinance data for ANTM; skipping retries
+14:23:53 INFO market_data_fetching.market_data - Fetching batch of tickers 101-200 (ARI:CART)
+14:24:31 INFO market_data_fetching.market_data - Batch result: 86 succeeded, 14 failed
+14:24:31 INFO market_data_fetching.market_data - Retrying ARNC individually after batch miss
+14:24:33 WARNING market_data_fetching.market_data - Empty yfinance data for ARNC; skipping retries
+14:24:33 INFO market_data_fetching.market_data - Retrying ATU individually after batch miss
+14:24:36 WARNING market_data_fetching.market_data - Empty yfinance data for ATU; skipping retries
+14:24:36 INFO market_data_fetching.market_data - Retrying AVAV_ individually after batch miss
+14:24:41 WARNING market_data_fetching.market_data - Empty yfinance data for AVAV_; skipping retries
+14:24:41 INFO market_data_fetching.market_data - Trying variant AVAV for base AVAV_
+14:24:42 INFO market_data_fetching.market_data - Retrying BCEI individually after batch miss
+14:24:43 WARNING market_data_fetching.market_data - Empty yfinance data for BCEI; skipping retries
+14:24:43 INFO market_data_fetching.market_data - Retrying BFB individually after batch miss
+14:24:43 WARNING market_data_fetching.market_data - Empty yfinance data for BFB; skipping retries
+14:24:43 INFO market_data_fetching.market_data - Retrying BGCP individually after batch miss
+14:24:44 WARNING market_data_fetching.market_data - Empty yfinance data for BGCP; skipping retries
+14:24:44 INFO market_data_fetching.market_data - Retrying BHI individually after batch miss
+14:24:45 WARNING market_data_fetching.market_data - Empty yfinance data for BHI; skipping retries
+14:24:45 INFO market_data_fetching.market_data - Retrying BHLB individually after batch miss
+14:24:45 WARNING market_data_fetching.market_data - Empty yfinance data for BHLB; skipping retries
+14:24:45 INFO market_data_fetching.market_data - Retrying BJRI individually after batch miss
+14:24:51 INFO market_data_fetching.market_data - Retrying BLDR individually after batch miss
+14:24:51 INFO market_data_fetching.market_data - Retrying BLL individually after batch miss
+14:24:52 WARNING market_data_fetching.market_data - Empty yfinance data for BLL; skipping retries
+14:24:52 INFO market_data_fetching.market_data - Retrying BRKS individually after batch miss
+14:24:53 WARNING market_data_fetching.market_data - Empty yfinance data for BRKS; skipping retries
+14:24:53 INFO market_data_fetching.market_data - Retrying BRK_B individually after batch miss
+14:24:54 WARNING market_data_fetching.market_data - Empty yfinance data for BRK_B; skipping retries
+14:24:54 INFO market_data_fetching.market_data - Trying variant BRK-B for base BRK_B
+14:24:54 INFO market_data_fetching.market_data - Retrying CACI individually after batch miss
+14:24:54 INFO market_data_fetching.market_data - Fetching batch of tickers 201-300 (CASY:CTSH)
+14:25:30 INFO market_data_fetching.market_data - Batch result: 88 succeeded, 12 failed
+14:25:30 INFO market_data_fetching.market_data - Retrying CAT individually after batch miss
+14:25:30 INFO market_data_fetching.market_data - Retrying CBG individually after batch miss
+14:25:31 WARNING market_data_fetching.market_data - Empty yfinance data for CBG; skipping retries
+14:25:31 INFO market_data_fetching.market_data - Retrying CBS individually after batch miss
+14:25:33 WARNING market_data_fetching.market_data - Empty yfinance data for CBS; skipping retries
+14:25:33 INFO market_data_fetching.market_data - Retrying CDAY individually after batch miss
+14:25:34 WARNING market_data_fetching.market_data - Empty yfinance data for CDAY; skipping retries
+14:25:34 INFO market_data_fetching.market_data - Retrying CDEV individually after batch miss
+14:25:35 WARNING market_data_fetching.market_data - Empty yfinance data for CDEV; skipping retries
+14:25:35 INFO market_data_fetching.market_data - Retrying CHKK individually after batch miss
+14:25:36 WARNING market_data_fetching.market_data - Empty yfinance data for CHKK; skipping retries
+14:25:36 INFO market_data_fetching.market_data - Retrying CLI individually after batch miss
+14:25:37 WARNING market_data_fetching.market_data - Empty yfinance data for CLI; skipping retries
+14:25:37 INFO market_data_fetching.market_data - Retrying CNHI individually after batch miss
+14:25:37 WARNING market_data_fetching.market_data - Empty yfinance data for CNHI; skipping retries
+14:25:37 INFO market_data_fetching.market_data - Retrying CPRX individually after batch miss
+14:25:38 INFO market_data_fetching.market_data - Retrying CR1 individually after batch miss
+14:25:44 WARNING market_data_fetching.market_data - Empty yfinance data for CR1; skipping retries
+14:25:44 INFO market_data_fetching.market_data - Retrying CSGP individually after batch miss
+14:25:44 INFO market_data_fetching.market_data - Retrying CTL individually after batch miss
+14:25:45 WARNING market_data_fetching.market_data - Empty yfinance data for CTL; skipping retries
+14:25:45 INFO market_data_fetching.market_data - Fetching batch of tickers 301-400 (CTVA:ERI)
+14:26:17 INFO market_data_fetching.market_data - Batch result: 95 succeeded, 5 failed
+14:26:17 INFO market_data_fetching.market_data - Retrying CWEN/A individually after batch miss
+14:26:18 WARNING market_data_fetching.market_data - Empty yfinance data for CWEN/A; skipping retries
+14:26:18 INFO market_data_fetching.market_data - Trying variant CWEN-A for base CWEN/A
+14:26:19 INFO market_data_fetching.market_data - Retrying DOW1 individually after batch miss
+14:26:19 WARNING market_data_fetching.market_data - Empty yfinance data for DOW1; skipping retries
+14:26:19 INFO market_data_fetching.market_data - Retrying DPS individually after batch miss
+14:26:25 WARNING market_data_fetching.market_data - Empty yfinance data for DPS; skipping retries
+14:26:25 INFO market_data_fetching.market_data - Retrying EMBC individually after batch miss
+14:26:25 INFO market_data_fetching.market_data - Retrying ERI individually after batch miss
+14:26:26 WARNING market_data_fetching.market_data - Empty yfinance data for ERI; skipping retries
+14:26:26 INFO market_data_fetching.market_data - Fetching batch of tickers 401-500 (ERIE:GNL)
+14:27:00 INFO market_data_fetching.market_data - Batch result: 93 succeeded, 7 failed
+14:27:00 INFO market_data_fetching.market_data - Retrying EXPE individually after batch miss
+14:27:00 INFO market_data_fetching.market_data - Retrying EXR individually after batch miss
+14:27:01 INFO market_data_fetching.market_data - Retrying FBHS individually after batch miss
+14:27:02 WARNING market_data_fetching.market_data - Empty yfinance data for FBHS; skipping retries
+14:27:02 INFO market_data_fetching.market_data - Retrying FLT individually after batch miss
+14:27:02 WARNING market_data_fetching.market_data - Empty yfinance data for FLT; skipping retries
+14:27:02 INFO market_data_fetching.market_data - Retrying FTOC individually after batch miss
+14:27:03 WARNING market_data_fetching.market_data - Empty yfinance data for FTOC; skipping retries
+14:27:03 INFO market_data_fetching.market_data - Retrying FUN1 individually after batch miss
+14:27:09 WARNING market_data_fetching.market_data - Empty yfinance data for FUN1; skipping retries
+14:27:09 INFO market_data_fetching.market_data - Retrying FVAC individually after batch miss
+14:27:10 WARNING market_data_fetching.market_data - Empty yfinance data for FVAC; skipping retries
+14:27:10 INFO market_data_fetching.market_data - Fetching batch of tickers 501-600 (GNRC:IQV)
+14:27:47 INFO market_data_fetching.market_data - Batch result: 90 succeeded, 10 failed
+14:27:47 INFO market_data_fetching.market_data - Retrying GPS individually after batch miss
+14:27:48 WARNING market_data_fetching.market_data - Empty yfinance data for GPS; skipping retries
+14:27:48 INFO market_data_fetching.market_data - Retrying GSAH individually after batch miss
+14:27:48 WARNING market_data_fetching.market_data - Empty yfinance data for GSAH; skipping retries
+14:27:48 INFO market_data_fetching.market_data - Retrying HCN individually after batch miss
+14:27:49 WARNING market_data_fetching.market_data - Empty yfinance data for HCN; skipping retries
+14:27:49 INFO market_data_fetching.market_data - Retrying HCP individually after batch miss
+14:27:50 WARNING market_data_fetching.market_data - Empty yfinance data for HCP; skipping retries
+14:27:50 INFO market_data_fetching.market_data - Retrying HFC individually after batch miss
+14:27:51 WARNING market_data_fetching.market_data - Empty yfinance data for HFC; skipping retries
+14:27:51 INFO market_data_fetching.market_data - Retrying HLT individually after batch miss
+14:27:56 INFO market_data_fetching.market_data - Retrying HTA individually after batch miss
+14:27:59 WARNING market_data_fetching.market_data - Empty yfinance data for HTA; skipping retries
+14:27:59 INFO market_data_fetching.market_data - Retrying IIVI individually after batch miss
+14:28:00 WARNING market_data_fetching.market_data - Empty yfinance data for IIVI; skipping retries
+14:28:00 INFO market_data_fetching.market_data - Retrying ILMN individually after batch miss
+14:28:00 INFO market_data_fetching.market_data - Retrying INT individually after batch miss
+14:28:01 WARNING market_data_fetching.market_data - Empty yfinance data for INT; skipping retries
+14:28:01 INFO market_data_fetching.market_data - Fetching batch of tickers 601-700 (IR:MAA)
+14:28:34 INFO market_data_fetching.market_data - Batch result: 93 succeeded, 7 failed
+14:28:34 INFO market_data_fetching.market_data - Retrying ITW individually after batch miss
+14:28:36 INFO market_data_fetching.market_data - Retrying JCOM individually after batch miss
+14:28:36 WARNING market_data_fetching.market_data - Empty yfinance data for JCOM; skipping retries
+14:28:36 INFO market_data_fetching.market_data - Retrying JEC individually after batch miss
+14:28:37 WARNING market_data_fetching.market_data - Empty yfinance data for JEC; skipping retries
+14:28:37 INFO market_data_fetching.market_data - Retrying KORS individually after batch miss
+14:28:37 WARNING market_data_fetching.market_data - Empty yfinance data for KORS; skipping retries
+14:28:37 INFO market_data_fetching.market_data - Retrying KRG individually after batch miss
+14:28:38 INFO market_data_fetching.market_data - Retrying LII individually after batch miss
+14:28:38 INFO market_data_fetching.market_data - Retrying LUK individually after batch miss
+14:28:38 WARNING market_data_fetching.market_data - Empty yfinance data for LUK; skipping retries
+14:28:38 INFO market_data_fetching.market_data - Fetching batch of tickers 701-800 (MAAC:NOW)
+14:29:10 INFO market_data_fetching.market_data - Batch result: 93 succeeded, 7 failed
+14:29:10 INFO market_data_fetching.market_data - Retrying MAAC individually after batch miss
+14:29:12 WARNING market_data_fetching.market_data - Empty yfinance data for MAAC; skipping retries
+14:29:12 INFO market_data_fetching.market_data - Retrying MCF individually after batch miss
+14:29:13 WARNING market_data_fetching.market_data - Empty yfinance data for MCF; skipping retries
+14:29:13 INFO market_data_fetching.market_data - Retrying MLHR individually after batch miss
+14:29:18 WARNING market_data_fetching.market_data - Empty yfinance data for MLHR; skipping retries
+14:29:18 INFO market_data_fetching.market_data - Retrying MOG/A individually after batch miss
+14:29:20 WARNING market_data_fetching.market_data - Empty yfinance data for MOG/A; skipping retries
+14:29:20 INFO market_data_fetching.market_data - Trying variant MOG-A for base MOG/A
+14:29:20 INFO market_data_fetching.market_data - Retrying MSFT individually after batch miss
+14:29:20 INFO market_data_fetching.market_data - Retrying MYL individually after batch miss
+14:29:21 WARNING market_data_fetching.market_data - Empty yfinance data for MYL; skipping retries
+14:29:21 INFO market_data_fetching.market_data - Retrying NCR individually after batch miss
+14:29:27 WARNING market_data_fetching.market_data - Empty yfinance data for NCR; skipping retries
+14:29:27 INFO market_data_fetching.market_data - Fetching batch of tickers 801-900 (NPK:PLXS)
+14:30:02 INFO market_data_fetching.market_data - Batch result: 93 succeeded, 7 failed
+14:30:02 INFO market_data_fetching.market_data - Retrying NVR individually after batch miss
+14:30:02 INFO market_data_fetching.market_data - Retrying NYCB individually after batch miss
+14:30:08 WARNING market_data_fetching.market_data - Empty yfinance data for NYCB; skipping retries
+14:30:08 INFO market_data_fetching.market_data - Retrying NYMT individually after batch miss
+14:30:09 WARNING market_data_fetching.market_data - Empty yfinance data for NYMT; skipping retries
+14:30:09 INFO market_data_fetching.market_data - Retrying OAC individually after batch miss
+14:30:09 WARNING market_data_fetching.market_data - Empty yfinance data for OAC; skipping retries
+14:30:09 INFO market_data_fetching.market_data - Retrying OAS individually after batch miss
+14:30:10 WARNING market_data_fetching.market_data - Empty yfinance data for OAS; skipping retries
+14:30:10 INFO market_data_fetching.market_data - Retrying OFC individually after batch miss
+14:30:11 WARNING market_data_fetching.market_data - Empty yfinance data for OFC; skipping retries
+14:30:11 INFO market_data_fetching.market_data - Retrying PKI individually after batch miss
+14:30:12 WARNING market_data_fetching.market_data - Empty yfinance data for PKI; skipping retries
+14:30:12 INFO market_data_fetching.market_data - Fetching batch of tickers 901-1000 (PM:SCL)
+14:30:46 INFO market_data_fetching.market_data - Batch result: 93 succeeded, 7 failed
+14:30:46 INFO market_data_fetching.market_data - Retrying PNM individually after batch miss
+14:30:47 WARNING market_data_fetching.market_data - Empty yfinance data for PNM; skipping retries
+14:30:47 INFO market_data_fetching.market_data - Retrying QDEL individually after batch miss
+14:30:47 INFO market_data_fetching.market_data - Retrying RBA individually after batch miss
+14:30:48 INFO market_data_fetching.market_data - Retrying RCII individually after batch miss
+14:30:49 WARNING market_data_fetching.market_data - Empty yfinance data for RCII; skipping retries
+14:30:49 INFO market_data_fetching.market_data - Retrying RE individually after batch miss
+14:30:51 WARNING market_data_fetching.market_data - Empty yfinance data for RE; skipping retries
+14:30:51 INFO market_data_fetching.market_data - Retrying RUSHA1 individually after batch miss
+14:30:55 WARNING market_data_fetching.market_data - Empty yfinance data for RUSHA1; skipping retries
+14:30:55 INFO market_data_fetching.market_data - Retrying RXN individually after batch miss
+14:30:56 WARNING market_data_fetching.market_data - Empty yfinance data for RXN; skipping retries
+14:30:56 INFO market_data_fetching.market_data - Fetching batch of tickers 1001-1100 (SCSC:TOL)
+14:31:30 INFO market_data_fetching.market_data - Batch result: 93 succeeded, 7 failed
+14:31:30 INFO market_data_fetching.market_data - Retrying SEAS individually after batch miss
+14:31:31 WARNING market_data_fetching.market_data - Empty yfinance data for SEAS; skipping retries
+14:31:31 INFO market_data_fetching.market_data - Retrying SEZL individually after batch miss
+14:31:32 INFO market_data_fetching.market_data - Retrying SGH individually after batch miss
+14:31:37 WARNING market_data_fetching.market_data - Empty yfinance data for SGH; skipping retries
+14:31:37 INFO market_data_fetching.market_data - Retrying SJW individually after batch miss
+14:31:38 WARNING market_data_fetching.market_data - Empty yfinance data for SJW; skipping retries
+14:31:38 INFO market_data_fetching.market_data - Retrying SNDK1 individually after batch miss
+14:31:39 WARNING market_data_fetching.market_data - Empty yfinance data for SNDK1; skipping retries
+14:31:39 INFO market_data_fetching.market_data - Retrying SQ individually after batch miss
+14:31:44 WARNING market_data_fetching.market_data - Empty yfinance data for SQ; skipping retries
+14:31:44 INFO market_data_fetching.market_data - Retrying TMST individually after batch miss
+14:31:45 WARNING market_data_fetching.market_data - Empty yfinance data for TMST; skipping retries
+14:31:45 INFO market_data_fetching.market_data - Fetching batch of tickers 1101-1200 (TPL:WFC)
+14:32:23 INFO market_data_fetching.market_data - Batch result: 95 succeeded, 5 failed
+14:32:23 INFO market_data_fetching.market_data - Retrying TPX individually after batch miss
+14:32:24 WARNING market_data_fetching.market_data - Empty yfinance data for TPX; skipping retries
+14:32:24 INFO market_data_fetching.market_data - Retrying TYL individually after batch miss
+14:32:25 INFO market_data_fetching.market_data - Retrying UTX individually after batch miss
+14:32:25 WARNING market_data_fetching.market_data - Empty yfinance data for UTX; skipping retries
+14:32:25 INFO market_data_fetching.market_data - Retrying VRTS individually after batch miss
+14:32:26 INFO market_data_fetching.market_data - Retrying WETF individually after batch miss
+14:32:32 WARNING market_data_fetching.market_data - Empty yfinance data for WETF; skipping retries
+14:32:32 INFO market_data_fetching.market_data - Fetching batch of tickers 1201-1244 (WFTLF:ZTS)
+14:32:50 INFO market_data_fetching.market_data - Batch result: 39 succeeded, 5 failed
+14:32:50 INFO market_data_fetching.market_data - Retrying WFTLF individually after batch miss
+14:32:51 WARNING market_data_fetching.market_data - Empty yfinance data for WFTLF; skipping retries
+14:32:51 INFO market_data_fetching.market_data - Retrying WLTW individually after batch miss
+14:32:57 WARNING market_data_fetching.market_data - Empty yfinance data for WLTW; skipping retries
+14:32:57 INFO market_data_fetching.market_data - Retrying WWE individually after batch miss
+14:32:57 WARNING market_data_fetching.market_data - Empty yfinance data for WWE; skipping retries
+14:32:57 INFO market_data_fetching.market_data - Retrying YETI individually after batch miss
+14:32:58 INFO market_data_fetching.market_data - Retrying ZI individually after batch miss
+14:33:04 WARNING market_data_fetching.market_data - Empty yfinance data for ZI; skipping retries
+14:33:04 INFO market_data_fetching.market_data - Resolved A to yfinance ticker A
+14:33:04 INFO market_data_fetching.market_data - Resolved AA to yfinance ticker AA
+14:33:04 INFO market_data_fetching.market_data - Resolved AAL to yfinance ticker AAL
+14:33:04 INFO market_data_fetching.market_data - Resolved AAP to yfinance ticker AAP
+14:33:04 INFO market_data_fetching.market_data - Resolved AAPL to yfinance ticker AAPL
+14:33:04 INFO market_data_fetching.market_data - Resolved AAT to yfinance ticker AAT
+14:33:04 INFO market_data_fetching.market_data - Resolved ABBV to yfinance ticker ABBV
+14:33:04 INFO market_data_fetching.market_data - Resolved ABG to yfinance ticker ABG
+14:33:04 INFO market_data_fetching.market_data - Resolved ABM to yfinance ticker ABM
+14:33:04 INFO market_data_fetching.market_data - Resolved ABNB to yfinance ticker ABNB
+14:33:04 INFO market_data_fetching.market_data - Resolved ABR to yfinance ticker ABR
+14:33:04 INFO market_data_fetching.market_data - Resolved ABT to yfinance ticker ABT
+14:33:04 INFO market_data_fetching.market_data - Resolved ACA to yfinance ticker ACA
+14:33:04 INFO market_data_fetching.market_data - Resolved ACAD to yfinance ticker ACAD
+14:33:04 INFO market_data_fetching.market_data - Resolved ACGL to yfinance ticker ACGL
+14:33:04 INFO market_data_fetching.market_data - Resolved ACHC to yfinance ticker ACHC
+14:33:04 INFO market_data_fetching.market_data - Resolved ACI to yfinance ticker ACI
+14:33:04 INFO market_data_fetching.market_data - Resolved ACLS to yfinance ticker ACLS
+14:33:04 INFO market_data_fetching.market_data - Resolved ACM to yfinance ticker ACM
+14:33:04 INFO market_data_fetching.market_data - Resolved ACMR to yfinance ticker ACMR
+14:33:04 INFO market_data_fetching.market_data - Resolved ACN to yfinance ticker ACN
+14:33:04 INFO market_data_fetching.market_data - Resolved ADBE to yfinance ticker ADBE
+14:33:04 INFO market_data_fetching.market_data - Resolved ADC to yfinance ticker ADC
+14:33:04 INFO market_data_fetching.market_data - Resolved ADI to yfinance ticker ADI
+14:33:04 INFO market_data_fetching.market_data - Resolved ADM to yfinance ticker ADM
+14:33:04 INFO market_data_fetching.market_data - Resolved ADMA to yfinance ticker ADMA
+14:33:04 INFO market_data_fetching.market_data - Resolved ADP to yfinance ticker ADP
+14:33:04 INFO market_data_fetching.market_data - Resolved ADSK to yfinance ticker ADSK
+14:33:04 INFO market_data_fetching.market_data - Resolved AEE to yfinance ticker AEE
+14:33:04 INFO market_data_fetching.market_data - Resolved AEIS to yfinance ticker AEIS
+14:33:04 INFO market_data_fetching.market_data - Resolved AEO to yfinance ticker AEO
+14:33:04 INFO market_data_fetching.market_data - Resolved AEP to yfinance ticker AEP
+14:33:04 INFO market_data_fetching.market_data - Resolved AES to yfinance ticker AES
+14:33:04 INFO market_data_fetching.market_data - Resolved AESI to yfinance ticker AESI
+14:33:04 INFO market_data_fetching.market_data - Resolved AFG to yfinance ticker AFG
+14:33:04 INFO market_data_fetching.market_data - Resolved AFL to yfinance ticker AFL
+14:33:04 INFO market_data_fetching.market_data - Resolved AGCO to yfinance ticker AGCO
+14:33:04 INFO market_data_fetching.market_data - Resolved AHCO to yfinance ticker AHCO
+14:33:04 INFO market_data_fetching.market_data - Resolved AHH to yfinance ticker AHH
+14:33:04 INFO market_data_fetching.market_data - Resolved AIG to yfinance ticker AIG
+14:33:04 INFO market_data_fetching.market_data - Resolved AIR to yfinance ticker AIR
+14:33:04 INFO market_data_fetching.market_data - Resolved AJG to yfinance ticker AJG
+14:33:04 INFO market_data_fetching.market_data - Resolved AKAM to yfinance ticker AKAM
+14:33:04 INFO market_data_fetching.market_data - Resolved AKR to yfinance ticker AKR
+14:33:04 INFO market_data_fetching.market_data - Resolved AL to yfinance ticker AL
+14:33:04 INFO market_data_fetching.market_data - Resolved ALB to yfinance ticker ALB
+14:33:04 INFO market_data_fetching.market_data - Resolved ALG to yfinance ticker ALG
+14:33:04 INFO market_data_fetching.market_data - Resolved ALGM to yfinance ticker ALGM
+14:33:04 INFO market_data_fetching.market_data - Resolved ALGN to yfinance ticker ALGN
+14:33:04 INFO market_data_fetching.market_data - Resolved ALK to yfinance ticker ALK
+14:33:04 INFO market_data_fetching.market_data - Resolved ALKS to yfinance ticker ALKS
+14:33:04 INFO market_data_fetching.market_data - Resolved ALL to yfinance ticker ALL
+14:33:04 INFO market_data_fetching.market_data - Resolved ALLE to yfinance ticker ALLE
+14:33:04 INFO market_data_fetching.market_data - Resolved ALLY to yfinance ticker ALLY
+14:33:04 INFO market_data_fetching.market_data - Resolved ALRM to yfinance ticker ALRM
+14:33:04 INFO market_data_fetching.market_data - Resolved ALV to yfinance ticker ALV
+14:33:04 INFO market_data_fetching.market_data - Resolved AM to yfinance ticker AM
+14:33:04 INFO market_data_fetching.market_data - Resolved AMAT to yfinance ticker AMAT
+14:33:04 INFO market_data_fetching.market_data - Resolved AMCR to yfinance ticker AMCR
+14:33:04 INFO market_data_fetching.market_data - Resolved AMD to yfinance ticker AMD
+14:33:04 INFO market_data_fetching.market_data - Resolved AME to yfinance ticker AME
+14:33:04 INFO market_data_fetching.market_data - Resolved AMG to yfinance ticker AMG
+14:33:04 INFO market_data_fetching.market_data - Resolved AMGN to yfinance ticker AMGN
+14:33:04 INFO market_data_fetching.market_data - Resolved AMH to yfinance ticker AMH
+14:33:04 INFO market_data_fetching.market_data - Resolved AMKR to yfinance ticker AMKR
+14:33:04 INFO market_data_fetching.market_data - Resolved AMN to yfinance ticker AMN
+14:33:04 INFO market_data_fetching.market_data - Resolved AMP to yfinance ticker AMP
+14:33:04 INFO market_data_fetching.market_data - Resolved AMPH to yfinance ticker AMPH
+14:33:04 INFO market_data_fetching.market_data - Resolved AMT to yfinance ticker AMT
+14:33:04 INFO market_data_fetching.market_data - Resolved AMTM to yfinance ticker AMTM
+14:33:04 INFO market_data_fetching.market_data - Resolved AMZN to yfinance ticker AMZN
+14:33:04 INFO market_data_fetching.market_data - Resolved AN to yfinance ticker AN
+14:33:04 INFO market_data_fetching.market_data - Resolved ANET to yfinance ticker ANET
+14:33:04 INFO market_data_fetching.market_data - Resolved ANF to yfinance ticker ANF
+14:33:04 INFO market_data_fetching.market_data - Resolved ANGI to yfinance ticker ANGI
+14:33:04 INFO market_data_fetching.market_data - Resolved ANIP to yfinance ticker ANIP
+14:33:04 INFO market_data_fetching.market_data - Resolved AON to yfinance ticker AON
+14:33:04 INFO market_data_fetching.market_data - Resolved AOS to yfinance ticker AOS
+14:33:04 INFO market_data_fetching.market_data - Resolved AOSL to yfinance ticker AOSL
+14:33:04 INFO market_data_fetching.market_data - Resolved APA to yfinance ticker APA
+14:33:04 INFO market_data_fetching.market_data - Resolved APAM to yfinance ticker APAM
+14:33:04 INFO market_data_fetching.market_data - Resolved APD to yfinance ticker APD
+14:33:04 INFO market_data_fetching.market_data - Resolved APH to yfinance ticker APH
+14:33:04 INFO market_data_fetching.market_data - Resolved APLE to yfinance ticker APLE
+14:33:04 INFO market_data_fetching.market_data - Resolved APO to yfinance ticker APO
+14:33:04 INFO market_data_fetching.market_data - Resolved APOG to yfinance ticker APOG
+14:33:04 INFO market_data_fetching.market_data - Resolved APP to yfinance ticker APP
+14:33:04 INFO market_data_fetching.market_data - Resolved APPF to yfinance ticker APPF
+14:33:04 INFO market_data_fetching.market_data - Resolved APTV to yfinance ticker APTV
+14:33:04 INFO market_data_fetching.market_data - Resolved AR to yfinance ticker AR
+14:33:04 INFO market_data_fetching.market_data - Resolved ARCB to yfinance ticker ARCB
+14:33:04 INFO market_data_fetching.market_data - Resolved ARE to yfinance ticker ARE
+14:33:04 INFO market_data_fetching.market_data - Resolved ARES to yfinance ticker ARES
+14:33:04 INFO market_data_fetching.market_data - Resolved ARI to yfinance ticker ARI
+14:33:04 INFO market_data_fetching.market_data - Resolved ARLO to yfinance ticker ARLO
+14:33:04 INFO market_data_fetching.market_data - Resolved ARMK to yfinance ticker ARMK
+14:33:04 INFO market_data_fetching.market_data - Resolved ARR to yfinance ticker ARR
+14:33:04 INFO market_data_fetching.market_data - Resolved ARW to yfinance ticker ARW
+14:33:04 INFO market_data_fetching.market_data - Resolved ARWR to yfinance ticker ARWR
+14:33:04 INFO market_data_fetching.market_data - Resolved ASB to yfinance ticker ASB
+14:33:04 INFO market_data_fetching.market_data - Resolved ASO to yfinance ticker ASO
+14:33:04 INFO market_data_fetching.market_data - Resolved ATEN to yfinance ticker ATEN
+14:33:04 INFO market_data_fetching.market_data - Resolved ATGE to yfinance ticker ATGE
+14:33:04 INFO market_data_fetching.market_data - Resolved ATI to yfinance ticker ATI
+14:33:04 INFO market_data_fetching.market_data - Resolved ATO to yfinance ticker ATO
+14:33:04 INFO market_data_fetching.market_data - Resolved ATR to yfinance ticker ATR
+14:33:04 INFO market_data_fetching.market_data - Resolved AVA to yfinance ticker AVA
+14:33:04 INFO market_data_fetching.market_data - Resolved AVAV_ to yfinance ticker AVAV
+14:33:04 INFO market_data_fetching.market_data - Resolved AVB to yfinance ticker AVB
+14:33:04 INFO market_data_fetching.market_data - Resolved AVGO to yfinance ticker AVGO
+14:33:04 INFO market_data_fetching.market_data - Resolved AVT to yfinance ticker AVT
+14:33:04 INFO market_data_fetching.market_data - Resolved AVTR to yfinance ticker AVTR
+14:33:04 INFO market_data_fetching.market_data - Resolved AVY to yfinance ticker AVY
+14:33:04 INFO market_data_fetching.market_data - Resolved AWK to yfinance ticker AWK
+14:33:04 INFO market_data_fetching.market_data - Resolved AWR to yfinance ticker AWR
+14:33:04 INFO market_data_fetching.market_data - Resolved AX to yfinance ticker AX
+14:33:04 INFO market_data_fetching.market_data - Resolved AXL to yfinance ticker AXL
+14:33:04 INFO market_data_fetching.market_data - Resolved AXP to yfinance ticker AXP
+14:33:04 INFO market_data_fetching.market_data - Resolved AYI to yfinance ticker AYI
+14:33:04 INFO market_data_fetching.market_data - Resolved AZO to yfinance ticker AZO
+14:33:04 INFO market_data_fetching.market_data - Resolved AZZ to yfinance ticker AZZ
+14:33:04 INFO market_data_fetching.market_data - Resolved BA to yfinance ticker BA
+14:33:04 INFO market_data_fetching.market_data - Resolved BAC to yfinance ticker BAC
+14:33:04 INFO market_data_fetching.market_data - Resolved BAH to yfinance ticker BAH
+14:33:04 INFO market_data_fetching.market_data - Resolved BANF to yfinance ticker BANF
+14:33:04 INFO market_data_fetching.market_data - Resolved BAX to yfinance ticker BAX
+14:33:04 INFO market_data_fetching.market_data - Resolved BBY to yfinance ticker BBY
+14:33:04 INFO market_data_fetching.market_data - Resolved BC to yfinance ticker BC
+14:33:04 INFO market_data_fetching.market_data - Resolved BCC to yfinance ticker BCC
+14:33:04 INFO market_data_fetching.market_data - Resolved BDX to yfinance ticker BDX
+14:33:04 INFO market_data_fetching.market_data - Resolved BEN to yfinance ticker BEN
+14:33:04 INFO market_data_fetching.market_data - Resolved BG to yfinance ticker BG
+14:33:04 INFO market_data_fetching.market_data - Resolved BIIB to yfinance ticker BIIB
+14:33:04 INFO market_data_fetching.market_data - Resolved BILL to yfinance ticker BILL
+14:33:04 INFO market_data_fetching.market_data - Resolved BIO to yfinance ticker BIO
+14:33:04 INFO market_data_fetching.market_data - Resolved BJ to yfinance ticker BJ
+14:33:04 INFO market_data_fetching.market_data - Resolved BJRI to yfinance ticker BJRI
+14:33:04 INFO market_data_fetching.market_data - Resolved BK to yfinance ticker BK
+14:33:04 INFO market_data_fetching.market_data - Resolved BKE to yfinance ticker BKE
+14:33:04 INFO market_data_fetching.market_data - Resolved BKH to yfinance ticker BKH
+14:33:04 INFO market_data_fetching.market_data - Resolved BKU to yfinance ticker BKU
+14:33:04 INFO market_data_fetching.market_data - Resolved BL to yfinance ticker BL
+14:33:04 INFO market_data_fetching.market_data - Resolved BLD to yfinance ticker BLD
+14:33:04 INFO market_data_fetching.market_data - Resolved BLDR to yfinance ticker BLDR
+14:33:04 INFO market_data_fetching.market_data - Resolved BLFS to yfinance ticker BLFS
+14:33:04 INFO market_data_fetching.market_data - Resolved BLK to yfinance ticker BLK
+14:33:04 INFO market_data_fetching.market_data - Resolved BLKB to yfinance ticker BLKB
+14:33:04 INFO market_data_fetching.market_data - Resolved BLMN to yfinance ticker BLMN
+14:33:04 INFO market_data_fetching.market_data - Resolved BMI to yfinance ticker BMI
+14:33:04 INFO market_data_fetching.market_data - Resolved BMRN to yfinance ticker BMRN
+14:33:04 INFO market_data_fetching.market_data - Resolved BMY to yfinance ticker BMY
+14:33:04 INFO market_data_fetching.market_data - Resolved BOH to yfinance ticker BOH
+14:33:04 INFO market_data_fetching.market_data - Resolved BOOT to yfinance ticker BOOT
+14:33:04 INFO market_data_fetching.market_data - Resolved BOX to yfinance ticker BOX
+14:33:04 INFO market_data_fetching.market_data - Resolved BR to yfinance ticker BR
+14:33:04 INFO market_data_fetching.market_data - Resolved BRBR to yfinance ticker BRBR
+14:33:04 INFO market_data_fetching.market_data - Resolved BRC to yfinance ticker BRC
+14:33:04 INFO market_data_fetching.market_data - Resolved BRKR to yfinance ticker BRKR
+14:33:04 INFO market_data_fetching.market_data - Resolved BRK_B to yfinance ticker BRK-B
+14:33:04 INFO market_data_fetching.market_data - Resolved BRO to yfinance ticker BRO
+14:33:04 INFO market_data_fetching.market_data - Resolved BRX to yfinance ticker BRX
+14:33:04 INFO market_data_fetching.market_data - Resolved BSX to yfinance ticker BSX
+14:33:04 INFO market_data_fetching.market_data - Resolved BSY to yfinance ticker BSY
+14:33:04 INFO market_data_fetching.market_data - Resolved BTSG to yfinance ticker BTSG
+14:33:04 INFO market_data_fetching.market_data - Resolved BTU to yfinance ticker BTU
+14:33:04 INFO market_data_fetching.market_data - Resolved BURL to yfinance ticker BURL
+14:33:04 INFO market_data_fetching.market_data - Resolved BWA to yfinance ticker BWA
+14:33:04 INFO market_data_fetching.market_data - Resolved BWXT to yfinance ticker BWXT
+14:33:04 INFO market_data_fetching.market_data - Resolved BX to yfinance ticker BX
+14:33:04 INFO market_data_fetching.market_data - Resolved BXMT to yfinance ticker BXMT
+14:33:04 INFO market_data_fetching.market_data - Resolved BXP to yfinance ticker BXP
+14:33:04 INFO market_data_fetching.market_data - Resolved BYD to yfinance ticker BYD
+14:33:04 INFO market_data_fetching.market_data - Resolved C to yfinance ticker C
+14:33:04 INFO market_data_fetching.market_data - Resolved CABO to yfinance ticker CABO
+14:33:04 INFO market_data_fetching.market_data - Resolved CACI to yfinance ticker CACI
+14:33:04 INFO market_data_fetching.market_data - Resolved CAG to yfinance ticker CAG
+14:33:04 INFO market_data_fetching.market_data - Resolved CAH to yfinance ticker CAH
+14:33:04 INFO market_data_fetching.market_data - Resolved CAKE to yfinance ticker CAKE
+14:33:04 INFO market_data_fetching.market_data - Resolved CALM to yfinance ticker CALM
+14:33:04 INFO market_data_fetching.market_data - Resolved CALX to yfinance ticker CALX
+14:33:04 INFO market_data_fetching.market_data - Resolved CAR to yfinance ticker CAR
+14:33:04 INFO market_data_fetching.market_data - Resolved CARG to yfinance ticker CARG
+14:33:04 INFO market_data_fetching.market_data - Resolved CARR to yfinance ticker CARR
+14:33:04 INFO market_data_fetching.market_data - Resolved CART to yfinance ticker CART
+14:33:04 INFO market_data_fetching.market_data - Resolved CASY to yfinance ticker CASY
+14:33:04 INFO market_data_fetching.market_data - Resolved CAT to yfinance ticker CAT
+14:33:04 INFO market_data_fetching.market_data - Resolved CATY to yfinance ticker CATY
+14:33:04 INFO market_data_fetching.market_data - Resolved CAVA to yfinance ticker CAVA
+14:33:04 INFO market_data_fetching.market_data - Resolved CB to yfinance ticker CB
+14:33:04 INFO market_data_fetching.market_data - Resolved CBOE to yfinance ticker CBOE
+14:33:04 INFO market_data_fetching.market_data - Resolved CBRL to yfinance ticker CBRL
+14:33:04 INFO market_data_fetching.market_data - Resolved CBSH to yfinance ticker CBSH
+14:33:04 INFO market_data_fetching.market_data - Resolved CC to yfinance ticker CC
+14:33:04 INFO market_data_fetching.market_data - Resolved CCI to yfinance ticker CCI
+14:33:04 INFO market_data_fetching.market_data - Resolved CCK to yfinance ticker CCK
+14:33:04 INFO market_data_fetching.market_data - Resolved CCL to yfinance ticker CCL
+14:33:04 INFO market_data_fetching.market_data - Resolved CCOI to yfinance ticker CCOI
+14:33:04 INFO market_data_fetching.market_data - Resolved CCS to yfinance ticker CCS
+14:33:04 INFO market_data_fetching.market_data - Resolved CDNS to yfinance ticker CDNS
+14:33:04 INFO market_data_fetching.market_data - Resolved CDW to yfinance ticker CDW
+14:33:04 INFO market_data_fetching.market_data - Resolved CE to yfinance ticker CE
+14:33:04 INFO market_data_fetching.market_data - Resolved CEG to yfinance ticker CEG
+14:33:04 INFO market_data_fetching.market_data - Resolved CELH to yfinance ticker CELH
+14:33:04 INFO market_data_fetching.market_data - Resolved CENX to yfinance ticker CENX
+14:33:04 INFO market_data_fetching.market_data - Resolved CERT to yfinance ticker CERT
+14:33:04 INFO market_data_fetching.market_data - Resolved CF to yfinance ticker CF
+14:33:04 INFO market_data_fetching.market_data - Resolved CFG to yfinance ticker CFG
+14:33:04 INFO market_data_fetching.market_data - Resolved CG to yfinance ticker CG
+14:33:04 INFO market_data_fetching.market_data - Resolved CGNX to yfinance ticker CGNX
+14:33:04 INFO market_data_fetching.market_data - Resolved CHD to yfinance ticker CHD
+14:33:04 INFO market_data_fetching.market_data - Resolved CHE to yfinance ticker CHE
+14:33:04 INFO market_data_fetching.market_data - Resolved CHH to yfinance ticker CHH
+14:33:04 INFO market_data_fetching.market_data - Resolved CHRW to yfinance ticker CHRW
+14:33:04 INFO market_data_fetching.market_data - Resolved CHTR to yfinance ticker CHTR
+14:33:04 INFO market_data_fetching.market_data - Resolved CHWY to yfinance ticker CHWY
+14:33:04 INFO market_data_fetching.market_data - Resolved CI to yfinance ticker CI
+14:33:04 INFO market_data_fetching.market_data - Resolved CIEN to yfinance ticker CIEN
+14:33:04 INFO market_data_fetching.market_data - Resolved CINF to yfinance ticker CINF
+14:33:04 INFO market_data_fetching.market_data - Resolved CL to yfinance ticker CL
+14:33:04 INFO market_data_fetching.market_data - Resolved CLF to yfinance ticker CLF
+14:33:04 INFO market_data_fetching.market_data - Resolved CLH to yfinance ticker CLH
+14:33:04 INFO market_data_fetching.market_data - Resolved CLSK to yfinance ticker CLSK
+14:33:04 INFO market_data_fetching.market_data - Resolved CLX to yfinance ticker CLX
+14:33:04 INFO market_data_fetching.market_data - Resolved CMA to yfinance ticker CMA
+14:33:04 INFO market_data_fetching.market_data - Resolved CMC to yfinance ticker CMC
+14:33:04 INFO market_data_fetching.market_data - Resolved CMCSA to yfinance ticker CMCSA
+14:33:04 INFO market_data_fetching.market_data - Resolved CME to yfinance ticker CME
+14:33:04 INFO market_data_fetching.market_data - Resolved CMG to yfinance ticker CMG
+14:33:04 INFO market_data_fetching.market_data - Resolved CMI to yfinance ticker CMI
+14:33:04 INFO market_data_fetching.market_data - Resolved CMS to yfinance ticker CMS
+14:33:04 INFO market_data_fetching.market_data - Resolved CNC to yfinance ticker CNC
+14:33:04 INFO market_data_fetching.market_data - Resolved CNK to yfinance ticker CNK
+14:33:04 INFO market_data_fetching.market_data - Resolved CNM to yfinance ticker CNM
+14:33:04 INFO market_data_fetching.market_data - Resolved CNP to yfinance ticker CNP
+14:33:04 INFO market_data_fetching.market_data - Resolved CNR to yfinance ticker CNR
+14:33:04 INFO market_data_fetching.market_data - Resolved CNS to yfinance ticker CNS
+14:33:04 INFO market_data_fetching.market_data - Resolved CNX to yfinance ticker CNX
+14:33:04 INFO market_data_fetching.market_data - Resolved CNXC to yfinance ticker CNXC
+14:33:04 INFO market_data_fetching.market_data - Resolved COF to yfinance ticker COF
+14:33:04 INFO market_data_fetching.market_data - Resolved COHU to yfinance ticker COHU
+14:33:04 INFO market_data_fetching.market_data - Resolved COIN to yfinance ticker COIN
+14:33:04 INFO market_data_fetching.market_data - Resolved COKE to yfinance ticker COKE
+14:33:04 INFO market_data_fetching.market_data - Resolved COLB to yfinance ticker COLB
+14:33:04 INFO market_data_fetching.market_data - Resolved CON to yfinance ticker CON
+14:33:04 INFO market_data_fetching.market_data - Resolved COO to yfinance ticker COO
+14:33:04 INFO market_data_fetching.market_data - Resolved COP to yfinance ticker COP
+14:33:04 INFO market_data_fetching.market_data - Resolved CORT to yfinance ticker CORT
+14:33:04 INFO market_data_fetching.market_data - Resolved COST to yfinance ticker COST
+14:33:04 INFO market_data_fetching.market_data - Resolved COTY to yfinance ticker COTY
+14:33:04 INFO market_data_fetching.market_data - Resolved CPB to yfinance ticker CPB
+14:33:04 INFO market_data_fetching.market_data - Resolved CPRT to yfinance ticker CPRT
+14:33:04 INFO market_data_fetching.market_data - Resolved CPRX to yfinance ticker CPRX
+14:33:04 INFO market_data_fetching.market_data - Resolved CPT to yfinance ticker CPT
+14:33:04 INFO market_data_fetching.market_data - Resolved CRBG to yfinance ticker CRBG
+14:33:04 INFO market_data_fetching.market_data - Resolved CRC to yfinance ticker CRC
+14:33:04 INFO market_data_fetching.market_data - Resolved CRH to yfinance ticker CRH
+14:33:04 INFO market_data_fetching.market_data - Resolved CRI to yfinance ticker CRI
+14:33:04 INFO market_data_fetching.market_data - Resolved CRK to yfinance ticker CRK
+14:33:04 INFO market_data_fetching.market_data - Resolved CRL to yfinance ticker CRL
+14:33:04 INFO market_data_fetching.market_data - Resolved CRM to yfinance ticker CRM
+14:33:04 INFO market_data_fetching.market_data - Resolved CROX to yfinance ticker CROX
+14:33:04 INFO market_data_fetching.market_data - Resolved CRS to yfinance ticker CRS
+14:33:04 INFO market_data_fetching.market_data - Resolved CRSR to yfinance ticker CRSR
+14:33:04 INFO market_data_fetching.market_data - Resolved CRUS to yfinance ticker CRUS
+14:33:04 INFO market_data_fetching.market_data - Resolved CRVL to yfinance ticker CRVL
+14:33:04 INFO market_data_fetching.market_data - Resolved CRWD to yfinance ticker CRWD
+14:33:04 INFO market_data_fetching.market_data - Resolved CSCO to yfinance ticker CSCO
+14:33:04 INFO market_data_fetching.market_data - Resolved CSGP to yfinance ticker CSGP
+14:33:04 INFO market_data_fetching.market_data - Resolved CSL to yfinance ticker CSL
+14:33:04 INFO market_data_fetching.market_data - Resolved CSR to yfinance ticker CSR
+14:33:04 INFO market_data_fetching.market_data - Resolved CSX to yfinance ticker CSX
+14:33:04 INFO market_data_fetching.market_data - Resolved CTAS to yfinance ticker CTAS
+14:33:04 INFO market_data_fetching.market_data - Resolved CTRA to yfinance ticker CTRA
+14:33:04 INFO market_data_fetching.market_data - Resolved CTRE to yfinance ticker CTRE
+14:33:04 INFO market_data_fetching.market_data - Resolved CTSH to yfinance ticker CTSH
+14:33:04 INFO market_data_fetching.market_data - Resolved CTVA to yfinance ticker CTVA
+14:33:04 INFO market_data_fetching.market_data - Resolved CUBE to yfinance ticker CUBE
+14:33:04 INFO market_data_fetching.market_data - Resolved CUBI to yfinance ticker CUBI
+14:33:04 INFO market_data_fetching.market_data - Resolved CURB to yfinance ticker CURB
+14:33:04 INFO market_data_fetching.market_data - Resolved CVBF to yfinance ticker CVBF
+14:33:04 INFO market_data_fetching.market_data - Resolved CVI to yfinance ticker CVI
+14:33:04 INFO market_data_fetching.market_data - Resolved CVLT to yfinance ticker CVLT
+14:33:04 INFO market_data_fetching.market_data - Resolved CVNA to yfinance ticker CVNA
+14:33:04 INFO market_data_fetching.market_data - Resolved CVS to yfinance ticker CVS
+14:33:04 INFO market_data_fetching.market_data - Resolved CVX to yfinance ticker CVX
+14:33:04 INFO market_data_fetching.market_data - Resolved CW to yfinance ticker CW
+14:33:04 INFO market_data_fetching.market_data - Resolved CWEN to yfinance ticker CWEN
+14:33:04 INFO market_data_fetching.market_data - Resolved CWEN/A to yfinance ticker CWEN-A
+14:33:04 INFO market_data_fetching.market_data - Resolved CWK to yfinance ticker CWK
+14:33:04 INFO market_data_fetching.market_data - Resolved CWT to yfinance ticker CWT
+14:33:04 INFO market_data_fetching.market_data - Resolved CXM to yfinance ticker CXM
+14:33:04 INFO market_data_fetching.market_data - Resolved CXW to yfinance ticker CXW
+14:33:04 INFO market_data_fetching.market_data - Resolved CYTK to yfinance ticker CYTK
+14:33:04 INFO market_data_fetching.market_data - Resolved D to yfinance ticker D
+14:33:04 INFO market_data_fetching.market_data - Resolved DAL to yfinance ticker DAL
+14:33:04 INFO market_data_fetching.market_data - Resolved DAN to yfinance ticker DAN
+14:33:04 INFO market_data_fetching.market_data - Resolved DAR to yfinance ticker DAR
+14:33:04 INFO market_data_fetching.market_data - Resolved DASH to yfinance ticker DASH
+14:33:04 INFO market_data_fetching.market_data - Resolved DBX to yfinance ticker DBX
+14:33:04 INFO market_data_fetching.market_data - Resolved DCI to yfinance ticker DCI
+14:33:04 INFO market_data_fetching.market_data - Resolved DD to yfinance ticker DD
+14:33:04 INFO market_data_fetching.market_data - Resolved DDOG to yfinance ticker DDOG
+14:33:04 INFO market_data_fetching.market_data - Resolved DE to yfinance ticker DE
+14:33:04 INFO market_data_fetching.market_data - Resolved DEA to yfinance ticker DEA
+14:33:04 INFO market_data_fetching.market_data - Resolved DECK to yfinance ticker DECK
+14:33:04 INFO market_data_fetching.market_data - Resolved DELL to yfinance ticker DELL
+14:33:04 INFO market_data_fetching.market_data - Resolved DFH to yfinance ticker DFH
+14:33:04 INFO market_data_fetching.market_data - Resolved DG to yfinance ticker DG
+14:33:04 INFO market_data_fetching.market_data - Resolved DGII to yfinance ticker DGII
+14:33:04 INFO market_data_fetching.market_data - Resolved DGX to yfinance ticker DGX
+14:33:04 INFO market_data_fetching.market_data - Resolved DHI to yfinance ticker DHI
+14:33:04 INFO market_data_fetching.market_data - Resolved DHR to yfinance ticker DHR
+14:33:04 INFO market_data_fetching.market_data - Resolved DIOD to yfinance ticker DIOD
+14:33:04 INFO market_data_fetching.market_data - Resolved DIS to yfinance ticker DIS
+14:33:04 INFO market_data_fetching.market_data - Resolved DKS to yfinance ticker DKS
+14:33:04 INFO market_data_fetching.market_data - Resolved DLR to yfinance ticker DLR
+14:33:04 INFO market_data_fetching.market_data - Resolved DLTR to yfinance ticker DLTR
+14:33:04 INFO market_data_fetching.market_data - Resolved DNOW to yfinance ticker DNOW
+14:33:04 INFO market_data_fetching.market_data - Resolved DOCN to yfinance ticker DOCN
+14:33:04 INFO market_data_fetching.market_data - Resolved DOCS to yfinance ticker DOCS
+14:33:04 INFO market_data_fetching.market_data - Resolved DOCU to yfinance ticker DOCU
+14:33:04 INFO market_data_fetching.market_data - Resolved DOV to yfinance ticker DOV
+14:33:04 INFO market_data_fetching.market_data - Resolved DPZ to yfinance ticker DPZ
+14:33:04 INFO market_data_fetching.market_data - Resolved DRH to yfinance ticker DRH
+14:33:04 INFO market_data_fetching.market_data - Resolved DRI to yfinance ticker DRI
+14:33:04 INFO market_data_fetching.market_data - Resolved DT to yfinance ticker DT
+14:33:04 INFO market_data_fetching.market_data - Resolved DTE to yfinance ticker DTE
+14:33:04 INFO market_data_fetching.market_data - Resolved DTM to yfinance ticker DTM
+14:33:04 INFO market_data_fetching.market_data - Resolved DUK to yfinance ticker DUK
+14:33:04 INFO market_data_fetching.market_data - Resolved DUOL to yfinance ticker DUOL
+14:33:04 INFO market_data_fetching.market_data - Resolved DV to yfinance ticker DV
+14:33:04 INFO market_data_fetching.market_data - Resolved DVA to yfinance ticker DVA
+14:33:04 INFO market_data_fetching.market_data - Resolved DVAX to yfinance ticker DVAX
+14:33:04 INFO market_data_fetching.market_data - Resolved DVN to yfinance ticker DVN
+14:33:04 INFO market_data_fetching.market_data - Resolved DXC to yfinance ticker DXC
+14:33:04 INFO market_data_fetching.market_data - Resolved DXCM to yfinance ticker DXCM
+14:33:04 INFO market_data_fetching.market_data - Resolved DXPE to yfinance ticker DXPE
+14:33:04 INFO market_data_fetching.market_data - Resolved DY to yfinance ticker DY
+14:33:04 INFO market_data_fetching.market_data - Resolved EA to yfinance ticker EA
+14:33:04 INFO market_data_fetching.market_data - Resolved EAT to yfinance ticker EAT
+14:33:04 INFO market_data_fetching.market_data - Resolved EBAY to yfinance ticker EBAY
+14:33:04 INFO market_data_fetching.market_data - Resolved ECG to yfinance ticker ECG
+14:33:04 INFO market_data_fetching.market_data - Resolved ECL to yfinance ticker ECL
+14:33:04 INFO market_data_fetching.market_data - Resolved ED to yfinance ticker ED
+14:33:04 INFO market_data_fetching.market_data - Resolved EEFT to yfinance ticker EEFT
+14:33:04 INFO market_data_fetching.market_data - Resolved EFC to yfinance ticker EFC
+14:33:04 INFO market_data_fetching.market_data - Resolved EFX to yfinance ticker EFX
+14:33:04 INFO market_data_fetching.market_data - Resolved EGBN to yfinance ticker EGBN
+14:33:04 INFO market_data_fetching.market_data - Resolved EGP to yfinance ticker EGP
+14:33:04 INFO market_data_fetching.market_data - Resolved EIG to yfinance ticker EIG
+14:33:04 INFO market_data_fetching.market_data - Resolved EIX to yfinance ticker EIX
+14:33:04 INFO market_data_fetching.market_data - Resolved EL to yfinance ticker EL
+14:33:04 INFO market_data_fetching.market_data - Resolved ELF to yfinance ticker ELF
+14:33:04 INFO market_data_fetching.market_data - Resolved ELME to yfinance ticker ELME
+14:33:04 INFO market_data_fetching.market_data - Resolved ELS to yfinance ticker ELS
+14:33:04 INFO market_data_fetching.market_data - Resolved EMBC to yfinance ticker EMBC
+14:33:04 INFO market_data_fetching.market_data - Resolved EME to yfinance ticker EME
+14:33:04 INFO market_data_fetching.market_data - Resolved EMN to yfinance ticker EMN
+14:33:04 INFO market_data_fetching.market_data - Resolved EMR to yfinance ticker EMR
+14:33:04 INFO market_data_fetching.market_data - Resolved ENPH to yfinance ticker ENPH
+14:33:04 INFO market_data_fetching.market_data - Resolved ENR to yfinance ticker ENR
+14:33:04 INFO market_data_fetching.market_data - Resolved ENS to yfinance ticker ENS
+14:33:04 INFO market_data_fetching.market_data - Resolved ENTG to yfinance ticker ENTG
+14:33:04 INFO market_data_fetching.market_data - Resolved ENVA to yfinance ticker ENVA
+14:33:04 INFO market_data_fetching.market_data - Resolved EOG to yfinance ticker EOG
+14:33:04 INFO market_data_fetching.market_data - Resolved EPAM to yfinance ticker EPAM
+14:33:04 INFO market_data_fetching.market_data - Resolved EPR to yfinance ticker EPR
+14:33:04 INFO market_data_fetching.market_data - Resolved EPRT to yfinance ticker EPRT
+14:33:04 INFO market_data_fetching.market_data - Resolved EQH to yfinance ticker EQH
+14:33:04 INFO market_data_fetching.market_data - Resolved EQIX to yfinance ticker EQIX
+14:33:04 INFO market_data_fetching.market_data - Resolved EQR to yfinance ticker EQR
+14:33:04 INFO market_data_fetching.market_data - Resolved EQT to yfinance ticker EQT
+14:33:04 INFO market_data_fetching.market_data - Resolved ERIE to yfinance ticker ERIE
+14:33:04 INFO market_data_fetching.market_data - Resolved ES to yfinance ticker ES
+14:33:04 INFO market_data_fetching.market_data - Resolved ESAB to yfinance ticker ESAB
+14:33:04 INFO market_data_fetching.market_data - Resolved ESE to yfinance ticker ESE
+14:33:04 INFO market_data_fetching.market_data - Resolved ESS to yfinance ticker ESS
+14:33:04 INFO market_data_fetching.market_data - Resolved ETH to yfinance ticker ETH
+14:33:04 INFO market_data_fetching.market_data - Resolved ETN to yfinance ticker ETN
+14:33:04 INFO market_data_fetching.market_data - Resolved ETR to yfinance ticker ETR
+14:33:04 INFO market_data_fetching.market_data - Resolved ETSY to yfinance ticker ETSY
+14:33:04 INFO market_data_fetching.market_data - Resolved EVR to yfinance ticker EVR
+14:33:04 INFO market_data_fetching.market_data - Resolved EVRG to yfinance ticker EVRG
+14:33:04 INFO market_data_fetching.market_data - Resolved EVTC to yfinance ticker EVTC
+14:33:04 INFO market_data_fetching.market_data - Resolved EW to yfinance ticker EW
+14:33:04 INFO market_data_fetching.market_data - Resolved EXC to yfinance ticker EXC
+14:33:04 INFO market_data_fetching.market_data - Resolved EXEL to yfinance ticker EXEL
+14:33:04 INFO market_data_fetching.market_data - Resolved EXLS to yfinance ticker EXLS
+14:33:04 INFO market_data_fetching.market_data - Resolved EXP to yfinance ticker EXP
+14:33:04 INFO market_data_fetching.market_data - Resolved EXPD to yfinance ticker EXPD
+14:33:04 INFO market_data_fetching.market_data - Resolved EXPE to yfinance ticker EXPE
+14:33:04 INFO market_data_fetching.market_data - Resolved EXPI to yfinance ticker EXPI
+14:33:04 INFO market_data_fetching.market_data - Resolved EXR to yfinance ticker EXR
+14:33:04 INFO market_data_fetching.market_data - Resolved EXTR to yfinance ticker EXTR
+14:33:04 INFO market_data_fetching.market_data - Resolved EYE to yfinance ticker EYE
+14:33:04 INFO market_data_fetching.market_data - Resolved EZPW to yfinance ticker EZPW
+14:33:04 INFO market_data_fetching.market_data - Resolved F to yfinance ticker F
+14:33:04 INFO market_data_fetching.market_data - Resolved FANG to yfinance ticker FANG
+14:33:04 INFO market_data_fetching.market_data - Resolved FAST to yfinance ticker FAST
+14:33:04 INFO market_data_fetching.market_data - Resolved FB to yfinance ticker FB
+14:33:04 INFO market_data_fetching.market_data - Resolved FBK to yfinance ticker FBK
+14:33:04 INFO market_data_fetching.market_data - Resolved FBRT to yfinance ticker FBRT
+14:33:04 INFO market_data_fetching.market_data - Resolved FCPT to yfinance ticker FCPT
+14:33:04 INFO market_data_fetching.market_data - Resolved FCX to yfinance ticker FCX
+14:33:04 INFO market_data_fetching.market_data - Resolved FDP to yfinance ticker FDP
+14:33:04 INFO market_data_fetching.market_data - Resolved FDS to yfinance ticker FDS
+14:33:04 INFO market_data_fetching.market_data - Resolved FDX to yfinance ticker FDX
+14:33:04 INFO market_data_fetching.market_data - Resolved FE to yfinance ticker FE
+14:33:04 INFO market_data_fetching.market_data - Resolved FELE to yfinance ticker FELE
+14:33:04 INFO market_data_fetching.market_data - Resolved FFIV to yfinance ticker FFIV
+14:33:04 INFO market_data_fetching.market_data - Resolved FHN to yfinance ticker FHN
+14:33:04 INFO market_data_fetching.market_data - Resolved FIBK to yfinance ticker FIBK
+14:33:04 INFO market_data_fetching.market_data - Resolved FICO to yfinance ticker FICO
+14:33:04 INFO market_data_fetching.market_data - Resolved FIS to yfinance ticker FIS
+14:33:04 INFO market_data_fetching.market_data - Resolved FISV to yfinance ticker FISV
+14:33:04 INFO market_data_fetching.market_data - Resolved FITB to yfinance ticker FITB
+14:33:04 INFO market_data_fetching.market_data - Resolved FIVE to yfinance ticker FIVE
+14:33:04 INFO market_data_fetching.market_data - Resolved FIX to yfinance ticker FIX
+14:33:04 INFO market_data_fetching.market_data - Resolved FIZZ to yfinance ticker FIZZ
+14:33:04 INFO market_data_fetching.market_data - Resolved FLEX to yfinance ticker FLEX
+14:33:04 INFO market_data_fetching.market_data - Resolved FLO to yfinance ticker FLO
+14:33:04 INFO market_data_fetching.market_data - Resolved FLR to yfinance ticker FLR
+14:33:04 INFO market_data_fetching.market_data - Resolved FLS to yfinance ticker FLS
+14:33:04 INFO market_data_fetching.market_data - Resolved FMC to yfinance ticker FMC
+14:33:04 INFO market_data_fetching.market_data - Resolved FN to yfinance ticker FN
+14:33:04 INFO market_data_fetching.market_data - Resolved FNB to yfinance ticker FNB
+14:33:04 INFO market_data_fetching.market_data - Resolved FND to yfinance ticker FND
+14:33:04 INFO market_data_fetching.market_data - Resolved FNF to yfinance ticker FNF
+14:33:04 INFO market_data_fetching.market_data - Resolved FORM to yfinance ticker FORM
+14:33:04 INFO market_data_fetching.market_data - Resolved FOUR to yfinance ticker FOUR
+14:33:04 INFO market_data_fetching.market_data - Resolved FOX to yfinance ticker FOX
+14:33:04 INFO market_data_fetching.market_data - Resolved FOXA to yfinance ticker FOXA
+14:33:04 INFO market_data_fetching.market_data - Resolved FR to yfinance ticker FR
+14:33:04 INFO market_data_fetching.market_data - Resolved FRPT to yfinance ticker FRPT
+14:33:04 INFO market_data_fetching.market_data - Resolved FRT to yfinance ticker FRT
+14:33:04 INFO market_data_fetching.market_data - Resolved FSLR to yfinance ticker FSLR
+14:33:04 INFO market_data_fetching.market_data - Resolved FTDR to yfinance ticker FTDR
+14:33:04 INFO market_data_fetching.market_data - Resolved FTI to yfinance ticker FTI
+14:33:04 INFO market_data_fetching.market_data - Resolved FTNT to yfinance ticker FTNT
+14:33:04 INFO market_data_fetching.market_data - Resolved FTRE to yfinance ticker FTRE
+14:33:04 INFO market_data_fetching.market_data - Resolved FTV to yfinance ticker FTV
+14:33:04 INFO market_data_fetching.market_data - Resolved FUL to yfinance ticker FUL
+14:33:04 INFO market_data_fetching.market_data - Resolved G to yfinance ticker G
+14:33:04 INFO market_data_fetching.market_data - Resolved GBCI to yfinance ticker GBCI
+14:33:04 INFO market_data_fetching.market_data - Resolved GBX to yfinance ticker GBX
+14:33:04 INFO market_data_fetching.market_data - Resolved GD to yfinance ticker GD
+14:33:04 INFO market_data_fetching.market_data - Resolved GDDY to yfinance ticker GDDY
+14:33:04 INFO market_data_fetching.market_data - Resolved GDEN to yfinance ticker GDEN
+14:33:04 INFO market_data_fetching.market_data - Resolved GDYN to yfinance ticker GDYN
+14:33:04 INFO market_data_fetching.market_data - Resolved GE to yfinance ticker GE
+14:33:04 INFO market_data_fetching.market_data - Resolved GEHC to yfinance ticker GEHC
+14:33:04 INFO market_data_fetching.market_data - Resolved GEN to yfinance ticker GEN
+14:33:04 INFO market_data_fetching.market_data - Resolved GEO to yfinance ticker GEO
+14:33:04 INFO market_data_fetching.market_data - Resolved GES to yfinance ticker GES
+14:33:04 INFO market_data_fetching.market_data - Resolved GEV to yfinance ticker GEV
+14:33:04 INFO market_data_fetching.market_data - Resolved GFF to yfinance ticker GFF
+14:33:04 INFO market_data_fetching.market_data - Resolved GGG to yfinance ticker GGG
+14:33:04 INFO market_data_fetching.market_data - Resolved GHC to yfinance ticker GHC
+14:33:04 INFO market_data_fetching.market_data - Resolved GILD to yfinance ticker GILD
+14:33:04 INFO market_data_fetching.market_data - Resolved GIS to yfinance ticker GIS
+14:33:04 INFO market_data_fetching.market_data - Resolved GKOS to yfinance ticker GKOS
+14:33:04 INFO market_data_fetching.market_data - Resolved GLPI to yfinance ticker GLPI
+14:33:04 INFO market_data_fetching.market_data - Resolved GLW to yfinance ticker GLW
+14:33:04 INFO market_data_fetching.market_data - Resolved GM to yfinance ticker GM
+14:33:04 INFO market_data_fetching.market_data - Resolved GME to yfinance ticker GME
+14:33:04 INFO market_data_fetching.market_data - Resolved GMED to yfinance ticker GMED
+14:33:04 INFO market_data_fetching.market_data - Resolved GNL to yfinance ticker GNL
+14:33:04 INFO market_data_fetching.market_data - Resolved GNRC to yfinance ticker GNRC
+14:33:04 INFO market_data_fetching.market_data - Resolved GNTX to yfinance ticker GNTX
+14:33:04 INFO market_data_fetching.market_data - Resolved GNW to yfinance ticker GNW
+14:33:04 INFO market_data_fetching.market_data - Resolved GO to yfinance ticker GO
+14:33:04 INFO market_data_fetching.market_data - Resolved GOGO to yfinance ticker GOGO
+14:33:04 INFO market_data_fetching.market_data - Resolved GOLF to yfinance ticker GOLF
+14:33:04 INFO market_data_fetching.market_data - Resolved GOOG to yfinance ticker GOOG
+14:33:04 INFO market_data_fetching.market_data - Resolved GOOGL to yfinance ticker GOOGL
+14:33:04 INFO market_data_fetching.market_data - Resolved GPC to yfinance ticker GPC
+14:33:04 INFO market_data_fetching.market_data - Resolved GPI to yfinance ticker GPI
+14:33:04 INFO market_data_fetching.market_data - Resolved GPK to yfinance ticker GPK
+14:33:04 INFO market_data_fetching.market_data - Resolved GPN to yfinance ticker GPN
+14:33:04 INFO market_data_fetching.market_data - Resolved GRBK to yfinance ticker GRBK
+14:33:04 INFO market_data_fetching.market_data - Resolved GRMN to yfinance ticker GRMN
+14:33:04 INFO market_data_fetching.market_data - Resolved GS to yfinance ticker GS
+14:33:04 INFO market_data_fetching.market_data - Resolved GT to yfinance ticker GT
+14:33:04 INFO market_data_fetching.market_data - Resolved GTLS to yfinance ticker GTLS
+14:33:04 INFO market_data_fetching.market_data - Resolved GTY to yfinance ticker GTY
+14:33:04 INFO market_data_fetching.market_data - Resolved GWRE to yfinance ticker GWRE
+14:33:04 INFO market_data_fetching.market_data - Resolved GWW to yfinance ticker GWW
+14:33:04 INFO market_data_fetching.market_data - Resolved GXO to yfinance ticker GXO
+14:33:04 INFO market_data_fetching.market_data - Resolved H to yfinance ticker H
+14:33:04 INFO market_data_fetching.market_data - Resolved HAE to yfinance ticker HAE
+14:33:04 INFO market_data_fetching.market_data - Resolved HAL to yfinance ticker HAL
+14:33:04 INFO market_data_fetching.market_data - Resolved HALO to yfinance ticker HALO
+14:33:04 INFO market_data_fetching.market_data - Resolved HAS to yfinance ticker HAS
+14:33:04 INFO market_data_fetching.market_data - Resolved HASI to yfinance ticker HASI
+14:33:04 INFO market_data_fetching.market_data - Resolved HAYW to yfinance ticker HAYW
+14:33:04 INFO market_data_fetching.market_data - Resolved HBAN to yfinance ticker HBAN
+14:33:04 INFO market_data_fetching.market_data - Resolved HCA to yfinance ticker HCA
+14:33:04 INFO market_data_fetching.market_data - Resolved HCC to yfinance ticker HCC
+14:33:04 INFO market_data_fetching.market_data - Resolved HCI to yfinance ticker HCI
+14:33:04 INFO market_data_fetching.market_data - Resolved HD to yfinance ticker HD
+14:33:04 INFO market_data_fetching.market_data - Resolved HE to yfinance ticker HE
+14:33:04 INFO market_data_fetching.market_data - Resolved HI to yfinance ticker HI
+14:33:04 INFO market_data_fetching.market_data - Resolved HIG to yfinance ticker HIG
+14:33:04 INFO market_data_fetching.market_data - Resolved HII to yfinance ticker HII
+14:33:04 INFO market_data_fetching.market_data - Resolved HIW to yfinance ticker HIW
+14:33:04 INFO market_data_fetching.market_data - Resolved HL to yfinance ticker HL
+14:33:04 INFO market_data_fetching.market_data - Resolved HLI to yfinance ticker HLI
+14:33:04 INFO market_data_fetching.market_data - Resolved HLIT to yfinance ticker HLIT
+14:33:04 INFO market_data_fetching.market_data - Resolved HLNE to yfinance ticker HLNE
+14:33:04 INFO market_data_fetching.market_data - Resolved HLT to yfinance ticker HLT
+14:33:04 INFO market_data_fetching.market_data - Resolved HNI to yfinance ticker HNI
+14:33:04 INFO market_data_fetching.market_data - Resolved HOG to yfinance ticker HOG
+14:33:04 INFO market_data_fetching.market_data - Resolved HOLX to yfinance ticker HOLX
+14:33:04 INFO market_data_fetching.market_data - Resolved HON to yfinance ticker HON
+14:33:04 INFO market_data_fetching.market_data - Resolved HOOD to yfinance ticker HOOD
+14:33:04 INFO market_data_fetching.market_data - Resolved HOPE to yfinance ticker HOPE
+14:33:04 INFO market_data_fetching.market_data - Resolved HP to yfinance ticker HP
+14:33:04 INFO market_data_fetching.market_data - Resolved HPE to yfinance ticker HPE
+14:33:04 INFO market_data_fetching.market_data - Resolved HPQ to yfinance ticker HPQ
+14:33:04 INFO market_data_fetching.market_data - Resolved HRB to yfinance ticker HRB
+14:33:04 INFO market_data_fetching.market_data - Resolved HRL to yfinance ticker HRL
+14:33:04 INFO market_data_fetching.market_data - Resolved HRMY to yfinance ticker HRMY
+14:33:04 INFO market_data_fetching.market_data - Resolved HSIC to yfinance ticker HSIC
+14:33:04 INFO market_data_fetching.market_data - Resolved HST to yfinance ticker HST
+14:33:04 INFO market_data_fetching.market_data - Resolved HSY to yfinance ticker HSY
+14:33:04 INFO market_data_fetching.market_data - Resolved HTZ to yfinance ticker HTZ
+14:33:04 INFO market_data_fetching.market_data - Resolved HUBB to yfinance ticker HUBB
+14:33:04 INFO market_data_fetching.market_data - Resolved HUM to yfinance ticker HUM
+14:33:04 INFO market_data_fetching.market_data - Resolved HWKN to yfinance ticker HWKN
+14:33:04 INFO market_data_fetching.market_data - Resolved HXL to yfinance ticker HXL
+14:33:04 INFO market_data_fetching.market_data - Resolved HZO to yfinance ticker HZO
+14:33:04 INFO market_data_fetching.market_data - Resolved IAC to yfinance ticker IAC
+14:33:04 INFO market_data_fetching.market_data - Resolved IBKR to yfinance ticker IBKR
+14:33:04 INFO market_data_fetching.market_data - Resolved IBM to yfinance ticker IBM
+14:33:04 INFO market_data_fetching.market_data - Resolved IBP to yfinance ticker IBP
+14:33:04 INFO market_data_fetching.market_data - Resolved ICE to yfinance ticker ICE
+14:33:04 INFO market_data_fetching.market_data - Resolved ICHR to yfinance ticker ICHR
+14:33:04 INFO market_data_fetching.market_data - Resolved ICUI to yfinance ticker ICUI
+14:33:04 INFO market_data_fetching.market_data - Resolved IDCC to yfinance ticker IDCC
+14:33:04 INFO market_data_fetching.market_data - Resolved IDXX to yfinance ticker IDXX
+14:33:04 INFO market_data_fetching.market_data - Resolved IEX to yfinance ticker IEX
+14:33:04 INFO market_data_fetching.market_data - Resolved IFF to yfinance ticker IFF
+14:33:04 INFO market_data_fetching.market_data - Resolved IIIN to yfinance ticker IIIN
+14:33:04 INFO market_data_fetching.market_data - Resolved IIPR to yfinance ticker IIPR
+14:33:04 INFO market_data_fetching.market_data - Resolved ILMN to yfinance ticker ILMN
+14:33:04 INFO market_data_fetching.market_data - Resolved INCY to yfinance ticker INCY
+14:33:04 INFO market_data_fetching.market_data - Resolved INDB to yfinance ticker INDB
+14:33:04 INFO market_data_fetching.market_data - Resolved INDV to yfinance ticker INDV
+14:33:04 INFO market_data_fetching.market_data - Resolved INGR to yfinance ticker INGR
+14:33:04 INFO market_data_fetching.market_data - Resolved INN to yfinance ticker INN
+14:33:04 INFO market_data_fetching.market_data - Resolved INSP to yfinance ticker INSP
+14:33:04 INFO market_data_fetching.market_data - Resolved INSW to yfinance ticker INSW
+14:33:04 INFO market_data_fetching.market_data - Resolved INTC to yfinance ticker INTC
+14:33:04 INFO market_data_fetching.market_data - Resolved INTU to yfinance ticker INTU
+14:33:04 INFO market_data_fetching.market_data - Resolved INVA to yfinance ticker INVA
+14:33:04 INFO market_data_fetching.market_data - Resolved INVH to yfinance ticker INVH
+14:33:04 INFO market_data_fetching.market_data - Resolved IP to yfinance ticker IP
+14:33:04 INFO market_data_fetching.market_data - Resolved IPAR to yfinance ticker IPAR
+14:33:04 INFO market_data_fetching.market_data - Resolved IQV to yfinance ticker IQV
+14:33:04 INFO market_data_fetching.market_data - Resolved IR to yfinance ticker IR
+14:33:04 INFO market_data_fetching.market_data - Resolved IRDM to yfinance ticker IRDM
+14:33:04 INFO market_data_fetching.market_data - Resolved IRM to yfinance ticker IRM
+14:33:04 INFO market_data_fetching.market_data - Resolved IRT to yfinance ticker IRT
+14:33:04 INFO market_data_fetching.market_data - Resolved ISRG to yfinance ticker ISRG
+14:33:04 INFO market_data_fetching.market_data - Resolved IT to yfinance ticker IT
+14:33:04 INFO market_data_fetching.market_data - Resolved ITGR to yfinance ticker ITGR
+14:33:04 INFO market_data_fetching.market_data - Resolved ITRI to yfinance ticker ITRI
+14:33:04 INFO market_data_fetching.market_data - Resolved ITT to yfinance ticker ITT
+14:33:04 INFO market_data_fetching.market_data - Resolved ITW to yfinance ticker ITW
+14:33:04 INFO market_data_fetching.market_data - Resolved IVZ to yfinance ticker IVZ
+14:33:04 INFO market_data_fetching.market_data - Resolved JAZZ to yfinance ticker JAZZ
+14:33:04 INFO market_data_fetching.market_data - Resolved JBGS to yfinance ticker JBGS
+14:33:04 INFO market_data_fetching.market_data - Resolved JBHT to yfinance ticker JBHT
+14:33:04 INFO market_data_fetching.market_data - Resolved JBL to yfinance ticker JBL
+14:33:04 INFO market_data_fetching.market_data - Resolved JBLU to yfinance ticker JBLU
+14:33:04 INFO market_data_fetching.market_data - Resolved JCI to yfinance ticker JCI
+14:33:04 INFO market_data_fetching.market_data - Resolved JHG to yfinance ticker JHG
+14:33:04 INFO market_data_fetching.market_data - Resolved JJSF to yfinance ticker JJSF
+14:33:04 INFO market_data_fetching.market_data - Resolved JKHY to yfinance ticker JKHY
+14:33:04 INFO market_data_fetching.market_data - Resolved JLL to yfinance ticker JLL
+14:33:04 INFO market_data_fetching.market_data - Resolved JNJ to yfinance ticker JNJ
+14:33:04 INFO market_data_fetching.market_data - Resolved JOE to yfinance ticker JOE
+14:33:04 INFO market_data_fetching.market_data - Resolved JPM to yfinance ticker JPM
+14:33:04 INFO market_data_fetching.market_data - Resolved JXN to yfinance ticker JXN
+14:33:04 INFO market_data_fetching.market_data - Resolved KBH to yfinance ticker KBH
+14:33:04 INFO market_data_fetching.market_data - Resolved KBR to yfinance ticker KBR
+14:33:04 INFO market_data_fetching.market_data - Resolved KD to yfinance ticker KD
+14:33:04 INFO market_data_fetching.market_data - Resolved KEX to yfinance ticker KEX
+14:33:04 INFO market_data_fetching.market_data - Resolved KEY to yfinance ticker KEY
+14:33:04 INFO market_data_fetching.market_data - Resolved KEYS to yfinance ticker KEYS
+14:33:04 INFO market_data_fetching.market_data - Resolved KFY to yfinance ticker KFY
+14:33:04 INFO market_data_fetching.market_data - Resolved KGS to yfinance ticker KGS
+14:33:04 INFO market_data_fetching.market_data - Resolved KHC to yfinance ticker KHC
+14:33:04 INFO market_data_fetching.market_data - Resolved KIM to yfinance ticker KIM
+14:33:04 INFO market_data_fetching.market_data - Resolved KKR to yfinance ticker KKR
+14:33:04 INFO market_data_fetching.market_data - Resolved KLAC to yfinance ticker KLAC
+14:33:04 INFO market_data_fetching.market_data - Resolved KLIC to yfinance ticker KLIC
+14:33:04 INFO market_data_fetching.market_data - Resolved KMB to yfinance ticker KMB
+14:33:04 INFO market_data_fetching.market_data - Resolved KMI to yfinance ticker KMI
+14:33:04 INFO market_data_fetching.market_data - Resolved KMX to yfinance ticker KMX
+14:33:04 INFO market_data_fetching.market_data - Resolved KN to yfinance ticker KN
+14:33:04 INFO market_data_fetching.market_data - Resolved KNF to yfinance ticker KNF
+14:33:04 INFO market_data_fetching.market_data - Resolved KNSL to yfinance ticker KNSL
+14:33:04 INFO market_data_fetching.market_data - Resolved KNX to yfinance ticker KNX
+14:33:04 INFO market_data_fetching.market_data - Resolved KO to yfinance ticker KO
+14:33:04 INFO market_data_fetching.market_data - Resolved KR to yfinance ticker KR
+14:33:04 INFO market_data_fetching.market_data - Resolved KRC to yfinance ticker KRC
+14:33:04 INFO market_data_fetching.market_data - Resolved KREF to yfinance ticker KREF
+14:33:04 INFO market_data_fetching.market_data - Resolved KRG to yfinance ticker KRG
+14:33:04 INFO market_data_fetching.market_data - Resolved KRYS to yfinance ticker KRYS
+14:33:04 INFO market_data_fetching.market_data - Resolved KSS to yfinance ticker KSS
+14:33:04 INFO market_data_fetching.market_data - Resolved KTOS to yfinance ticker KTOS
+14:33:04 INFO market_data_fetching.market_data - Resolved KVUE to yfinance ticker KVUE
+14:33:04 INFO market_data_fetching.market_data - Resolved LAD to yfinance ticker LAD
+14:33:04 INFO market_data_fetching.market_data - Resolved LAMR to yfinance ticker LAMR
+14:33:04 INFO market_data_fetching.market_data - Resolved LANC to yfinance ticker LANC
+14:33:04 INFO market_data_fetching.market_data - Resolved LB to yfinance ticker LB
+14:33:04 INFO market_data_fetching.market_data - Resolved LBRT to yfinance ticker LBRT
+14:33:04 INFO market_data_fetching.market_data - Resolved LDOS to yfinance ticker LDOS
+14:33:04 INFO market_data_fetching.market_data - Resolved LECO to yfinance ticker LECO
+14:33:04 INFO market_data_fetching.market_data - Resolved LEG to yfinance ticker LEG
+14:33:04 INFO market_data_fetching.market_data - Resolved LEN to yfinance ticker LEN
+14:33:04 INFO market_data_fetching.market_data - Resolved LFUS to yfinance ticker LFUS
+14:33:04 INFO market_data_fetching.market_data - Resolved LH to yfinance ticker LH
+14:33:04 INFO market_data_fetching.market_data - Resolved LHX to yfinance ticker LHX
+14:33:04 INFO market_data_fetching.market_data - Resolved LII to yfinance ticker LII
+14:33:04 INFO market_data_fetching.market_data - Resolved LIN to yfinance ticker LIN
+14:33:04 INFO market_data_fetching.market_data - Resolved LITE to yfinance ticker LITE
+14:33:04 INFO market_data_fetching.market_data - Resolved LKQ to yfinance ticker LKQ
+14:33:04 INFO market_data_fetching.market_data - Resolved LLY to yfinance ticker LLY
+14:33:04 INFO market_data_fetching.market_data - Resolved LMAT to yfinance ticker LMAT
+14:33:04 INFO market_data_fetching.market_data - Resolved LMT to yfinance ticker LMT
+14:33:04 INFO market_data_fetching.market_data - Resolved LNC to yfinance ticker LNC
+14:33:04 INFO market_data_fetching.market_data - Resolved LNN to yfinance ticker LNN
+14:33:04 INFO market_data_fetching.market_data - Resolved LNT to yfinance ticker LNT
+14:33:04 INFO market_data_fetching.market_data - Resolved LNTH to yfinance ticker LNTH
+14:33:04 INFO market_data_fetching.market_data - Resolved LOW to yfinance ticker LOW
+14:33:04 INFO market_data_fetching.market_data - Resolved LPG to yfinance ticker LPG
+14:33:04 INFO market_data_fetching.market_data - Resolved LPX to yfinance ticker LPX
+14:33:04 INFO market_data_fetching.market_data - Resolved LQDT to yfinance ticker LQDT
+14:33:04 INFO market_data_fetching.market_data - Resolved LRCX to yfinance ticker LRCX
+14:33:04 INFO market_data_fetching.market_data - Resolved LRN to yfinance ticker LRN
+14:33:04 INFO market_data_fetching.market_data - Resolved LSCC to yfinance ticker LSCC
+14:33:04 INFO market_data_fetching.market_data - Resolved LSTR to yfinance ticker LSTR
+14:33:04 INFO market_data_fetching.market_data - Resolved LTC to yfinance ticker LTC
+14:33:04 INFO market_data_fetching.market_data - Resolved LULU to yfinance ticker LULU
+14:33:04 INFO market_data_fetching.market_data - Resolved LUV to yfinance ticker LUV
+14:33:04 INFO market_data_fetching.market_data - Resolved LVS to yfinance ticker LVS
+14:33:04 INFO market_data_fetching.market_data - Resolved LW to yfinance ticker LW
+14:33:04 INFO market_data_fetching.market_data - Resolved LYB to yfinance ticker LYB
+14:33:04 INFO market_data_fetching.market_data - Resolved LYV to yfinance ticker LYV
+14:33:04 INFO market_data_fetching.market_data - Resolved LZB to yfinance ticker LZB
+14:33:04 INFO market_data_fetching.market_data - Resolved M to yfinance ticker M
+14:33:04 INFO market_data_fetching.market_data - Resolved MA to yfinance ticker MA
+14:33:04 INFO market_data_fetching.market_data - Resolved MAA to yfinance ticker MAA
+14:33:04 INFO market_data_fetching.market_data - Resolved MAC to yfinance ticker MAC
+14:33:04 INFO market_data_fetching.market_data - Resolved MAN to yfinance ticker MAN
+14:33:04 INFO market_data_fetching.market_data - Resolved MANH to yfinance ticker MANH
+14:33:04 INFO market_data_fetching.market_data - Resolved MAR to yfinance ticker MAR
+14:33:04 INFO market_data_fetching.market_data - Resolved MARA to yfinance ticker MARA
+14:33:04 INFO market_data_fetching.market_data - Resolved MAS to yfinance ticker MAS
+14:33:04 INFO market_data_fetching.market_data - Resolved MASI to yfinance ticker MASI
+14:33:04 INFO market_data_fetching.market_data - Resolved MAT to yfinance ticker MAT
+14:33:04 INFO market_data_fetching.market_data - Resolved MATX to yfinance ticker MATX
+14:33:04 INFO market_data_fetching.market_data - Resolved MBC to yfinance ticker MBC
+14:33:04 INFO market_data_fetching.market_data - Resolved MC to yfinance ticker MC
+14:33:04 INFO market_data_fetching.market_data - Resolved MCD to yfinance ticker MCD
+14:33:04 INFO market_data_fetching.market_data - Resolved MCHP to yfinance ticker MCHP
+14:33:04 INFO market_data_fetching.market_data - Resolved MCK to yfinance ticker MCK
+14:33:04 INFO market_data_fetching.market_data - Resolved MCO to yfinance ticker MCO
+14:33:04 INFO market_data_fetching.market_data - Resolved MCY to yfinance ticker MCY
+14:33:04 INFO market_data_fetching.market_data - Resolved MDLZ to yfinance ticker MDLZ
+14:33:04 INFO market_data_fetching.market_data - Resolved MDT to yfinance ticker MDT
+14:33:04 INFO market_data_fetching.market_data - Resolved MDU to yfinance ticker MDU
+14:33:04 INFO market_data_fetching.market_data - Resolved MEDP to yfinance ticker MEDP
+14:33:04 INFO market_data_fetching.market_data - Resolved MET to yfinance ticker MET
+14:33:04 INFO market_data_fetching.market_data - Resolved MGM to yfinance ticker MGM
+14:33:04 INFO market_data_fetching.market_data - Resolved MGY to yfinance ticker MGY
+14:33:04 INFO market_data_fetching.market_data - Resolved MHK to yfinance ticker MHK
+14:33:04 INFO market_data_fetching.market_data - Resolved MHO to yfinance ticker MHO
+14:33:04 INFO market_data_fetching.market_data - Resolved MIDD to yfinance ticker MIDD
+14:33:04 INFO market_data_fetching.market_data - Resolved MKC to yfinance ticker MKC
+14:33:04 INFO market_data_fetching.market_data - Resolved MKSI to yfinance ticker MKSI
+14:33:04 INFO market_data_fetching.market_data - Resolved MKTX to yfinance ticker MKTX
+14:33:04 INFO market_data_fetching.market_data - Resolved MLI to yfinance ticker MLI
+14:33:04 INFO market_data_fetching.market_data - Resolved MLM to yfinance ticker MLM
+14:33:04 INFO market_data_fetching.market_data - Resolved MMC to yfinance ticker MMC
+14:33:04 INFO market_data_fetching.market_data - Resolved MMM to yfinance ticker MMM
+14:33:04 INFO market_data_fetching.market_data - Resolved MMSI to yfinance ticker MMSI
+14:33:04 INFO market_data_fetching.market_data - Resolved MNST to yfinance ticker MNST
+14:33:04 INFO market_data_fetching.market_data - Resolved MO to yfinance ticker MO
+14:33:04 INFO market_data_fetching.market_data - Resolved MOG/A to yfinance ticker MOG-A
+14:33:04 INFO market_data_fetching.market_data - Resolved MOH to yfinance ticker MOH
+14:33:04 INFO market_data_fetching.market_data - Resolved MORN to yfinance ticker MORN
+14:33:04 INFO market_data_fetching.market_data - Resolved MOS to yfinance ticker MOS
+14:33:04 INFO market_data_fetching.market_data - Resolved MPC to yfinance ticker MPC
+14:33:04 INFO market_data_fetching.market_data - Resolved MPW to yfinance ticker MPW
+14:33:04 INFO market_data_fetching.market_data - Resolved MPWR to yfinance ticker MPWR
+14:33:04 INFO market_data_fetching.market_data - Resolved MRCY to yfinance ticker MRCY
+14:33:04 INFO market_data_fetching.market_data - Resolved MRK to yfinance ticker MRK
+14:33:04 INFO market_data_fetching.market_data - Resolved MRNA to yfinance ticker MRNA
+14:33:04 INFO market_data_fetching.market_data - Resolved MRP to yfinance ticker MRP
+14:33:04 INFO market_data_fetching.market_data - Resolved MRTN to yfinance ticker MRTN
+14:33:04 INFO market_data_fetching.market_data - Resolved MS to yfinance ticker MS
+14:33:04 INFO market_data_fetching.market_data - Resolved MSA to yfinance ticker MSA
+14:33:04 INFO market_data_fetching.market_data - Resolved MSCI to yfinance ticker MSCI
+14:33:04 INFO market_data_fetching.market_data - Resolved MSEX to yfinance ticker MSEX
+14:33:04 INFO market_data_fetching.market_data - Resolved MSFT to yfinance ticker MSFT
+14:33:04 INFO market_data_fetching.market_data - Resolved MSI to yfinance ticker MSI
+14:33:04 INFO market_data_fetching.market_data - Resolved MSM to yfinance ticker MSM
+14:33:04 INFO market_data_fetching.market_data - Resolved MTB to yfinance ticker MTB
+14:33:04 INFO market_data_fetching.market_data - Resolved MTCH to yfinance ticker MTCH
+14:33:04 INFO market_data_fetching.market_data - Resolved MTD to yfinance ticker MTD
+14:33:04 INFO market_data_fetching.market_data - Resolved MTDR to yfinance ticker MTDR
+14:33:04 INFO market_data_fetching.market_data - Resolved MTH to yfinance ticker MTH
+14:33:04 INFO market_data_fetching.market_data - Resolved MTN to yfinance ticker MTN
+14:33:04 INFO market_data_fetching.market_data - Resolved MTSI to yfinance ticker MTSI
+14:33:04 INFO market_data_fetching.market_data - Resolved MTZ to yfinance ticker MTZ
+14:33:04 INFO market_data_fetching.market_data - Resolved MU to yfinance ticker MU
+14:33:04 INFO market_data_fetching.market_data - Resolved MUR to yfinance ticker MUR
+14:33:04 INFO market_data_fetching.market_data - Resolved MUSA to yfinance ticker MUSA
+14:33:04 INFO market_data_fetching.market_data - Resolved MWA to yfinance ticker MWA
+14:33:04 INFO market_data_fetching.market_data - Resolved MXL to yfinance ticker MXL
+14:33:04 INFO market_data_fetching.market_data - Resolved MYGN to yfinance ticker MYGN
+14:33:04 INFO market_data_fetching.market_data - Resolved MYRG to yfinance ticker MYRG
+14:33:04 INFO market_data_fetching.market_data - Resolved NABL to yfinance ticker NABL
+14:33:04 INFO market_data_fetching.market_data - Resolved NATL to yfinance ticker NATL
+14:33:04 INFO market_data_fetching.market_data - Resolved NAVI to yfinance ticker NAVI
+14:33:04 INFO market_data_fetching.market_data - Resolved NBHC to yfinance ticker NBHC
+14:33:04 INFO market_data_fetching.market_data - Resolved NBIX to yfinance ticker NBIX
+14:33:04 INFO market_data_fetching.market_data - Resolved NCLH to yfinance ticker NCLH
+14:33:04 INFO market_data_fetching.market_data - Resolved NDAQ to yfinance ticker NDAQ
+14:33:04 INFO market_data_fetching.market_data - Resolved NDSN to yfinance ticker NDSN
+14:33:04 INFO market_data_fetching.market_data - Resolved NE to yfinance ticker NE
+14:33:04 INFO market_data_fetching.market_data - Resolved NEE to yfinance ticker NEE
+14:33:04 INFO market_data_fetching.market_data - Resolved NEM to yfinance ticker NEM
+14:33:04 INFO market_data_fetching.market_data - Resolved NEO to yfinance ticker NEO
+14:33:04 INFO market_data_fetching.market_data - Resolved NEOG to yfinance ticker NEOG
+14:33:04 INFO market_data_fetching.market_data - Resolved NFG to yfinance ticker NFG
+14:33:04 INFO market_data_fetching.market_data - Resolved NFLX to yfinance ticker NFLX
+14:33:04 INFO market_data_fetching.market_data - Resolved NI to yfinance ticker NI
+14:33:04 INFO market_data_fetching.market_data - Resolved NKE to yfinance ticker NKE
+14:33:04 INFO market_data_fetching.market_data - Resolved NLY to yfinance ticker NLY
+14:33:04 INFO market_data_fetching.market_data - Resolved NMIH to yfinance ticker NMIH
+14:33:04 INFO market_data_fetching.market_data - Resolved NNN to yfinance ticker NNN
+14:33:04 INFO market_data_fetching.market_data - Resolved NOC to yfinance ticker NOC
+14:33:04 INFO market_data_fetching.market_data - Resolved NOG to yfinance ticker NOG
+14:33:04 INFO market_data_fetching.market_data - Resolved NOV to yfinance ticker NOV
+14:33:04 INFO market_data_fetching.market_data - Resolved NOVT to yfinance ticker NOVT
+14:33:04 INFO market_data_fetching.market_data - Resolved NOW to yfinance ticker NOW
+14:33:04 INFO market_data_fetching.market_data - Resolved NPK to yfinance ticker NPK
+14:33:04 INFO market_data_fetching.market_data - Resolved NRG to yfinance ticker NRG
+14:33:04 INFO market_data_fetching.market_data - Resolved NSA to yfinance ticker NSA
+14:33:04 INFO market_data_fetching.market_data - Resolved NSC to yfinance ticker NSC
+14:33:04 INFO market_data_fetching.market_data - Resolved NSIT to yfinance ticker NSIT
+14:33:04 INFO market_data_fetching.market_data - Resolved NSP to yfinance ticker NSP
+14:33:04 INFO market_data_fetching.market_data - Resolved NTAP to yfinance ticker NTAP
+14:33:04 INFO market_data_fetching.market_data - Resolved NTCT to yfinance ticker NTCT
+14:33:04 INFO market_data_fetching.market_data - Resolved NTNX to yfinance ticker NTNX
+14:33:04 INFO market_data_fetching.market_data - Resolved NTRS to yfinance ticker NTRS
+14:33:04 INFO market_data_fetching.market_data - Resolved NUE to yfinance ticker NUE
+14:33:04 INFO market_data_fetching.market_data - Resolved NVDA to yfinance ticker NVDA
+14:33:04 INFO market_data_fetching.market_data - Resolved NVR to yfinance ticker NVR
+14:33:04 INFO market_data_fetching.market_data - Resolved NVT to yfinance ticker NVT
+14:33:04 INFO market_data_fetching.market_data - Resolved NWBI to yfinance ticker NWBI
+14:33:04 INFO market_data_fetching.market_data - Resolved NWL to yfinance ticker NWL
+14:33:04 INFO market_data_fetching.market_data - Resolved NWN to yfinance ticker NWN
+14:33:04 INFO market_data_fetching.market_data - Resolved NWS to yfinance ticker NWS
+14:33:04 INFO market_data_fetching.market_data - Resolved NWSA to yfinance ticker NWSA
+14:33:04 INFO market_data_fetching.market_data - Resolved NXPI to yfinance ticker NXPI
+14:33:04 INFO market_data_fetching.market_data - Resolved NXRT to yfinance ticker NXRT
+14:33:04 INFO market_data_fetching.market_data - Resolved NXST to yfinance ticker NXST
+14:33:04 INFO market_data_fetching.market_data - Resolved NXT to yfinance ticker NXT
+14:33:04 INFO market_data_fetching.market_data - Resolved NYT to yfinance ticker NYT
+14:33:04 INFO market_data_fetching.market_data - Resolved O to yfinance ticker O
+14:33:04 INFO market_data_fetching.market_data - Resolved OC to yfinance ticker OC
+14:33:04 INFO market_data_fetching.market_data - Resolved ODFL to yfinance ticker ODFL
+14:33:04 INFO market_data_fetching.market_data - Resolved OFG to yfinance ticker OFG
+14:33:04 INFO market_data_fetching.market_data - Resolved OGE to yfinance ticker OGE
+14:33:04 INFO market_data_fetching.market_data - Resolved OGN to yfinance ticker OGN
+14:33:04 INFO market_data_fetching.market_data - Resolved OHI to yfinance ticker OHI
+14:33:04 INFO market_data_fetching.market_data - Resolved OII to yfinance ticker OII
+14:33:04 INFO market_data_fetching.market_data - Resolved OKE to yfinance ticker OKE
+14:33:04 INFO market_data_fetching.market_data - Resolved OKTA to yfinance ticker OKTA
+14:33:04 INFO market_data_fetching.market_data - Resolved OLED to yfinance ticker OLED
+14:33:04 INFO market_data_fetching.market_data - Resolved OLLI to yfinance ticker OLLI
+14:33:04 INFO market_data_fetching.market_data - Resolved OLN to yfinance ticker OLN
+14:33:04 INFO market_data_fetching.market_data - Resolved OMC to yfinance ticker OMC
+14:33:04 INFO market_data_fetching.market_data - Resolved ON to yfinance ticker ON
+14:33:04 INFO market_data_fetching.market_data - Resolved ONTO to yfinance ticker ONTO
+14:33:04 INFO market_data_fetching.market_data - Resolved OPCH to yfinance ticker OPCH
+14:33:04 INFO market_data_fetching.market_data - Resolved ORA to yfinance ticker ORA
+14:33:04 INFO market_data_fetching.market_data - Resolved ORCL to yfinance ticker ORCL
+14:33:04 INFO market_data_fetching.market_data - Resolved ORI to yfinance ticker ORI
+14:33:04 INFO market_data_fetching.market_data - Resolved ORLY to yfinance ticker ORLY
+14:33:04 INFO market_data_fetching.market_data - Resolved OSIS to yfinance ticker OSIS
+14:33:04 INFO market_data_fetching.market_data - Resolved OSK to yfinance ticker OSK
+14:33:04 INFO market_data_fetching.market_data - Resolved OTIS to yfinance ticker OTIS
+14:33:04 INFO market_data_fetching.market_data - Resolved OUT to yfinance ticker OUT
+14:33:04 INFO market_data_fetching.market_data - Resolved OVV to yfinance ticker OVV
+14:33:04 INFO market_data_fetching.market_data - Resolved OXY to yfinance ticker OXY
+14:33:04 INFO market_data_fetching.market_data - Resolved OZK to yfinance ticker OZK
+14:33:04 INFO market_data_fetching.market_data - Resolved PAG to yfinance ticker PAG
+14:33:04 INFO market_data_fetching.market_data - Resolved PAHC to yfinance ticker PAHC
+14:33:04 INFO market_data_fetching.market_data - Resolved PANW to yfinance ticker PANW
+14:33:04 INFO market_data_fetching.market_data - Resolved PARR to yfinance ticker PARR
+14:33:04 INFO market_data_fetching.market_data - Resolved PATH to yfinance ticker PATH
+14:33:04 INFO market_data_fetching.market_data - Resolved PAYC to yfinance ticker PAYC
+14:33:04 INFO market_data_fetching.market_data - Resolved PAYX to yfinance ticker PAYX
+14:33:04 INFO market_data_fetching.market_data - Resolved PBF to yfinance ticker PBF
+14:33:04 INFO market_data_fetching.market_data - Resolved PBH to yfinance ticker PBH
+14:33:04 INFO market_data_fetching.market_data - Resolved PBI to yfinance ticker PBI
+14:33:04 INFO market_data_fetching.market_data - Resolved PCAR to yfinance ticker PCAR
+14:33:04 INFO market_data_fetching.market_data - Resolved PCG to yfinance ticker PCG
+14:33:04 INFO market_data_fetching.market_data - Resolved PCH to yfinance ticker PCH
+14:33:04 INFO market_data_fetching.market_data - Resolved PCLN to yfinance ticker PCLN
+14:33:04 INFO market_data_fetching.market_data - Resolved PCTY to yfinance ticker PCTY
+14:33:04 INFO market_data_fetching.market_data - Resolved PEB to yfinance ticker PEB
+14:33:04 INFO market_data_fetching.market_data - Resolved PEG to yfinance ticker PEG
+14:33:04 INFO market_data_fetching.market_data - Resolved PEGA to yfinance ticker PEGA
+14:33:04 INFO market_data_fetching.market_data - Resolved PEN to yfinance ticker PEN
+14:33:04 INFO market_data_fetching.market_data - Resolved PENN to yfinance ticker PENN
+14:33:04 INFO market_data_fetching.market_data - Resolved PEP to yfinance ticker PEP
+14:33:04 INFO market_data_fetching.market_data - Resolved PFE to yfinance ticker PFE
+14:33:04 INFO market_data_fetching.market_data - Resolved PFG to yfinance ticker PFG
+14:33:04 INFO market_data_fetching.market_data - Resolved PFGC to yfinance ticker PFGC
+14:33:04 INFO market_data_fetching.market_data - Resolved PG to yfinance ticker PG
+14:33:04 INFO market_data_fetching.market_data - Resolved PGNY to yfinance ticker PGNY
+14:33:04 INFO market_data_fetching.market_data - Resolved PGR to yfinance ticker PGR
+14:33:04 INFO market_data_fetching.market_data - Resolved PH to yfinance ticker PH
+14:33:04 INFO market_data_fetching.market_data - Resolved PHIN to yfinance ticker PHIN
+14:33:04 INFO market_data_fetching.market_data - Resolved PHM to yfinance ticker PHM
+14:33:04 INFO market_data_fetching.market_data - Resolved PI to yfinance ticker PI
+14:33:04 INFO market_data_fetching.market_data - Resolved PII to yfinance ticker PII
+14:33:04 INFO market_data_fetching.market_data - Resolved PINS to yfinance ticker PINS
+14:33:04 INFO market_data_fetching.market_data - Resolved PK to yfinance ticker PK
+14:33:04 INFO market_data_fetching.market_data - Resolved PKG to yfinance ticker PKG
+14:33:04 INFO market_data_fetching.market_data - Resolved PLAB to yfinance ticker PLAB
+14:33:04 INFO market_data_fetching.market_data - Resolved PLAY to yfinance ticker PLAY
+14:33:04 INFO market_data_fetching.market_data - Resolved PLD to yfinance ticker PLD
+14:33:04 INFO market_data_fetching.market_data - Resolved PLMR to yfinance ticker PLMR
+14:33:04 INFO market_data_fetching.market_data - Resolved PLNT to yfinance ticker PLNT
+14:33:04 INFO market_data_fetching.market_data - Resolved PLTR to yfinance ticker PLTR
+14:33:04 INFO market_data_fetching.market_data - Resolved PLXS to yfinance ticker PLXS
+14:33:04 INFO market_data_fetching.market_data - Resolved PM to yfinance ticker PM
+14:33:04 INFO market_data_fetching.market_data - Resolved PMT to yfinance ticker PMT
+14:33:04 INFO market_data_fetching.market_data - Resolved PNC to yfinance ticker PNC
+14:33:04 INFO market_data_fetching.market_data - Resolved PNFP to yfinance ticker PNFP
+14:33:04 INFO market_data_fetching.market_data - Resolved PNR to yfinance ticker PNR
+14:33:04 INFO market_data_fetching.market_data - Resolved PNW to yfinance ticker PNW
+14:33:04 INFO market_data_fetching.market_data - Resolved PODD to yfinance ticker PODD
+14:33:04 INFO market_data_fetching.market_data - Resolved POOL to yfinance ticker POOL
+14:33:04 INFO market_data_fetching.market_data - Resolved POWI to yfinance ticker POWI
+14:33:04 INFO market_data_fetching.market_data - Resolved POWL to yfinance ticker POWL
+14:33:04 INFO market_data_fetching.market_data - Resolved PPC to yfinance ticker PPC
+14:33:04 INFO market_data_fetching.market_data - Resolved PPG to yfinance ticker PPG
+14:33:04 INFO market_data_fetching.market_data - Resolved PPL to yfinance ticker PPL
+14:33:04 INFO market_data_fetching.market_data - Resolved PRAA to yfinance ticker PRAA
+14:33:04 INFO market_data_fetching.market_data - Resolved PRGO to yfinance ticker PRGO
+14:33:04 INFO market_data_fetching.market_data - Resolved PRGS to yfinance ticker PRGS
+14:33:04 INFO market_data_fetching.market_data - Resolved PRI to yfinance ticker PRI
+14:33:04 INFO market_data_fetching.market_data - Resolved PRLB to yfinance ticker PRLB
+14:33:04 INFO market_data_fetching.market_data - Resolved PRU to yfinance ticker PRU
+14:33:04 INFO market_data_fetching.market_data - Resolved PRVA to yfinance ticker PRVA
+14:33:04 INFO market_data_fetching.market_data - Resolved PSA to yfinance ticker PSA
+14:33:04 INFO market_data_fetching.market_data - Resolved PSMT to yfinance ticker PSMT
+14:33:04 INFO market_data_fetching.market_data - Resolved PSN to yfinance ticker PSN
+14:33:04 INFO market_data_fetching.market_data - Resolved PSTG to yfinance ticker PSTG
+14:33:04 INFO market_data_fetching.market_data - Resolved PSX to yfinance ticker PSX
+14:33:04 INFO market_data_fetching.market_data - Resolved PTC to yfinance ticker PTC
+14:33:04 INFO market_data_fetching.market_data - Resolved PTCT to yfinance ticker PTCT
+14:33:04 INFO market_data_fetching.market_data - Resolved PTEN to yfinance ticker PTEN
+14:33:04 INFO market_data_fetching.market_data - Resolved PTGX to yfinance ticker PTGX
+14:33:04 INFO market_data_fetching.market_data - Resolved PVH to yfinance ticker PVH
+14:33:04 INFO market_data_fetching.market_data - Resolved PWR to yfinance ticker PWR
+14:33:04 INFO market_data_fetching.market_data - Resolved PYPL to yfinance ticker PYPL
+14:33:04 INFO market_data_fetching.market_data - Resolved PZZA to yfinance ticker PZZA
+14:33:04 INFO market_data_fetching.market_data - Resolved Q to yfinance ticker Q
+14:33:04 INFO market_data_fetching.market_data - Resolved QCOM to yfinance ticker QCOM
+14:33:04 INFO market_data_fetching.market_data - Resolved QDEL to yfinance ticker QDEL
+14:33:04 INFO market_data_fetching.market_data - Resolved QLYS to yfinance ticker QLYS
+14:33:04 INFO market_data_fetching.market_data - Resolved QRVO to yfinance ticker QRVO
+14:33:04 INFO market_data_fetching.market_data - Resolved QTWO to yfinance ticker QTWO
+14:33:04 INFO market_data_fetching.market_data - Resolved R to yfinance ticker R
+14:33:04 INFO market_data_fetching.market_data - Resolved RAL to yfinance ticker RAL
+14:33:04 INFO market_data_fetching.market_data - Resolved RAMP to yfinance ticker RAMP
+14:33:04 INFO market_data_fetching.market_data - Resolved RBA to yfinance ticker RBA
+14:33:04 INFO market_data_fetching.market_data - Resolved RBC to yfinance ticker RBC
+14:33:04 INFO market_data_fetching.market_data - Resolved RCL to yfinance ticker RCL
+14:33:04 INFO market_data_fetching.market_data - Resolved RCUS to yfinance ticker RCUS
+14:33:04 INFO market_data_fetching.market_data - Resolved RDNT to yfinance ticker RDNT
+14:33:04 INFO market_data_fetching.market_data - Resolved REG to yfinance ticker REG
+14:33:04 INFO market_data_fetching.market_data - Resolved REGN to yfinance ticker REGN
+14:33:04 INFO market_data_fetching.market_data - Resolved RES to yfinance ticker RES
+14:33:04 INFO market_data_fetching.market_data - Resolved REXR to yfinance ticker REXR
+14:33:04 INFO market_data_fetching.market_data - Resolved REZI to yfinance ticker REZI
+14:33:04 INFO market_data_fetching.market_data - Resolved RF to yfinance ticker RF
+14:33:04 INFO market_data_fetching.market_data - Resolved RGA to yfinance ticker RGA
+14:33:04 INFO market_data_fetching.market_data - Resolved RGEN to yfinance ticker RGEN
+14:33:04 INFO market_data_fetching.market_data - Resolved RGLD to yfinance ticker RGLD
+14:33:04 INFO market_data_fetching.market_data - Resolved RH to yfinance ticker RH
+14:33:04 INFO market_data_fetching.market_data - Resolved RHI to yfinance ticker RHI
+14:33:04 INFO market_data_fetching.market_data - Resolved RJF to yfinance ticker RJF
+14:33:04 INFO market_data_fetching.market_data - Resolved RL to yfinance ticker RL
+14:33:04 INFO market_data_fetching.market_data - Resolved RLI to yfinance ticker RLI
+14:33:04 INFO market_data_fetching.market_data - Resolved RMBS to yfinance ticker RMBS
+14:33:04 INFO market_data_fetching.market_data - Resolved RMD to yfinance ticker RMD
+14:33:04 INFO market_data_fetching.market_data - Resolved RNR to yfinance ticker RNR
+14:33:04 INFO market_data_fetching.market_data - Resolved RNST to yfinance ticker RNST
+14:33:04 INFO market_data_fetching.market_data - Resolved ROCK to yfinance ticker ROCK
+14:33:04 INFO market_data_fetching.market_data - Resolved ROK to yfinance ticker ROK
+14:33:04 INFO market_data_fetching.market_data - Resolved ROL to yfinance ticker ROL
+14:33:04 INFO market_data_fetching.market_data - Resolved ROP to yfinance ticker ROP
+14:33:04 INFO market_data_fetching.market_data - Resolved ROST to yfinance ticker ROST
+14:33:04 INFO market_data_fetching.market_data - Resolved RPM to yfinance ticker RPM
+14:33:04 INFO market_data_fetching.market_data - Resolved RRC to yfinance ticker RRC
+14:33:04 INFO market_data_fetching.market_data - Resolved RRR to yfinance ticker RRR
+14:33:04 INFO market_data_fetching.market_data - Resolved RS to yfinance ticker RS
+14:33:04 INFO market_data_fetching.market_data - Resolved RSG to yfinance ticker RSG
+14:33:04 INFO market_data_fetching.market_data - Resolved RUN to yfinance ticker RUN
+14:33:04 INFO market_data_fetching.market_data - Resolved RWT to yfinance ticker RWT
+14:33:04 INFO market_data_fetching.market_data - Resolved RXO to yfinance ticker RXO
+14:33:04 INFO market_data_fetching.market_data - Resolved RYAN to yfinance ticker RYAN
+14:33:04 INFO market_data_fetching.market_data - Resolved RYN to yfinance ticker RYN
+14:33:04 INFO market_data_fetching.market_data - Resolved SABR to yfinance ticker SABR
+14:33:04 INFO market_data_fetching.market_data - Resolved SAFE to yfinance ticker SAFE
+14:33:04 INFO market_data_fetching.market_data - Resolved SAIA to yfinance ticker SAIA
+14:33:04 INFO market_data_fetching.market_data - Resolved SAIC to yfinance ticker SAIC
+14:33:04 INFO market_data_fetching.market_data - Resolved SAM to yfinance ticker SAM
+14:33:04 INFO market_data_fetching.market_data - Resolved SANM to yfinance ticker SANM
+14:33:04 INFO market_data_fetching.market_data - Resolved SARO to yfinance ticker SARO
+14:33:04 INFO market_data_fetching.market_data - Resolved SATS to yfinance ticker SATS
+14:33:04 INFO market_data_fetching.market_data - Resolved SBAC to yfinance ticker SBAC
+14:33:04 INFO market_data_fetching.market_data - Resolved SBRA to yfinance ticker SBRA
+14:33:04 INFO market_data_fetching.market_data - Resolved SBUX to yfinance ticker SBUX
+14:33:04 INFO market_data_fetching.market_data - Resolved SCHL to yfinance ticker SCHL
+14:33:04 INFO market_data_fetching.market_data - Resolved SCHW to yfinance ticker SCHW
+14:33:04 INFO market_data_fetching.market_data - Resolved SCI to yfinance ticker SCI
+14:33:04 INFO market_data_fetching.market_data - Resolved SCL to yfinance ticker SCL
+14:33:04 INFO market_data_fetching.market_data - Resolved SCSC to yfinance ticker SCSC
+14:33:04 INFO market_data_fetching.market_data - Resolved SDGR to yfinance ticker SDGR
+14:33:04 INFO market_data_fetching.market_data - Resolved SEDG to yfinance ticker SEDG
+14:33:04 INFO market_data_fetching.market_data - Resolved SEE to yfinance ticker SEE
+14:33:04 INFO market_data_fetching.market_data - Resolved SEIC to yfinance ticker SEIC
+14:33:04 INFO market_data_fetching.market_data - Resolved SEZL to yfinance ticker SEZL
+14:33:04 INFO market_data_fetching.market_data - Resolved SF to yfinance ticker SF
+14:33:04 INFO market_data_fetching.market_data - Resolved SFBS to yfinance ticker SFBS
+14:33:04 INFO market_data_fetching.market_data - Resolved SFM to yfinance ticker SFM
+14:33:04 INFO market_data_fetching.market_data - Resolved SHAK to yfinance ticker SHAK
+14:33:04 INFO market_data_fetching.market_data - Resolved SHEN to yfinance ticker SHEN
+14:33:04 INFO market_data_fetching.market_data - Resolved SHO to yfinance ticker SHO
+14:33:04 INFO market_data_fetching.market_data - Resolved SHOO to yfinance ticker SHOO
+14:33:04 INFO market_data_fetching.market_data - Resolved SHW to yfinance ticker SHW
+14:33:04 INFO market_data_fetching.market_data - Resolved SIG to yfinance ticker SIG
+14:33:04 INFO market_data_fetching.market_data - Resolved SIGI to yfinance ticker SIGI
+14:33:04 INFO market_data_fetching.market_data - Resolved SITM to yfinance ticker SITM
+14:33:04 INFO market_data_fetching.market_data - Resolved SJM to yfinance ticker SJM
+14:33:04 INFO market_data_fetching.market_data - Resolved SKT to yfinance ticker SKT
+14:33:04 INFO market_data_fetching.market_data - Resolved SKYW to yfinance ticker SKYW
+14:33:04 INFO market_data_fetching.market_data - Resolved SLAB to yfinance ticker SLAB
+14:33:04 INFO market_data_fetching.market_data - Resolved SLB to yfinance ticker SLB
+14:33:04 INFO market_data_fetching.market_data - Resolved SLG to yfinance ticker SLG
+14:33:04 INFO market_data_fetching.market_data - Resolved SLM to yfinance ticker SLM
+14:33:04 INFO market_data_fetching.market_data - Resolved SLVM to yfinance ticker SLVM
+14:33:04 INFO market_data_fetching.market_data - Resolved SM to yfinance ticker SM
+14:33:04 INFO market_data_fetching.market_data - Resolved SMCI to yfinance ticker SMCI
+14:33:04 INFO market_data_fetching.market_data - Resolved SMG to yfinance ticker SMG
+14:33:04 INFO market_data_fetching.market_data - Resolved SMTC to yfinance ticker SMTC
+14:33:04 INFO market_data_fetching.market_data - Resolved SNA to yfinance ticker SNA
+14:33:04 INFO market_data_fetching.market_data - Resolved SNPS to yfinance ticker SNPS
+14:33:04 INFO market_data_fetching.market_data - Resolved SNX to yfinance ticker SNX
+14:33:04 INFO market_data_fetching.market_data - Resolved SO to yfinance ticker SO
+14:33:04 INFO market_data_fetching.market_data - Resolved SOLS to yfinance ticker SOLS
+14:33:04 INFO market_data_fetching.market_data - Resolved SOLV to yfinance ticker SOLV
+14:33:04 INFO market_data_fetching.market_data - Resolved SON to yfinance ticker SON
+14:33:04 INFO market_data_fetching.market_data - Resolved SONO to yfinance ticker SONO
+14:33:04 INFO market_data_fetching.market_data - Resolved SPG to yfinance ticker SPG
+14:33:04 INFO market_data_fetching.market_data - Resolved SPGI to yfinance ticker SPGI
+14:33:04 INFO market_data_fetching.market_data - Resolved SPSC to yfinance ticker SPSC
+14:33:04 INFO market_data_fetching.market_data - Resolved SPXC to yfinance ticker SPXC
+14:33:04 INFO market_data_fetching.market_data - Resolved SRE to yfinance ticker SRE
+14:33:04 INFO market_data_fetching.market_data - Resolved SRPT to yfinance ticker SRPT
+14:33:04 INFO market_data_fetching.market_data - Resolved SSB to yfinance ticker SSB
+14:33:04 INFO market_data_fetching.market_data - Resolved SSD to yfinance ticker SSD
+14:33:04 INFO market_data_fetching.market_data - Resolved SSTK to yfinance ticker SSTK
+14:33:04 INFO market_data_fetching.market_data - Resolved STAA to yfinance ticker STAA
+14:33:04 INFO market_data_fetching.market_data - Resolved STAG to yfinance ticker STAG
+14:33:04 INFO market_data_fetching.market_data - Resolved STE to yfinance ticker STE
+14:33:04 INFO market_data_fetching.market_data - Resolved STLD to yfinance ticker STLD
+14:33:04 INFO market_data_fetching.market_data - Resolved STRA to yfinance ticker STRA
+14:33:04 INFO market_data_fetching.market_data - Resolved STRL to yfinance ticker STRL
+14:33:04 INFO market_data_fetching.market_data - Resolved STT to yfinance ticker STT
+14:33:04 INFO market_data_fetching.market_data - Resolved STWD to yfinance ticker STWD
+14:33:04 INFO market_data_fetching.market_data - Resolved STX to yfinance ticker STX
+14:33:04 INFO market_data_fetching.market_data - Resolved STZ to yfinance ticker STZ
+14:33:04 INFO market_data_fetching.market_data - Resolved SUPN to yfinance ticker SUPN
+14:33:04 INFO market_data_fetching.market_data - Resolved SW to yfinance ticker SW
+14:33:04 INFO market_data_fetching.market_data - Resolved SWK to yfinance ticker SWK
+14:33:04 INFO market_data_fetching.market_data - Resolved SWKS to yfinance ticker SWKS
+14:33:04 INFO market_data_fetching.market_data - Resolved SWX to yfinance ticker SWX
+14:33:04 INFO market_data_fetching.market_data - Resolved SXC to yfinance ticker SXC
+14:33:04 INFO market_data_fetching.market_data - Resolved SXT to yfinance ticker SXT
+14:33:04 INFO market_data_fetching.market_data - Resolved SYF to yfinance ticker SYF
+14:33:04 INFO market_data_fetching.market_data - Resolved SYK to yfinance ticker SYK
+14:33:04 INFO market_data_fetching.market_data - Resolved SYNA to yfinance ticker SYNA
+14:33:04 INFO market_data_fetching.market_data - Resolved SYY to yfinance ticker SYY
+14:33:04 INFO market_data_fetching.market_data - Resolved T to yfinance ticker T
+14:33:04 INFO market_data_fetching.market_data - Resolved TALO to yfinance ticker TALO
+14:33:04 INFO market_data_fetching.market_data - Resolved TAP to yfinance ticker TAP
+14:33:04 INFO market_data_fetching.market_data - Resolved TDC to yfinance ticker TDC
+14:33:04 INFO market_data_fetching.market_data - Resolved TDG to yfinance ticker TDG
+14:33:04 INFO market_data_fetching.market_data - Resolved TDS to yfinance ticker TDS
+14:33:04 INFO market_data_fetching.market_data - Resolved TDW to yfinance ticker TDW
+14:33:04 INFO market_data_fetching.market_data - Resolved TDY to yfinance ticker TDY
+14:33:04 INFO market_data_fetching.market_data - Resolved TECH to yfinance ticker TECH
+14:33:04 INFO market_data_fetching.market_data - Resolved TEL to yfinance ticker TEL
+14:33:04 INFO market_data_fetching.market_data - Resolved TER to yfinance ticker TER
+14:33:04 INFO market_data_fetching.market_data - Resolved TEX to yfinance ticker TEX
+14:33:04 INFO market_data_fetching.market_data - Resolved TFC to yfinance ticker TFC
+14:33:04 INFO market_data_fetching.market_data - Resolved TFX to yfinance ticker TFX
+14:33:04 INFO market_data_fetching.market_data - Resolved TGT to yfinance ticker TGT
+14:33:04 INFO market_data_fetching.market_data - Resolved TGTX to yfinance ticker TGTX
+14:33:04 INFO market_data_fetching.market_data - Resolved THC to yfinance ticker THC
+14:33:04 INFO market_data_fetching.market_data - Resolved THO to yfinance ticker THO
+14:33:04 INFO market_data_fetching.market_data - Resolved THS to yfinance ticker THS
+14:33:04 INFO market_data_fetching.market_data - Resolved TJX to yfinance ticker TJX
+14:33:04 INFO market_data_fetching.market_data - Resolved TLNE to yfinance ticker TLNE
+14:33:04 INFO market_data_fetching.market_data - Resolved TMDX to yfinance ticker TMDX
+14:33:04 INFO market_data_fetching.market_data - Resolved TMO to yfinance ticker TMO
+14:33:04 INFO market_data_fetching.market_data - Resolved TMUS to yfinance ticker TMUS
+14:33:04 INFO market_data_fetching.market_data - Resolved TNC to yfinance ticker TNC
+14:33:04 INFO market_data_fetching.market_data - Resolved TNDM to yfinance ticker TNDM
+14:33:04 INFO market_data_fetching.market_data - Resolved TOL to yfinance ticker TOL
+14:33:04 INFO market_data_fetching.market_data - Resolved TPL to yfinance ticker TPL
+14:33:04 INFO market_data_fetching.market_data - Resolved TPR to yfinance ticker TPR
+14:33:04 INFO market_data_fetching.market_data - Resolved TREX to yfinance ticker TREX
+14:33:04 INFO market_data_fetching.market_data - Resolved TRGP to yfinance ticker TRGP
+14:33:04 INFO market_data_fetching.market_data - Resolved TRIP to yfinance ticker TRIP
+14:33:04 INFO market_data_fetching.market_data - Resolved TRMB to yfinance ticker TRMB
+14:33:04 INFO market_data_fetching.market_data - Resolved TRN to yfinance ticker TRN
+14:33:04 INFO market_data_fetching.market_data - Resolved TROW to yfinance ticker TROW
+14:33:04 INFO market_data_fetching.market_data - Resolved TRU to yfinance ticker TRU
+14:33:04 INFO market_data_fetching.market_data - Resolved TRUP to yfinance ticker TRUP
+14:33:04 INFO market_data_fetching.market_data - Resolved TRV to yfinance ticker TRV
+14:33:04 INFO market_data_fetching.market_data - Resolved TSCO to yfinance ticker TSCO
+14:33:04 INFO market_data_fetching.market_data - Resolved TSLA to yfinance ticker TSLA
+14:33:04 INFO market_data_fetching.market_data - Resolved TSN to yfinance ticker TSN
+14:33:04 INFO market_data_fetching.market_data - Resolved TT to yfinance ticker TT
+14:33:04 INFO market_data_fetching.market_data - Resolved TTC to yfinance ticker TTC
+14:33:04 INFO market_data_fetching.market_data - Resolved TTD to yfinance ticker TTD
+14:33:04 INFO market_data_fetching.market_data - Resolved TTEK to yfinance ticker TTEK
+14:33:04 INFO market_data_fetching.market_data - Resolved TTMI to yfinance ticker TTMI
+14:33:04 INFO market_data_fetching.market_data - Resolved TTWO to yfinance ticker TTWO
+14:33:04 INFO market_data_fetching.market_data - Resolved TWLO to yfinance ticker TWLO
+14:33:04 INFO market_data_fetching.market_data - Resolved TWO to yfinance ticker TWO
+14:33:04 INFO market_data_fetching.market_data - Resolved TXN to yfinance ticker TXN
+14:33:04 INFO market_data_fetching.market_data - Resolved TXRH to yfinance ticker TXRH
+14:33:04 INFO market_data_fetching.market_data - Resolved TXT to yfinance ticker TXT
+14:33:04 INFO market_data_fetching.market_data - Resolved TYL to yfinance ticker TYL
+14:33:04 INFO market_data_fetching.market_data - Resolved UA to yfinance ticker UA
+14:33:04 INFO market_data_fetching.market_data - Resolved UAL to yfinance ticker UAL
+14:33:04 INFO market_data_fetching.market_data - Resolved UBER to yfinance ticker UBER
+14:33:04 INFO market_data_fetching.market_data - Resolved UBSI to yfinance ticker UBSI
+14:33:04 INFO market_data_fetching.market_data - Resolved UCTT to yfinance ticker UCTT
+14:33:04 INFO market_data_fetching.market_data - Resolved UDR to yfinance ticker UDR
+14:33:04 INFO market_data_fetching.market_data - Resolved UFPI to yfinance ticker UFPI
+14:33:04 INFO market_data_fetching.market_data - Resolved UGI to yfinance ticker UGI
+14:33:04 INFO market_data_fetching.market_data - Resolved UHS to yfinance ticker UHS
+14:33:04 INFO market_data_fetching.market_data - Resolved UHT to yfinance ticker UHT
+14:33:04 INFO market_data_fetching.market_data - Resolved ULS to yfinance ticker ULS
+14:33:04 INFO market_data_fetching.market_data - Resolved ULTA to yfinance ticker ULTA
+14:33:04 INFO market_data_fetching.market_data - Resolved UNF to yfinance ticker UNF
+14:33:04 INFO market_data_fetching.market_data - Resolved UNFI to yfinance ticker UNFI
+14:33:04 INFO market_data_fetching.market_data - Resolved UNH to yfinance ticker UNH
+14:33:04 INFO market_data_fetching.market_data - Resolved UNIT to yfinance ticker UNIT
+14:33:04 INFO market_data_fetching.market_data - Resolved UNM to yfinance ticker UNM
+14:33:04 INFO market_data_fetching.market_data - Resolved UNP to yfinance ticker UNP
+14:33:04 INFO market_data_fetching.market_data - Resolved UPS to yfinance ticker UPS
+14:33:04 INFO market_data_fetching.market_data - Resolved UPWK to yfinance ticker UPWK
+14:33:04 INFO market_data_fetching.market_data - Resolved URBN to yfinance ticker URBN
+14:33:04 INFO market_data_fetching.market_data - Resolved URI to yfinance ticker URI
+14:33:04 INFO market_data_fetching.market_data - Resolved USB to yfinance ticker USB
+14:33:04 INFO market_data_fetching.market_data - Resolved USFD to yfinance ticker USFD
+14:33:04 INFO market_data_fetching.market_data - Resolved UTHR to yfinance ticker UTHR
+14:33:04 INFO market_data_fetching.market_data - Resolved UVV to yfinance ticker UVV
+14:33:04 INFO market_data_fetching.market_data - Resolved V to yfinance ticker V
+14:33:04 INFO market_data_fetching.market_data - Resolved VAL to yfinance ticker VAL
+14:33:04 INFO market_data_fetching.market_data - Resolved VC to yfinance ticker VC
+14:33:04 INFO market_data_fetching.market_data - Resolved VCYT to yfinance ticker VCYT
+14:33:04 INFO market_data_fetching.market_data - Resolved VECO to yfinance ticker VECO
+14:33:04 INFO market_data_fetching.market_data - Resolved VFC to yfinance ticker VFC
+14:33:04 INFO market_data_fetching.market_data - Resolved VIAV to yfinance ticker VIAV
+14:33:04 INFO market_data_fetching.market_data - Resolved VICI to yfinance ticker VICI
+14:33:04 INFO market_data_fetching.market_data - Resolved VICR to yfinance ticker VICR
+14:33:04 INFO market_data_fetching.market_data - Resolved VIR to yfinance ticker VIR
+14:33:04 INFO market_data_fetching.market_data - Resolved VIRT to yfinance ticker VIRT
+14:33:04 INFO market_data_fetching.market_data - Resolved VITL to yfinance ticker VITL
+14:33:04 INFO market_data_fetching.market_data - Resolved VLO to yfinance ticker VLO
+14:33:04 INFO market_data_fetching.market_data - Resolved VLTO to yfinance ticker VLTO
+14:33:04 INFO market_data_fetching.market_data - Resolved VMC to yfinance ticker VMC
+14:33:04 INFO market_data_fetching.market_data - Resolved VNO to yfinance ticker VNO
+14:33:04 INFO market_data_fetching.market_data - Resolved VNOM to yfinance ticker VNOM
+14:33:04 INFO market_data_fetching.market_data - Resolved VNT to yfinance ticker VNT
+14:33:04 INFO market_data_fetching.market_data - Resolved VRSK to yfinance ticker VRSK
+14:33:04 INFO market_data_fetching.market_data - Resolved VRSN to yfinance ticker VRSN
+14:33:04 INFO market_data_fetching.market_data - Resolved VRTS to yfinance ticker VRTS
+14:33:04 INFO market_data_fetching.market_data - Resolved VRTX to yfinance ticker VRTX
+14:33:04 INFO market_data_fetching.market_data - Resolved VSAT to yfinance ticker VSAT
+14:33:04 INFO market_data_fetching.market_data - Resolved VSCO to yfinance ticker VSCO
+14:33:04 INFO market_data_fetching.market_data - Resolved VSH to yfinance ticker VSH
+14:33:04 INFO market_data_fetching.market_data - Resolved VSNTV to yfinance ticker VSNTV
+14:33:04 INFO market_data_fetching.market_data - Resolved VST to yfinance ticker VST
+14:33:04 INFO market_data_fetching.market_data - Resolved VSTS to yfinance ticker VSTS
+14:33:04 INFO market_data_fetching.market_data - Resolved VTR to yfinance ticker VTR
+14:33:04 INFO market_data_fetching.market_data - Resolved VVV to yfinance ticker VVV
+14:33:04 INFO market_data_fetching.market_data - Resolved VZ to yfinance ticker VZ
+14:33:04 INFO market_data_fetching.market_data - Resolved WAB to yfinance ticker WAB
+14:33:04 INFO market_data_fetching.market_data - Resolved WAL to yfinance ticker WAL
+14:33:04 INFO market_data_fetching.market_data - Resolved WAT to yfinance ticker WAT
+14:33:04 INFO market_data_fetching.market_data - Resolved WAY to yfinance ticker WAY
+14:33:04 INFO market_data_fetching.market_data - Resolved WBD to yfinance ticker WBD
+14:33:04 INFO market_data_fetching.market_data - Resolved WCC to yfinance ticker WCC
+14:33:04 INFO market_data_fetching.market_data - Resolved WD to yfinance ticker WD
+14:33:04 INFO market_data_fetching.market_data - Resolved WDAY to yfinance ticker WDAY
+14:33:04 INFO market_data_fetching.market_data - Resolved WDC to yfinance ticker WDC
+14:33:04 INFO market_data_fetching.market_data - Resolved WDFC to yfinance ticker WDFC
+14:33:04 INFO market_data_fetching.market_data - Resolved WEBS to yfinance ticker WEBS
+14:33:04 INFO market_data_fetching.market_data - Resolved WEC to yfinance ticker WEC
+14:33:04 INFO market_data_fetching.market_data - Resolved WEN to yfinance ticker WEN
+14:33:04 INFO market_data_fetching.market_data - Resolved WFC to yfinance ticker WFC
+14:33:04 INFO market_data_fetching.market_data - Resolved WGO to yfinance ticker WGO
+14:33:04 INFO market_data_fetching.market_data - Resolved WHD to yfinance ticker WHD
+14:33:04 INFO market_data_fetching.market_data - Resolved WHR to yfinance ticker WHR
+14:33:04 INFO market_data_fetching.market_data - Resolved WING to yfinance ticker WING
+14:33:04 INFO market_data_fetching.market_data - Resolved WLK to yfinance ticker WLK
+14:33:04 INFO market_data_fetching.market_data - Resolved WM to yfinance ticker WM
+14:33:04 INFO market_data_fetching.market_data - Resolved WMB to yfinance ticker WMB
+14:33:04 INFO market_data_fetching.market_data - Resolved WMG to yfinance ticker WMG
+14:33:04 INFO market_data_fetching.market_data - Resolved WMS to yfinance ticker WMS
+14:33:04 INFO market_data_fetching.market_data - Resolved WMT to yfinance ticker WMT
+14:33:04 INFO market_data_fetching.market_data - Resolved WPC to yfinance ticker WPC
+14:33:04 INFO market_data_fetching.market_data - Resolved WRB to yfinance ticker WRB
+14:33:04 INFO market_data_fetching.market_data - Resolved WS to yfinance ticker WS
+14:33:04 INFO market_data_fetching.market_data - Resolved WSC to yfinance ticker WSC
+14:33:04 INFO market_data_fetching.market_data - Resolved WSM to yfinance ticker WSM
+14:33:04 INFO market_data_fetching.market_data - Resolved WSO to yfinance ticker WSO
+14:33:04 INFO market_data_fetching.market_data - Resolved WSR to yfinance ticker WSR
+14:33:04 INFO market_data_fetching.market_data - Resolved WST to yfinance ticker WST
+14:33:04 INFO market_data_fetching.market_data - Resolved WTRG to yfinance ticker WTRG
+14:33:04 INFO market_data_fetching.market_data - Resolved WTS to yfinance ticker WTS
+14:33:04 INFO market_data_fetching.market_data - Resolved WU to yfinance ticker WU
+14:33:04 INFO market_data_fetching.market_data - Resolved WWD to yfinance ticker WWD
+14:33:04 INFO market_data_fetching.market_data - Resolved WWW to yfinance ticker WWW
+14:33:04 INFO market_data_fetching.market_data - Resolved WY to yfinance ticker WY
+14:33:04 INFO market_data_fetching.market_data - Resolved WYNN to yfinance ticker WYNN
+14:33:04 INFO market_data_fetching.market_data - Resolved XEL to yfinance ticker XEL
+14:33:04 INFO market_data_fetching.market_data - Resolved XHR to yfinance ticker XHR
+14:33:04 INFO market_data_fetching.market_data - Resolved XOM to yfinance ticker XOM
+14:33:04 INFO market_data_fetching.market_data - Resolved XPEL to yfinance ticker XPEL
+14:33:04 INFO market_data_fetching.market_data - Resolved XPER to yfinance ticker XPER
+14:33:04 INFO market_data_fetching.market_data - Resolved XPO to yfinance ticker XPO
+14:33:04 INFO market_data_fetching.market_data - Resolved XYL to yfinance ticker XYL
+14:33:04 INFO market_data_fetching.market_data - Resolved YELP to yfinance ticker YELP
+14:33:04 INFO market_data_fetching.market_data - Resolved YETI to yfinance ticker YETI
+14:33:04 INFO market_data_fetching.market_data - Resolved YOU to yfinance ticker YOU
+14:33:04 INFO market_data_fetching.market_data - Resolved YUM to yfinance ticker YUM
+14:33:04 INFO market_data_fetching.market_data - Resolved ZBH to yfinance ticker ZBH
+14:33:04 INFO market_data_fetching.market_data - Resolved ZBRA to yfinance ticker ZBRA
+14:33:04 INFO market_data_fetching.market_data - Resolved ZION to yfinance ticker ZION
+14:33:04 INFO market_data_fetching.market_data - Resolved ZTS to yfinance ticker ZTS
+14:33:04 INFO market_data_fetching.market_data - No yfinance data resolved for 74 symbols.
+14:33:04 INFO indicators.strategy - Dropping A: price 135.05 below SMA100 139.60
+14:33:04 INFO indicators.strategy - Dropping AAP: price 46.77 below SMA100 50.89
+14:33:04 INFO indicators.strategy - Dropping AAPL: price 248.04 below SMA100 261.26
+14:33:04 INFO indicators.strategy - Dropping AAT: price 17.98 below SMA100 19.22
+14:33:04 INFO indicators.strategy - Dropping ABBV: price 219.26 below SMA100 222.50
+14:33:04 INFO indicators.strategy - Dropping ABG: price 238.04 below SMA100 239.97
+14:33:04 INFO indicators.strategy - Dropping ABR: price 7.74 below SMA100 9.76
+14:33:04 INFO indicators.strategy - Dropping ABT: price 107.42 below SMA100 127.07
+14:33:04 INFO indicators.strategy - Dropping ACHC: price 15.23 below SMA100 18.97
+14:33:04 INFO indicators.strategy - Dropping ACI: price 17.06 below SMA100 17.62
+14:33:04 INFO indicators.strategy - Dropping ACM: price 97.08 below SMA100 116.52
+14:33:04 INFO indicators.strategy - Dropping ACMR: max gap 20.82% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping ADBE: price 301.07 below SMA100 339.56
+14:33:04 INFO indicators.strategy - Dropping ADMA: price 16.73 below SMA100 16.81
+14:33:04 INFO indicators.strategy - Dropping ADP: price 257.87 below SMA100 269.58
+14:33:04 INFO indicators.strategy - Dropping ADSK: price 270.00 below SMA100 302.30
+14:33:04 INFO indicators.strategy - Dropping AFG: price 127.79 below SMA100 134.96
+14:33:04 INFO indicators.strategy - Dropping AFL: price 107.09 below SMA100 109.37
+14:33:04 INFO indicators.strategy - Dropping AIG: price 72.32 below SMA100 78.63
+14:33:04 INFO indicators.strategy - Dropping AJG: price 253.21 below SMA100 270.60
+14:33:04 INFO indicators.strategy - Dropping ALKS: max gap 17.27% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping ALL: price 193.65 below SMA100 203.51
+14:33:04 INFO indicators.strategy - Dropping ALLE: price 166.80 below SMA100 167.77
+14:33:04 INFO indicators.strategy - Dropping ALLY: price 41.11 below SMA100 41.68
+14:33:04 INFO indicators.strategy - Dropping ALRM: price 48.93 below SMA100 51.85
+14:33:04 INFO indicators.strategy - Dropping AMH: price 31.99 below SMA100 32.09
+14:33:04 INFO indicators.strategy - Dropping AMPH: price 25.92 below SMA100 26.42
+14:33:04 INFO indicators.strategy - Dropping AMT: price 178.75 below SMA100 181.91
+14:33:04 INFO indicators.strategy - Dropping ANET: price 136.34 below SMA100 137.75
+14:33:04 INFO indicators.strategy - Dropping ANF: max gap 19.31% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping ANGI: price 12.69 below SMA100 13.83
+14:33:04 INFO indicators.strategy - Dropping ANIP: price 82.99 below SMA100 87.84
+14:33:04 INFO indicators.strategy - Dropping AON: price 338.69 below SMA100 351.15
+14:33:04 INFO indicators.strategy - Dropping AOSL: price 22.03 below SMA100 24.45
+14:33:04 INFO indicators.strategy - Dropping APOG: max gap 16.87% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping APP: price 524.41 below SMA100 618.94
+14:33:04 INFO indicators.strategy - Dropping APPF: price 219.43 below SMA100 244.19
+14:33:04 INFO indicators.strategy - Dropping APTV: price 76.47 below SMA100 81.17
+14:33:04 INFO indicators.strategy - Dropping ARE: price 59.69 below SMA100 62.63
+14:33:04 INFO indicators.strategy - Dropping ARES: price 155.89 below SMA100 161.11
+14:33:04 INFO indicators.strategy - Dropping ARLO: price 12.99 below SMA100 15.84
+14:33:04 INFO indicators.strategy - Dropping ATEN: price 17.38 below SMA100 17.65
+14:33:04 INFO indicators.strategy - Dropping ATO: price 165.34 below SMA100 170.00
+14:33:04 INFO indicators.strategy - Dropping AVB: price 178.77 below SMA100 181.92
+14:33:04 INFO indicators.strategy - Dropping AVGO: price 320.05 below SMA100 350.49
+14:33:04 INFO indicators.strategy - Dropping AVTR: price 11.80 below SMA100 12.33
+14:33:04 INFO indicators.strategy - Dropping AWK: price 129.71 below SMA100 133.62
+14:33:04 INFO indicators.strategy - Dropping AWR: price 73.16 below SMA100 73.20
+14:33:04 INFO indicators.strategy - Dropping AYI: price 315.25 below SMA100 352.15
+14:33:04 INFO indicators.strategy - Dropping AZO: price 3700.00 below SMA100 3823.51
+14:33:04 INFO indicators.strategy - Dropping BAC: price 51.72 below SMA100 52.51
+14:33:04 INFO indicators.strategy - Dropping BANF: price 108.47 below SMA100 116.23
+14:33:04 INFO indicators.strategy - Dropping BAX: price 19.84 below SMA100 20.72
+14:33:04 INFO indicators.strategy - Dropping BBY: price 67.05 below SMA100 74.02
+14:33:04 INFO indicators.strategy - Dropping BILL: price 48.45 below SMA100 51.29
+14:33:04 INFO indicators.strategy - Dropping BIO: price 296.57 below SMA100 306.46
+14:33:04 INFO indicators.strategy - Dropping BJRI: max gap 20.49% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping BKE: price 50.97 below SMA100 53.02
+14:33:04 INFO indicators.strategy - Dropping BL: price 53.08 below SMA100 54.69
+14:33:04 INFO indicators.strategy - Dropping BLFS: price 24.87 below SMA100 25.84
+14:33:04 INFO indicators.strategy - Dropping BLKB: price 56.34 below SMA100 62.46
+14:33:04 INFO indicators.strategy - Dropping BMI: price 169.52 below SMA100 178.27
+14:33:04 INFO indicators.strategy - Dropping BOOT: price 183.98 below SMA100 185.60
+14:33:04 INFO indicators.strategy - Dropping BOX: price 26.48 below SMA100 31.09
+14:33:04 INFO indicators.strategy - Dropping BR: price 207.54 below SMA100 229.41
+14:33:04 INFO indicators.strategy - Dropping BRBR: price 27.66 below SMA100 31.50
+14:33:04 INFO indicators.strategy - Dropping BRK_B: price 478.97 below SMA100 496.54
+14:33:04 INFO indicators.strategy - Dropping BRO: price 79.18 below SMA100 84.81
+14:33:04 INFO indicators.strategy - Dropping BSX: price 92.51 below SMA100 98.20
+14:33:04 INFO indicators.strategy - Dropping BSY: price 38.84 below SMA100 46.09
+14:33:04 INFO indicators.strategy - Dropping BX: price 150.48 below SMA100 157.62
+14:33:04 INFO indicators.strategy - Dropping BXP: price 65.49 below SMA100 70.64
+14:33:04 INFO indicators.strategy - Dropping CABO: price 80.65 below SMA100 136.25
+14:33:04 INFO indicators.strategy - Dropping CAG: price 17.50 below SMA100 17.70
+14:33:04 INFO indicators.strategy - Dropping CALM: price 80.50 below SMA100 89.19
+14:33:04 INFO indicators.strategy - Dropping CALX: price 54.19 below SMA100 58.44
+14:33:04 INFO indicators.strategy - Dropping CAR: price 121.68 below SMA100 141.36
+14:33:04 INFO indicators.strategy - Dropping CARG: price 34.00 below SMA100 36.18
+14:33:04 INFO indicators.strategy - Dropping CART: price 39.90 below SMA100 41.58
+14:33:04 INFO indicators.strategy - Dropping CBRL: price 30.21 below SMA100 35.01
+14:33:04 INFO indicators.strategy - Dropping CBSH: price 53.21 below SMA100 53.34
+14:33:04 INFO indicators.strategy - Dropping CCI: price 86.60 below SMA100 90.96
+14:33:04 INFO indicators.strategy - Dropping CCL: price 28.55 below SMA100 28.91
+14:33:04 INFO indicators.strategy - Dropping CCOI: price 24.29 below SMA100 30.19
+14:33:04 INFO indicators.strategy - Dropping CDNS: price 318.32 below SMA100 330.66
+14:33:04 INFO indicators.strategy - Dropping CDW: price 126.00 below SMA100 148.15
+14:33:04 INFO indicators.strategy - Dropping CEG: price 289.06 below SMA100 348.91
+14:33:04 INFO indicators.strategy - Dropping CELH: max gap 20.56% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping CERT: price 10.00 below SMA100 10.38
+14:33:04 INFO indicators.strategy - Dropping CGNX: price 39.76 below SMA100 41.20
+14:33:04 INFO indicators.strategy - Dropping CHRW: max gap 15.64% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping CHTR: price 191.69 below SMA100 229.71
+14:33:04 INFO indicators.strategy - Dropping CHWY: price 31.69 below SMA100 35.25
+14:33:04 INFO indicators.strategy - Dropping CI: price 279.20 below SMA100 282.10
+14:33:04 INFO indicators.strategy - Dropping CINF: price 157.03 below SMA100 159.70
+14:33:04 INFO indicators.strategy - Dropping CLSK: price 13.71 below SMA100 13.92
+14:33:04 INFO indicators.strategy - Dropping CMG: max gap 21.35% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping CMS: price 70.70 below SMA100 71.84
+14:33:04 INFO indicators.strategy - Dropping CNK: price 24.01 below SMA100 26.10
+14:33:04 INFO indicators.strategy - Dropping CNS: price 65.91 below SMA100 66.05
+14:33:04 INFO indicators.strategy - Dropping CNXC: price 43.22 below SMA100 43.33
+14:33:04 INFO indicators.strategy - Dropping COF: price 217.30 below SMA100 225.01
+14:33:04 INFO indicators.strategy - Dropping COIN: price 216.95 below SMA100 293.92
+14:33:04 INFO indicators.strategy - Dropping COO: max gap 16.40% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping CORT: price 43.98 below SMA100 71.85
+14:33:04 INFO indicators.strategy - Dropping COTY: price 3.36 below SMA100 3.68
+14:33:04 INFO indicators.strategy - Dropping CPB: price 26.79 below SMA100 29.68
+14:33:04 INFO indicators.strategy - Dropping CPRT: price 41.40 below SMA100 42.38
+14:33:04 INFO indicators.strategy - Dropping CRBG: price 30.05 below SMA100 30.99
+14:33:04 INFO indicators.strategy - Dropping CRM: price 228.05 below SMA100 246.89
+14:33:04 INFO indicators.strategy - Dropping CRSR: price 5.30 below SMA100 7.14
+14:33:04 INFO indicators.strategy - Dropping CRVL: price 69.88 below SMA100 74.19
+14:33:04 INFO indicators.strategy - Dropping CRWD: price 452.49 below SMA100 490.01
+14:33:04 INFO indicators.strategy - Dropping CSGP: price 65.60 below SMA100 73.12
+14:33:04 INFO indicators.strategy - Dropping CVI: price 24.54 below SMA100 32.38
+14:33:04 INFO indicators.strategy - Dropping CVLT: price 123.85 below SMA100 147.67
+14:33:04 INFO indicators.strategy - Dropping CWT: price 44.16 below SMA100 45.31
+14:33:04 INFO indicators.strategy - Dropping CXM: price 6.74 below SMA100 7.60
+14:33:04 INFO indicators.strategy - Dropping DASH: price 207.23 below SMA100 236.89
+14:33:04 INFO indicators.strategy - Dropping DBX: price 26.30 below SMA100 29.09
+14:33:04 INFO indicators.strategy - Dropping DDOG: price 130.13 below SMA100 149.18
+14:33:04 INFO indicators.strategy - Dropping DELL: price 115.43 below SMA100 134.36
+14:33:04 INFO indicators.strategy - Dropping DFH: price 19.20 below SMA100 21.82
+14:33:04 INFO indicators.strategy - Dropping DGII: max gap 19.41% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping DGX: price 181.02 below SMA100 181.32
+14:33:04 INFO indicators.strategy - Dropping DHI: price 150.51 below SMA100 156.30
+14:33:04 INFO indicators.strategy - Dropping DIS: price 110.98 below SMA100 111.16
+14:33:04 INFO indicators.strategy - Dropping DKS: price 206.16 below SMA100 217.10
+14:33:04 INFO indicators.strategy - Dropping DLR: price 159.16 below SMA100 163.42
+14:33:04 INFO indicators.strategy - Dropping DOCN: max gap 16.74% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping DOCS: price 40.63 below SMA100 57.34
+14:33:04 INFO indicators.strategy - Dropping DOCU: price 57.46 below SMA100 70.61
+14:33:04 INFO indicators.strategy - Dropping DPZ: price 411.50 below SMA100 419.76
+14:33:04 INFO indicators.strategy - Dropping DT: price 40.79 below SMA100 46.31
+14:33:04 INFO indicators.strategy - Dropping DTE: price 134.33 below SMA100 134.49
+14:33:04 INFO indicators.strategy - Dropping DUK: price 117.43 below SMA100 120.82
+14:33:04 INFO indicators.strategy - Dropping DUOL: price 155.98 below SMA100 237.32
+14:33:04 INFO indicators.strategy - Dropping DV: price 10.99 below SMA100 11.50
+14:33:04 INFO indicators.strategy - Dropping DVA: price 108.12 below SMA100 122.05
+14:33:04 INFO indicators.strategy - Dropping DVAX: max gap 39.17% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping EEFT: price 74.18 below SMA100 79.86
+14:33:04 INFO indicators.strategy - Dropping EFX: price 209.74 below SMA100 225.47
+14:33:04 INFO indicators.strategy - Dropping ELF: price 94.16 below SMA100 104.51
+14:33:04 INFO indicators.strategy - Dropping ELME: max gap 84.42% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping EMBC: price 10.94 below SMA100 13.24
+14:33:04 INFO indicators.strategy - Dropping ENR: price 19.76 below SMA100 22.65
+14:33:04 INFO indicators.strategy - Dropping EQH: price 45.64 below SMA100 48.43
+14:33:04 INFO indicators.strategy - Dropping ERIE: price 275.85 below SMA100 299.93
+14:33:04 INFO indicators.strategy - Dropping ESS: price 254.08 below SMA100 256.92
+14:33:04 INFO indicators.strategy - Dropping ETN: price 331.22 below SMA100 352.58
+14:33:04 INFO indicators.strategy - Dropping ETR: price 93.19 below SMA100 93.23
+14:33:04 INFO indicators.strategy - Dropping ETSY: price 60.17 below SMA100 60.84
+14:33:04 INFO indicators.strategy - Dropping EVTC: price 29.79 below SMA100 30.60
+14:33:04 INFO indicators.strategy - Dropping EXC: price 44.06 below SMA100 44.75
+14:33:04 INFO indicators.strategy - Dropping EXPI: price 9.23 below SMA100 10.46
+14:33:04 INFO indicators.strategy - Dropping EXTR: price 14.75 below SMA100 18.71
+14:33:04 INFO indicators.strategy - Dropping FBRT: price 10.09 below SMA100 10.20
+14:33:04 INFO indicators.strategy - Dropping FDS: price 286.68 below SMA100 291.98
+14:33:04 INFO indicators.strategy - Dropping FFIV: price 259.26 below SMA100 279.97
+14:33:04 INFO indicators.strategy - Dropping FICO: price 1544.69 below SMA100 1662.46
+14:33:04 INFO indicators.strategy - Dropping FIS: price 60.50 below SMA100 65.50
+14:33:04 INFO indicators.strategy - Dropping FISV: price 67.56 below SMA100 92.33
+14:33:04 INFO indicators.strategy - Dropping FIZZ: price 33.74 below SMA100 35.07
+14:33:04 INFO indicators.strategy - Dropping FLO: price 11.11 below SMA100 11.74
+14:33:04 INFO indicators.strategy - Dropping FMC: price 16.28 below SMA100 21.87
+14:33:04 INFO indicators.strategy - Dropping FNF: price 53.42 below SMA100 55.06
+14:33:04 INFO indicators.strategy - Dropping FOUR: price 66.21 below SMA100 72.85
+14:33:04 INFO indicators.strategy - Dropping FSLR: price 242.15 below SMA100 242.59
+14:33:04 INFO indicators.strategy - Dropping FTDR: price 57.99 below SMA100 60.35
+14:33:04 INFO indicators.strategy - Dropping FTNT: price 81.64 below SMA100 81.81
+14:33:04 INFO indicators.strategy - Dropping GDDY: price 103.70 below SMA100 129.78
+14:33:04 INFO indicators.strategy - Dropping GDEN: max gap 40.27% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping GE: price 293.87 below SMA100 300.77
+14:33:04 INFO indicators.strategy - Dropping GEN: price 25.41 below SMA100 27.17
+14:33:04 INFO indicators.strategy - Dropping GES: price 16.81 below SMA100 16.85
+14:33:04 INFO indicators.strategy - Dropping GIS: price 44.56 below SMA100 46.81
+14:33:04 INFO indicators.strategy - Dropping GKOS: max gap 23.32% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping GMED: max gap 29.64% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping GNTX: price 23.59 below SMA100 24.85
+14:33:04 INFO indicators.strategy - Dropping GNW: price 8.14 below SMA100 8.70
+14:33:04 INFO indicators.strategy - Dropping GO: price 9.80 below SMA100 13.05
+14:33:04 INFO indicators.strategy - Dropping GOGO: price 4.89 below SMA100 7.45
+14:33:04 INFO indicators.strategy - Dropping GPI: price 391.91 below SMA100 418.80
+14:33:04 INFO indicators.strategy - Dropping GPK: price 15.46 below SMA100 16.98
+14:33:04 INFO indicators.strategy - Dropping GPN: price 75.21 below SMA100 80.82
+14:33:04 INFO indicators.strategy - Dropping GRMN: price 206.17 below SMA100 219.68
+14:33:04 INFO indicators.strategy - Dropping GWRE: price 160.03 below SMA100 218.36
+14:33:04 INFO indicators.strategy - Dropping HALO: price 69.22 below SMA100 69.69
+14:33:04 INFO indicators.strategy - Dropping HCI: price 158.50 below SMA100 184.09
+14:33:04 INFO indicators.strategy - Dropping HIG: price 128.62 below SMA100 131.76
+14:33:04 INFO indicators.strategy - Dropping HIW: price 26.35 below SMA100 28.45
+14:33:04 INFO indicators.strategy - Dropping HLI: price 186.24 below SMA100 187.47
+14:33:04 INFO indicators.strategy - Dropping HOG: price 20.30 below SMA100 24.89
+14:33:04 INFO indicators.strategy - Dropping HOOD: price 106.99 below SMA100 125.23
+14:33:04 INFO indicators.strategy - Dropping HPE: price 21.05 below SMA100 23.37
+14:33:04 INFO indicators.strategy - Dropping HPQ: price 19.43 below SMA100 25.11
+14:33:04 INFO indicators.strategy - Dropping HRB: price 40.04 below SMA100 46.60
+14:33:04 INFO indicators.strategy - Dropping HTZ: price 5.53 below SMA100 5.65
+14:33:04 INFO indicators.strategy - Dropping ICHR: max gap 27.09% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping IDCC: price 330.52 below SMA100 340.76
+14:33:04 INFO indicators.strategy - Dropping IIIN: price 33.06 below SMA100 33.25
+14:33:04 INFO indicators.strategy - Dropping IIPR: price 49.65 below SMA100 50.35
+14:33:04 INFO indicators.strategy - Dropping INDV: max gap 18.86% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping INN: price 4.75 below SMA100 5.21
+14:33:04 INFO indicators.strategy - Dropping INSP: price 79.40 below SMA100 92.24
+14:33:04 INFO indicators.strategy - Dropping INTU: price 563.97 below SMA100 652.53
+14:33:04 INFO indicators.strategy - Dropping INVH: price 27.19 below SMA100 27.89
+14:33:04 INFO indicators.strategy - Dropping IT: price 231.76 below SMA100 242.54
+14:33:04 INFO indicators.strategy - Dropping ITRI: price 97.67 below SMA100 109.91
+14:33:04 INFO indicators.strategy - Dropping JAZZ: max gap 19.09% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping JBGS: price 17.14 below SMA100 19.22
+14:33:04 INFO indicators.strategy - Dropping JHG: max gap 16.48% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping JPM: price 297.72 below SMA100 308.68
+14:33:04 INFO indicators.strategy - Dropping KBH: price 59.04 below SMA100 61.79
+14:33:04 INFO indicators.strategy - Dropping KD: price 24.22 below SMA100 27.92
+14:33:04 INFO indicators.strategy - Dropping KHC: price 23.20 below SMA100 24.73
+14:33:04 INFO indicators.strategy - Dropping KKR: price 121.25 below SMA100 128.47
+14:33:04 INFO indicators.strategy - Dropping KMB: price 102.23 below SMA100 110.47
+14:33:04 INFO indicators.strategy - Dropping KNSL: price 406.70 below SMA100 411.82
+14:33:04 INFO indicators.strategy - Dropping KR: price 64.25 below SMA100 65.00
+14:33:04 INFO indicators.strategy - Dropping KRC: price 35.59 below SMA100 40.30
+14:33:04 INFO indicators.strategy - Dropping KREF: price 8.15 below SMA100 8.36
+14:33:04 INFO indicators.strategy - Dropping KSS: price 17.66 below SMA100 18.33
+14:33:04 INFO indicators.strategy - Dropping KVUE: max gap 18.75% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping LAD: price 322.50 below SMA100 322.52
+14:33:04 INFO indicators.strategy - Dropping LEN: price 111.84 below SMA100 122.04
+14:33:04 INFO indicators.strategy - Dropping LH: price 266.66 below SMA100 266.94
+14:33:04 INFO indicators.strategy - Dropping LII: price 509.76 below SMA100 511.13
+14:33:04 INFO indicators.strategy - Dropping LITE: max gap 16.00% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping LMAT: price 84.22 below SMA100 86.98
+14:33:04 INFO indicators.strategy - Dropping LNC: price 40.35 below SMA100 41.19
+14:33:04 INFO indicators.strategy - Dropping LRN: price 73.26 below SMA100 100.32
+14:33:04 INFO indicators.strategy - Dropping LW: price 43.72 below SMA100 55.67
+14:33:04 INFO indicators.strategy - Dropping LYV: price 146.97 below SMA100 148.64
+14:33:04 INFO indicators.strategy - Dropping LZB: max gap 15.88% >= 0.15 in last 90 days
+14:33:04 INFO indicators.strategy - Dropping MA: price 524.74 below SMA100 562.00
+14:33:04 INFO indicators.strategy - Dropping MAN: price 30.60 below SMA100 32.15
+14:33:04 INFO indicators.strategy - Dropping MANH: price 174.02 below SMA100 187.50
+14:33:04 INFO indicators.strategy - Dropping MARA: price 10.50 below SMA100 14.54
+14:33:04 INFO indicators.strategy - Dropping MASI: price 141.46 below SMA100 142.42
+14:33:04 INFO indicators.strategy - Dropping MET: price 75.81 below SMA100 79.00
+14:33:04 INFO indicators.strategy - Dropping MGM: price 34.03 below SMA100 34.46
+14:33:05 INFO indicators.strategy - Dropping MHO: price 133.45 below SMA100 136.22
+14:33:05 INFO indicators.strategy - Dropping MKC: price 60.79 below SMA100 66.10
+14:33:05 INFO indicators.strategy - Dropping MKTX: price 171.52 below SMA100 173.01
+14:33:05 INFO indicators.strategy - Dropping MMSI: price 81.66 below SMA100 85.31
+14:33:05 INFO indicators.strategy - Dropping MORN: price 210.90 below SMA100 221.76
+14:33:05 INFO indicators.strategy - Dropping MPC: price 175.38 below SMA100 184.36
+14:33:05 INFO indicators.strategy - Dropping MRP: price 30.20 below SMA100 30.97
+14:33:05 INFO indicators.strategy - Dropping MSEX: price 52.29 below SMA100 53.25
+14:33:05 INFO indicators.strategy - Dropping MSFT: price 465.95 below SMA100 496.89
+14:33:05 INFO indicators.strategy - Dropping MSI: price 401.66 below SMA100 413.71
+14:33:05 INFO indicators.strategy - Dropping MSM: price 85.77 below SMA100 86.13
+14:33:05 INFO indicators.strategy - Dropping MTCH: price 31.08 below SMA100 33.42
+14:33:05 INFO indicators.strategy - Dropping MTDR: price 42.94 below SMA100 43.05
+14:33:05 INFO indicators.strategy - Dropping MTN: price 138.21 below SMA100 143.89
+14:33:05 INFO indicators.strategy - Dropping MYGN: price 5.87 below SMA100 7.11
+14:33:05 INFO indicators.strategy - Dropping NABL: price 6.45 below SMA100 7.64
+14:33:05 INFO indicators.strategy - Dropping NATL: price 37.63 below SMA100 38.09
+14:33:05 INFO indicators.strategy - Dropping NAVI: price 12.08 below SMA100 12.51
+14:33:05 INFO indicators.strategy - Dropping NBIX: price 136.18 below SMA100 143.03
+14:33:05 INFO indicators.strategy - Dropping NCLH: price 20.93 below SMA100 22.26
+14:33:05 INFO indicators.strategy - Dropping NEOG: max gap 25.20% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping NFG: price 81.67 below SMA100 82.82
+14:33:05 INFO indicators.strategy - Dropping NFLX: price 86.12 below SMA100 107.93
+14:33:05 INFO indicators.strategy - Dropping NKE: price 65.04 below SMA100 66.38
+14:33:05 INFO indicators.strategy - Dropping NMIH: price 37.74 below SMA100 38.29
+14:33:05 INFO indicators.strategy - Dropping NOW: price 133.11 below SMA100 169.62
+14:33:05 INFO indicators.strategy - Dropping NRG: price 149.30 below SMA100 162.17
+14:33:05 INFO indicators.strategy - Dropping NSIT: price 82.60 below SMA100 98.10
+14:33:05 INFO indicators.strategy - Dropping NSP: max gap 20.78% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping NTAP: price 97.42 below SMA100 113.62
+14:33:05 INFO indicators.strategy - Dropping NTNX: price 42.81 below SMA100 62.28
+14:33:05 INFO indicators.strategy - Dropping NWL: price 4.32 below SMA100 4.36
+14:33:05 INFO indicators.strategy - Dropping NWSA: price 26.83 below SMA100 27.03
+14:33:05 INFO indicators.strategy - Dropping NXRT: price 30.53 below SMA100 30.67
+14:33:05 INFO indicators.strategy - Dropping OFG: price 37.15 below SMA100 41.58
+14:33:05 INFO indicators.strategy - Dropping OGE: price 42.69 below SMA100 43.86
+14:33:05 INFO indicators.strategy - Dropping OGN: max gap 20.85% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping OLED: price 120.10 below SMA100 130.57
+14:33:05 INFO indicators.strategy - Dropping OLLI: price 113.13 below SMA100 122.33
+14:33:05 INFO indicators.strategy - Dropping ORCL: price 177.16 below SMA100 239.38
+14:33:05 INFO indicators.strategy - Dropping ORI: price 37.94 below SMA100 40.48
+14:33:05 INFO indicators.strategy - Dropping OZK: price 45.94 below SMA100 47.44
+14:33:05 INFO indicators.strategy - Dropping PAG: price 159.36 below SMA100 166.59
+14:33:05 INFO indicators.strategy - Dropping PAHC: price 39.01 below SMA100 40.16
+14:33:05 INFO indicators.strategy - Dropping PANW: price 180.18 below SMA100 199.07
+14:33:05 INFO indicators.strategy - Dropping PARR: price 35.21 below SMA100 38.36
+14:33:05 INFO indicators.strategy - Dropping PATH: price 14.80 below SMA100 14.82
+14:33:05 INFO indicators.strategy - Dropping PAYC: price 152.29 below SMA100 182.22
+14:33:05 INFO indicators.strategy - Dropping PAYX: price 106.63 below SMA100 118.57
+14:33:05 INFO indicators.strategy - Dropping PBI: price 10.22 below SMA100 10.60
+14:33:05 INFO indicators.strategy - Dropping PCG: price 14.95 below SMA100 15.68
+14:33:05 INFO indicators.strategy - Dropping PCTY: price 145.86 below SMA100 152.46
+14:33:05 INFO indicators.strategy - Dropping PEG: price 78.28 below SMA100 80.73
+14:33:05 INFO indicators.strategy - Dropping PEGA: price 50.38 below SMA100 57.88
+14:33:05 INFO indicators.strategy - Dropping PEN: max gap 15.19% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping PENN: price 14.27 below SMA100 16.25
+14:33:05 INFO indicators.strategy - Dropping PFGC: price 93.89 below SMA100 97.66
+14:33:05 INFO indicators.strategy - Dropping PGR: price 206.03 below SMA100 215.42
+14:33:05 INFO indicators.strategy - Dropping PHM: price 125.16 below SMA100 125.48
+14:33:05 INFO indicators.strategy - Dropping PI: price 159.77 below SMA100 180.72
+14:33:05 INFO indicators.strategy - Dropping PINS: price 25.91 below SMA100 29.86
+14:33:05 INFO indicators.strategy - Dropping PLAB: max gap 25.26% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping PLNT: price 94.47 below SMA100 102.55
+14:33:05 INFO indicators.strategy - Dropping PLTR: price 169.60 below SMA100 177.69
+14:33:05 INFO indicators.strategy - Dropping PODD: price 271.60 below SMA100 313.00
+14:33:05 INFO indicators.strategy - Dropping POOL: price 265.02 below SMA100 270.67
+14:33:05 INFO indicators.strategy - Dropping PRAA: price 15.91 below SMA100 15.97
+14:33:05 INFO indicators.strategy - Dropping PRGO: price 14.72 below SMA100 17.50
+14:33:05 INFO indicators.strategy - Dropping PRGS: price 42.43 below SMA100 43.11
+14:33:05 INFO indicators.strategy - Dropping PRI: price 254.74 below SMA100 263.10
+14:33:05 INFO indicators.strategy - Dropping PRVA: price 23.94 below SMA100 23.98
+14:33:05 INFO indicators.strategy - Dropping PSN: price 72.73 below SMA100 77.01
+14:33:05 INFO indicators.strategy - Dropping PSTG: price 69.75 below SMA100 81.48
+14:33:05 INFO indicators.strategy - Dropping PTC: price 162.14 below SMA100 187.58
+14:33:05 INFO indicators.strategy - Dropping PVH: price 61.35 below SMA100 77.73
+14:33:05 INFO indicators.strategy - Dropping PYPL: price 56.62 below SMA100 64.33
+14:33:05 INFO indicators.strategy - Dropping PZZA: price 36.90 below SMA100 43.74
+14:33:05 INFO indicators.strategy - Dropping Q: SMA100 unavailable
+14:33:05 INFO indicators.strategy - Dropping QCOM: price 155.82 below SMA100 168.73
+14:33:05 INFO indicators.strategy - Dropping QDEL: price 28.09 below SMA100 28.13
+14:33:05 INFO indicators.strategy - Dropping QLYS: price 128.79 below SMA100 136.14
+14:33:05 INFO indicators.strategy - Dropping QRVO: price 80.91 below SMA100 87.90
+14:33:05 INFO indicators.strategy - Dropping QTWO: price 68.48 below SMA100 70.80
+14:33:05 INFO indicators.strategy - Dropping RAMP: price 25.76 below SMA100 28.12
+14:33:05 INFO indicators.strategy - Dropping RCL: price 286.11 below SMA100 293.68
+14:33:05 INFO indicators.strategy - Dropping RCUS: max gap 15.87% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping RDNT: price 73.17 below SMA100 76.11
+14:33:05 INFO indicators.strategy - Dropping REXR: price 39.93 below SMA100 40.79
+14:33:05 INFO indicators.strategy - Dropping REZI: price 36.11 below SMA100 37.33
+14:33:05 INFO indicators.strategy - Dropping RHI: price 28.57 below SMA100 29.50
+14:33:05 INFO indicators.strategy - Dropping RLI: price 56.97 below SMA100 61.68
+14:33:05 INFO indicators.strategy - Dropping RMD: price 252.38 below SMA100 258.69
+14:33:05 INFO indicators.strategy - Dropping ROCK: price 51.78 below SMA100 57.46
+14:33:05 INFO indicators.strategy - Dropping ROP: price 407.61 below SMA100 466.04
+14:33:05 INFO indicators.strategy - Dropping RPM: price 109.48 below SMA100 110.73
+14:33:05 INFO indicators.strategy - Dropping RRC: price 36.34 below SMA100 36.41
+14:33:05 INFO indicators.strategy - Dropping RUN: max gap 17.12% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping RYAN: price 50.00 below SMA100 54.00
+14:33:05 INFO indicators.strategy - Dropping SABR: price 1.33 below SMA100 1.68
+14:33:05 INFO indicators.strategy - Dropping SAFE: price 14.12 below SMA100 14.48
+14:33:05 INFO indicators.strategy - Dropping SBAC: price 187.16 below SMA100 192.54
+14:33:05 INFO indicators.strategy - Dropping SCSC: price 40.71 below SMA100 41.82
+14:33:05 INFO indicators.strategy - Dropping SDGR: price 16.42 below SMA100 18.83
+14:33:05 INFO indicators.strategy - Dropping SEE: max gap 21.69% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping SEZL: price 67.60 below SMA100 72.68
+14:33:05 INFO indicators.strategy - Dropping SFM: price 71.44 below SMA100 95.52
+14:33:05 INFO indicators.strategy - Dropping SHEN: price 11.12 below SMA100 12.07
+14:33:05 INFO indicators.strategy - Dropping SHO: price 9.04 below SMA100 9.17
+14:33:05 INFO indicators.strategy - Dropping SIG: price 89.79 below SMA100 94.01
+14:33:05 INFO indicators.strategy - Dropping SIGI: price 80.07 below SMA100 80.14
+14:33:05 INFO indicators.strategy - Dropping SITM: max gap 17.89% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping SJM: price 102.53 below SMA100 103.48
+14:33:05 INFO indicators.strategy - Dropping SKT: price 32.55 below SMA100 33.35
+14:33:05 INFO indicators.strategy - Dropping SKYW: price 101.66 below SMA100 101.69
+14:33:05 INFO indicators.strategy - Dropping SLG: price 45.90 below SMA100 51.28
+14:33:05 INFO indicators.strategy - Dropping SLM: price 27.62 below SMA100 27.63
+14:33:05 INFO indicators.strategy - Dropping SM: price 18.68 below SMA100 21.10
+14:33:05 INFO indicators.strategy - Dropping SMCI: price 31.70 below SMA100 40.25
+14:33:05 INFO indicators.strategy - Dropping SO: price 87.54 below SMA100 90.58
+14:33:05 INFO indicators.strategy - Dropping SOLS: SMA100 unavailable
+14:33:05 INFO indicators.strategy - Dropping SONO: price 14.91 below SMA100 16.79
+14:33:05 INFO indicators.strategy - Dropping SPSC: price 90.61 below SMA100 95.75
+14:33:05 INFO indicators.strategy - Dropping SRE: price 85.94 below SMA100 88.61
+14:33:05 INFO indicators.strategy - Dropping SRPT: max gap 37.67% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping SSTK: price 19.34 below SMA100 20.66
+14:33:05 INFO indicators.strategy - Dropping STAA: price 19.14 below SMA100 25.47
+14:33:05 INFO indicators.strategy - Dropping STAG: price 36.63 below SMA100 37.15
+14:33:05 INFO indicators.strategy - Dropping STWD: price 18.18 below SMA100 18.26
+14:33:05 INFO indicators.strategy - Dropping SUPN: price 48.25 below SMA100 48.32
+14:33:05 INFO indicators.strategy - Dropping SWKS: price 58.96 below SMA100 69.36
+14:33:05 INFO indicators.strategy - Dropping SXT: price 96.02 below SMA100 96.47
+14:33:05 INFO indicators.strategy - Dropping SYF: price 76.61 below SMA100 76.79
+14:33:05 INFO indicators.strategy - Dropping SYK: price 355.04 below SMA100 366.21
+14:33:05 INFO indicators.strategy - Dropping SYY: price 76.21 below SMA100 76.52
+14:33:05 INFO indicators.strategy - Dropping T: price 23.59 below SMA100 25.52
+14:33:05 INFO indicators.strategy - Dropping TDC: max gap 20.23% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping TEL: price 223.84 below SMA100 227.69
+14:33:05 INFO indicators.strategy - Dropping TER: max gap 17.75% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping TFX: price 103.40 below SMA100 120.32
+14:33:05 INFO indicators.strategy - Dropping TGTX: price 31.20 below SMA100 32.36
+14:33:05 INFO indicators.strategy - Dropping THC: price 188.78 below SMA100 199.57
+14:33:05 INFO indicators.strategy - Dropping THS: max gap 21.15% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping TMUS: price 186.03 below SMA100 214.74
+14:33:05 INFO indicators.strategy - Dropping TNDM: max gap 20.03% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping TREX: price 42.55 below SMA100 43.93
+14:33:05 INFO indicators.strategy - Dropping TRIP: price 13.23 below SMA100 15.59
+14:33:05 INFO indicators.strategy - Dropping TRMB: price 71.19 below SMA100 79.53
+14:33:05 INFO indicators.strategy - Dropping TRN: price 27.03 below SMA100 27.10
+14:33:05 INFO indicators.strategy - Dropping TRUP: price 32.82 below SMA100 39.56
+14:33:05 INFO indicators.strategy - Dropping TRV: price 277.72 below SMA100 278.99
+14:33:05 INFO indicators.strategy - Dropping TT: price 386.22 below SMA100 408.61
+14:33:05 INFO indicators.strategy - Dropping TTD: price 36.55 below SMA100 44.03
+14:33:05 INFO indicators.strategy - Dropping TTWO: price 245.73 below SMA100 248.77
+14:33:05 INFO indicators.strategy - Dropping TYL: price 434.76 below SMA100 484.83
+14:33:05 INFO indicators.strategy - Dropping UBER: price 82.31 below SMA100 90.43
+14:33:05 INFO indicators.strategy - Dropping UHS: price 205.09 below SMA100 212.66
+14:33:05 INFO indicators.strategy - Dropping ULS: price 71.20 below SMA100 77.19
+14:33:05 INFO indicators.strategy - Dropping UNF: max gap 25.31% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping UNM: price 76.10 below SMA100 76.26
+14:33:05 INFO indicators.strategy - Dropping UPWK: max gap 20.47% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping URBN: price 67.39 below SMA100 71.27
+14:33:05 INFO indicators.strategy - Dropping V: price 326.18 below SMA100 340.29
+14:33:05 INFO indicators.strategy - Dropping VC: price 91.41 below SMA100 108.38
+14:33:05 INFO indicators.strategy - Dropping VICI: price 28.54 below SMA100 29.68
+14:33:05 INFO indicators.strategy - Dropping VITL: price 28.38 below SMA100 36.64
+14:33:05 INFO indicators.strategy - Dropping VLTO: price 101.31 below SMA100 102.11
+14:33:05 INFO indicators.strategy - Dropping VNO: price 32.14 below SMA100 36.38
+14:33:05 INFO indicators.strategy - Dropping VNT: price 36.87 below SMA100 39.15
+14:33:05 INFO indicators.strategy - Dropping VRSK: price 218.04 below SMA100 230.92
+14:33:05 INFO indicators.strategy - Dropping VRSN: price 250.60 below SMA100 256.94
+14:33:05 INFO indicators.strategy - Dropping VRTS: price 166.70 below SMA100 172.96
+14:33:05 INFO indicators.strategy - Dropping VSAT: max gap 16.98% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping VSCO: max gap 16.84% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping VST: price 160.12 below SMA100 183.37
+14:33:05 INFO indicators.strategy - Dropping VVV: price 32.97 below SMA100 33.39
+14:33:05 INFO indicators.strategy - Dropping VZ: price 39.52 below SMA100 40.26
+14:33:05 INFO indicators.strategy - Dropping WAY: price 29.98 below SMA100 35.49
+14:33:05 INFO indicators.strategy - Dropping WD: price 63.95 below SMA100 72.21
+14:33:05 INFO indicators.strategy - Dropping WDAY: price 189.26 below SMA100 224.29
+14:33:05 INFO indicators.strategy - Dropping WEC: price 109.10 below SMA100 109.51
+14:33:05 INFO indicators.strategy - Dropping WEN: price 8.42 below SMA100 8.70
+14:33:05 INFO indicators.strategy - Dropping WGO: max gap 18.18% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping WMG: price 30.32 below SMA100 31.03
+14:33:05 INFO indicators.strategy - Dropping WRB: price 67.12 below SMA100 72.02
+14:33:05 INFO indicators.strategy - Dropping WST: price 236.66 below SMA100 268.62
+14:33:05 INFO indicators.strategy - Dropping WWW: price 18.02 below SMA100 21.91
+14:33:05 INFO indicators.strategy - Dropping WYNN: price 113.55 below SMA100 122.80
+14:33:05 INFO indicators.strategy - Dropping XEL: price 75.01 below SMA100 76.71
+14:33:05 INFO indicators.strategy - Dropping XYL: price 141.23 below SMA100 142.67
+14:33:05 INFO indicators.strategy - Dropping YELP: price 28.28 below SMA100 30.79
+14:33:05 INFO indicators.strategy - Dropping YOU: max gap 15.15% >= 0.15 in last 90 days
+14:33:05 INFO indicators.strategy - Dropping ZBH: price 86.60 below SMA100 95.24
+14:33:05 INFO indicators.strategy - Dropping ZBRA: price 240.54 below SMA100 274.33
+14:33:05 INFO indicators.strategy - Dropping ZTS: price 124.05 below SMA100 132.57
+14:33:05 INFO indicators.strategy - Dropping NYMT: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping XPER: price 5.97 below SMA100 6.22
+14:33:05 INFO indicators.strategy - Dropping AMEH: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping AAXN: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping BRKS: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping BLL: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping BHLB: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping ADS: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping BFB: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping BGCP: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping PCLN: SMA100 unavailable
+14:33:05 INFO indicators.strategy - Dropping BHI: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping CBG: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping OFC: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping OAS: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping BCEI: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping CNHI: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping IIVI: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping ABC: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping FLT: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping KORS: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping CR1: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping MCF: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping ERI: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping CDAY: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping HFC: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping HCP: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping DOW1: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping RE: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping ANTM: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping ATU: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping ETH: price 27.77 below SMA100 33.85
+14:33:05 INFO indicators.strategy - Dropping CHKK: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping FBHS: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping NYCB: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping FUN1: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping GPS: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping ZI: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping OAC: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping HTA: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping SJW: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping ARNC: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping JEC: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping LUK: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping DPS: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping ALTM: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping CTL: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping GSAH: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping MLHR: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping FVAC: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping MMC: price 183.16 below SMA100 189.05
+14:33:05 INFO indicators.strategy - Dropping TMST: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping LANC: momentum regression failed
+14:33:05 INFO indicators.strategy - Dropping FTOC: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping SGH: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping CDEV: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping AAN: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping SEAS: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping CBS: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping MAAC: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping UTX: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping RUSHA1: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping PKI: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping TPX: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping SNDK1: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping WWE: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping TLNE: price 366.43 below SMA100 390.52
+14:33:05 INFO indicators.strategy - Dropping PNM: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping RCII: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping CLI: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping VSNTV: SMA100 unavailable
+14:33:05 INFO indicators.strategy - Dropping MYL: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping NCR: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping HCN: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping WFTLF: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping INT: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping WETF: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping WLTW: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping SQ: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping JCOM: no yfinance data
+14:33:05 INFO indicators.strategy - Dropping RXN: no yfinance data
+14:33:05 INFO indicators.strategy - Momentum ranking complete. Kept 730 stocks
+14:33:05 INFO indicators.strategy - Drop summary: {'below_sma': 395, 'gap': 43, 'sma_missing': 4, 'no_data': 74, 'momentum_failed': 1}
+14:33:05 INFO indicators.charts - Saved momentum chart: logs/2026-01-24/momentum_charts/momentum_top_25.png
+14:33:05 INFO indicators.charts - Saved momentum chart: logs/2026-01-24/momentum_charts/momentum_top_25to50.png
+14:33:05 INFO indicators.charts - Saved momentum chart: logs/2026-01-24/momentum_charts/momentum_top50to75.png
+14:33:05 INFO indicators.charts - Saved momentum chart: logs/2026-01-24/momentum_charts/momentum_top75to100.png
+14:33:06 INFO __main__ - Top 100 tickers selected
+14:33:06 INFO __main__ - Checking S&P500 trend using ^GSPC
+14:33:06 INFO __main__ - S&P500 last close 6915.61 vs SMA200 6387.29
+14:33:07 INFO __main__ - Retrieved 0 open positions
+14:33:07 INFO execution.portfolio - Total sell orders scheduled: 0
+14:33:07 INFO __main__ - No sell orders required
+14:33:07 INFO __main__ - Cash available=9000.00 holdings value=0.00 total equity=9000.00
+14:33:07 INFO execution.portfolio - Scheduled buy for RXN_US_EQ qty=105.0481573574464 price=31.8100 cash_left=5658.42
+14:33:07 INFO execution.portfolio - Scheduled buy for RXN_US_EQ qty=23.276869423970254 price=189.5100 cash_left=1247.22
+14:33:07 INFO execution.portfolio - Scheduled buy for RXN_US_EQ qty=9.859436947734851 price=126.5000 cash_left=0.00
+14:33:07 INFO execution.portfolio - Total buy orders scheduled: 3
+14:33:07 INFO execution.trading212_client - Placing market order: ticker=RXN_US_EQ quantity=105.048157 extendedHours=False
+14:33:08 ERROR execution.trading212_client - Trading212 API error: POST https://demo.trading212.com/api/v0/equity/orders/market status=400 body={"type":"/api-errors/quantity-precision-mismatch","title":"Error while placing the order","status":400,"detail":"invalid quantity precision 3","traceId":"86155b339f3f46c168b103ec76addd8b"}
+14:33:08 ERROR __main__ - Order failed for RXN_US_EQ qty=105.048157: HTTP 400 for https://demo.trading212.com/api/v0/equity/orders/market: {"type":"/api-errors/quantity-precision-mismatch","title":"Error while placing the order","status":400,"detail":"invalid quantity precision 3","traceId":"86155b339f3f46c168b103ec76addd8b"}
+14:33:08 INFO execution.trading212_client - Placing market order: ticker=RXN_US_EQ quantity=23.276869 extendedHours=False
+14:33:08 ERROR execution.trading212_client - Trading212 API error: POST https://demo.trading212.com/api/v0/equity/orders/market status=400 body={"type":"/api-errors/quantity-precision-mismatch","title":"Error while placing the order","status":400,"detail":"invalid quantity precision 3","traceId":"10d0d7f06884601a01359224a7dc2741"}
+14:33:08 ERROR __main__ - Order failed for RXN_US_EQ qty=23.276869: HTTP 400 for https://demo.trading212.com/api/v0/equity/orders/market: {"type":"/api-errors/quantity-precision-mismatch","title":"Error while placing the order","status":400,"detail":"invalid quantity precision 3","traceId":"10d0d7f06884601a01359224a7dc2741"}
+14:33:08 INFO execution.trading212_client - Placing market order: ticker=RXN_US_EQ quantity=9.859437 extendedHours=False
+14:33:08 ERROR execution.trading212_client - Trading212 API error: POST https://demo.trading212.com/api/v0/equity/orders/market status=400 body={"type":"/api-errors/quantity-precision-mismatch","title":"Error while placing the order","status":400,"detail":"invalid quantity precision 3","traceId":"5cc51873343312a079a3b3b377c5d1d3"}
+14:33:08 ERROR __main__ - Order failed for RXN_US_EQ qty=9.859437: HTTP 400 for https://demo.trading212.com/api/v0/equity/orders/market: {"type":"/api-errors/quantity-precision-mismatch","title":"Error while placing the order","status":400,"detail":"invalid quantity precision 3","traceId":"5cc51873343312a079a3b3b377c5d1d3"}
+14:33:08 INFO __main__ - Run complete. Remaining cash estimate: 0.00

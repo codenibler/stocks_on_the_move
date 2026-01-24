@@ -8,6 +8,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 
 from core.classes import AnalyzedStock
 
@@ -30,6 +31,12 @@ def plot_momentum_buckets(
         (bucket_size * 2, bucket_size * 3, "top50to75"),
         (bucket_size * 3, bucket_size * 4, "top75to100"),
     ]
+    color_maps = [
+        plt.cm.Greens,
+        plt.cm.Blues,
+        plt.cm.Oranges,
+        plt.cm.Reds,
+    ]
 
     charts_dir = os.path.join(output_dir, "momentum_charts")
     os.makedirs(charts_dir, exist_ok=True)
@@ -45,7 +52,10 @@ def plot_momentum_buckets(
 
         fig, ax = plt.subplots(figsize=(12, 6))
         norm = plt.Normalize(min(scores), max(scores))
-        colors = plt.cm.Blues(norm(scores))
+        cmap = color_maps[idx % len(color_maps)]
+        colors = cmap(norm(scores))
+        alphas = 0.25 + 0.75 * norm(scores)
+        colors[:, 3] = np.clip(alphas, 0.25, 1.0)
         ax.bar(range(len(scores)), scores, color=colors)
         ax.set_title(f"Momentum rankings {start + 1}-{min(end, len(ranked))}")
         ax.set_ylabel("Momentum score")
