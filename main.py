@@ -4,6 +4,7 @@ import logging
 import os
 
 from indicators import analytics
+from indicators import charts
 from indicators import strategy
 from config.config import get_runtime_config, get_strategy_config, get_trading212_config
 from config.logging_utils import setup_logging
@@ -164,12 +165,23 @@ def main() -> None:
 
     if not risk_on:
         logger.info("S&P500 below SMA%s. Exiting after sells/rebalance.", strategy_config.sma_long)
+        updated_positions = client.get_positions()
+        if isinstance(updated_positions, list):
+            charts.plot_holdings_pie(updated_positions, output_dir=log_dir)
+        else:
+            logger.warning("Unable to refresh positions for holdings pie chart.")
         return
 
     if buy_orders:
         execute_orders(client, buy_orders, extended_hours=trading_config.extended_hours)
     else:
         logger.info("No buy orders required")
+
+    updated_positions = client.get_positions()
+    if isinstance(updated_positions, list):
+        charts.plot_holdings_pie(updated_positions, output_dir=log_dir)
+    else:
+        logger.warning("Unable to refresh positions for holdings pie chart.")
 
     logger.info("Run complete. Remaining cash estimate: %.2f", remaining_cash)
 
