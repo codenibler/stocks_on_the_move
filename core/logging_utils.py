@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import warnings
 from datetime import datetime, date
 
 
@@ -21,7 +22,7 @@ def setup_logging(log_root: str, log_level: str) -> str:
 
     formatter = logging.Formatter(
         "%(asctime)s %(levelname)s %(name)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
+        datefmt="%H:%M:%S",
     )
 
     file_handler = logging.FileHandler(log_path)
@@ -35,6 +36,16 @@ def setup_logging(log_root: str, log_level: str) -> str:
     logger.addHandler(file_handler)
     logger.addHandler(stream_handler)
 
+    _suppress_noisy_logs()
     logger.info("Logging initialized. Log file: %s", log_path)
 
     return log_dir
+
+
+def _suppress_noisy_logs() -> None:
+    logging.getLogger("yfinance").setLevel(logging.CRITICAL)
+    try:
+        from pandas.errors import Pandas4Warning
+    except ImportError:
+        return
+    warnings.filterwarnings("ignore", category=Pandas4Warning)

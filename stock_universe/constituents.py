@@ -135,34 +135,35 @@ def cross_reference_constituents(
         if short_name:
             short_to_instrument.setdefault(normalize_symbol(str(short_name)), inst)
 
+    base_matched = 0
     for key in sorted(normalized):
         inst = base_to_instrument.get(key)
         if inst and key not in seen:
             matched.append(inst)
             seen.add(key)
+            base_matched += 1
 
-    additional = 0
+    variant_matched = 0
     for key in sorted(normalized - seen):
         for variant in _dot_variants(key):
             inst = raw_base_to_instrument.get(variant)
             if inst:
                 matched.append(inst)
                 seen.add(key)
-                additional += 1
+                variant_matched += 1
                 break
 
-    short_added = 0
+    short_matched = 0
     for key in sorted(normalized - seen):
         inst = short_to_instrument.get(key)
         if inst:
             matched.append(inst)
             seen.add(key)
-            short_added += 1
+            short_matched += 1
 
-    if additional:
-        logger.info("Matched %s additional symbols via dot variants.", additional)
-    if short_added:
-        logger.info("Matched %s additional symbols via shortName metadata.", short_added)
+    logger.info("Matched %s symbols via normalized base tickers.", base_matched)
+    logger.info("Matched %s symbols via dot/slash variants.", variant_matched)
+    logger.info("Matched %s symbols via shortName metadata.", short_matched)
     logger.info("Matched %s Trading212 instruments to S&P constituents.", len(matched))
     return matched
 

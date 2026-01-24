@@ -76,10 +76,10 @@ def has_large_gap(
     gap = (df["Open"] - prev_close).abs() / prev_close
     gap = gap.replace([np.inf, -np.inf], np.nan)
     if isinstance(df.index, pd.DatetimeIndex):
-        if df.index.tz is not None:
-            cutoff = pd.Timestamp.now(tz=df.index.tz) - pd.Timedelta(days=lookback_days)
-        else:
-            cutoff = pd.Timestamp.utcnow() - pd.Timedelta(days=lookback_days)
+        idx = pd.to_datetime(df.index, utc=True, errors="coerce")
+        gap = gap.copy()
+        gap.index = idx.tz_convert(None)
+        cutoff = (pd.Timestamp.now(tz="UTC") - pd.Timedelta(days=lookback_days)).tz_convert(None)
         recent_gap = gap[gap.index >= cutoff]
     else:
         recent_gap = gap.tail(lookback_days)

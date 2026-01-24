@@ -10,22 +10,22 @@ import yfinance as yf
 logger = logging.getLogger(__name__)
 
 
-def build_yfinance_variants(base_symbol: str) -> List[str]:
-    variants = []
+def build_yfinance_tickers(base_symbol: str) -> List[str]:
+    tickers = []
     symbol = base_symbol.strip().upper()
     if not symbol:
-        return variants
-    variants.append(symbol)
+        return tickers
+    tickers.append(symbol)
     if "_" in symbol:
-        variants.append(symbol.replace("_", "-"))
-        variants.append(symbol.replace("_", "."))
-        variants.append(symbol.replace("_", "/"))
+        tickers.append(symbol.replace("_", "-"))
+        tickers.append(symbol.replace("_", "."))
+        tickers.append(symbol.replace("_", "/"))
     if "." in symbol:
-        variants.append(symbol.replace(".", "-"))
+        tickers.append(symbol.replace(".", "-"))
     if "/" in symbol:
-        variants.append(symbol.replace("/", "-"))
-        variants.append(symbol.replace("/", "."))
-    return list(dict.fromkeys(variants))
+        tickers.append(symbol.replace("/", "-"))
+        tickers.append(symbol.replace("/", "."))
+    return list(dict.fromkeys(tickers))
 
 
 def fetch_history_with_retries(
@@ -67,7 +67,7 @@ def fetch_history_with_retries(
     return None
 
 
-def fetch_history_with_variants(
+def fetch_history_with_tickers(
     base_symbol: str,
     *,
     period: str,
@@ -75,19 +75,19 @@ def fetch_history_with_variants(
     retries: int,
     retry_sleep_seconds: float,
 ) -> Tuple[Optional[str], Optional[pd.DataFrame]]:
-    variants = build_yfinance_variants(base_symbol)
-    for variant in variants:
+    tickers = build_yfinance_tickers(base_symbol)
+    for ticker in tickers:
         df = fetch_history_with_retries(
-            variant,
+            ticker,
             period=period,
             interval=interval,
             retries=retries,
             retry_sleep_seconds=retry_sleep_seconds,
         )
         if df is not None and not df.empty:
-            logger.info("Resolved %s to yfinance ticker %s", base_symbol, variant)
-            return variant, df
-        logger.info("No data for yfinance ticker %s (base %s)", variant, base_symbol)
+            logger.info("Resolved %s to yfinance ticker %s", base_symbol, ticker)
+            return ticker, df
+        logger.info("No data for yfinance ticker %s (base %s)", ticker, base_symbol)
     return None, None
 
 
