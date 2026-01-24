@@ -16,6 +16,9 @@ def build_yfinance_tickers(base_symbol: str) -> List[str]:
     if not symbol:
         return tickers
     tickers.append(symbol)
+    stripped = symbol.strip("._-/")
+    if stripped and stripped != symbol:
+        tickers.append(stripped)
     if "_" in symbol:
         tickers.append(symbol.replace("_", "-"))
         tickers.append(symbol.replace("_", "."))

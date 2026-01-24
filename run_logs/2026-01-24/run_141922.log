@@ -19,3 +19,55 @@
 14:19:24 INFO stock_universe.constituents - Saved unmatched symbols: logs/2026-01-24/symbols/unmatched_stocks.csv
 14:19:24 INFO indicators.strategy - Analyzing 1247 instruments for momentum
 14:19:24 INFO market_data_fetching.market_data - Fetching batch of tickers 1-100 (A:ARES)
+14:20:00 INFO market_data_fetching.market_data - Batch result: 89 succeeded, 11 failed
+14:20:00 INFO market_data_fetching.market_data - Retrying AAN individually after batch miss
+14:20:01 WARNING market_data_fetching.market_data - Empty yfinance data for AAN; skipping retries
+14:20:01 INFO market_data_fetching.market_data - Retrying AAXN individually after batch miss
+14:20:02 WARNING market_data_fetching.market_data - Empty yfinance data for AAXN; skipping retries
+14:20:02 INFO market_data_fetching.market_data - Retrying ABC individually after batch miss
+14:20:03 WARNING market_data_fetching.market_data - Empty yfinance data for ABC; skipping retries
+14:20:03 INFO market_data_fetching.market_data - Retrying ABG individually after batch miss
+14:20:03 INFO market_data_fetching.market_data - Retrying ADS individually after batch miss
+14:20:04 WARNING market_data_fetching.market_data - Empty yfinance data for ADS; skipping retries
+14:20:04 INFO market_data_fetching.market_data - Retrying AFG individually after batch miss
+14:20:04 INFO market_data_fetching.market_data - Retrying AFL individually after batch miss
+14:20:04 INFO market_data_fetching.market_data - Retrying ALTM individually after batch miss
+14:20:05 WARNING market_data_fetching.market_data - Empty yfinance data for ALTM; skipping retries
+14:20:05 INFO market_data_fetching.market_data - Retrying AMEH individually after batch miss
+14:20:06 WARNING market_data_fetching.market_data - Empty yfinance data for AMEH; skipping retries
+14:20:06 INFO market_data_fetching.market_data - Retrying AMT individually after batch miss
+14:20:11 INFO market_data_fetching.market_data - Retrying ANTM individually after batch miss
+14:20:12 WARNING market_data_fetching.market_data - Empty yfinance data for ANTM; skipping retries
+14:20:12 INFO market_data_fetching.market_data - Fetching batch of tickers 101-200 (ARI:CART)
+14:20:46 INFO market_data_fetching.market_data - Batch result: 88 succeeded, 12 failed
+14:20:46 INFO market_data_fetching.market_data - Retrying ARNC individually after batch miss
+14:20:46 WARNING market_data_fetching.market_data - Empty yfinance data for ARNC; skipping retries
+14:20:46 INFO market_data_fetching.market_data - Retrying ATU individually after batch miss
+14:20:52 WARNING market_data_fetching.market_data - Empty yfinance data for ATU; skipping retries
+14:20:52 INFO market_data_fetching.market_data - Retrying AVAV_ individually after batch miss
+14:20:53 WARNING market_data_fetching.market_data - Empty yfinance data for AVAV_; skipping retries
+14:20:53 INFO market_data_fetching.market_data - Trying variant AVAV- for base AVAV_
+14:20:54 WARNING market_data_fetching.market_data - Empty yfinance data for AVAV-; skipping retries
+14:20:54 INFO market_data_fetching.market_data - Trying variant AVAV. for base AVAV_
+14:20:56 WARNING market_data_fetching.market_data - Empty yfinance data for AVAV.; skipping retries
+14:20:56 INFO market_data_fetching.market_data - Trying variant AVAV/ for base AVAV_
+14:20:57 WARNING market_data_fetching.market_data - Empty yfinance data for AVAV/; skipping retries
+14:20:57 INFO market_data_fetching.market_data - Retrying BCEI individually after batch miss
+14:20:58 WARNING market_data_fetching.market_data - Empty yfinance data for BCEI; skipping retries
+14:20:58 INFO market_data_fetching.market_data - Retrying BFB individually after batch miss
+14:20:59 WARNING market_data_fetching.market_data - Empty yfinance data for BFB; skipping retries
+14:20:59 INFO market_data_fetching.market_data - Retrying BGCP individually after batch miss
+14:21:00 WARNING market_data_fetching.market_data - Empty yfinance data for BGCP; skipping retries
+14:21:00 INFO market_data_fetching.market_data - Retrying BHI individually after batch miss
+14:21:05 WARNING market_data_fetching.market_data - Empty yfinance data for BHI; skipping retries
+14:21:05 INFO market_data_fetching.market_data - Retrying BHLB individually after batch miss
+14:21:06 WARNING market_data_fetching.market_data - Empty yfinance data for BHLB; skipping retries
+14:21:06 INFO market_data_fetching.market_data - Retrying BLL individually after batch miss
+14:21:06 WARNING market_data_fetching.market_data - Empty yfinance data for BLL; skipping retries
+14:21:06 INFO market_data_fetching.market_data - Retrying BRKS individually after batch miss
+14:21:07 WARNING market_data_fetching.market_data - Empty yfinance data for BRKS; skipping retries
+14:21:07 INFO market_data_fetching.market_data - Retrying BRK_B individually after batch miss
+14:21:08 WARNING market_data_fetching.market_data - Empty yfinance data for BRK_B; skipping retries
+14:21:08 INFO market_data_fetching.market_data - Trying variant BRK-B for base BRK_B
+14:21:08 INFO market_data_fetching.market_data - Retrying BTSG individually after batch miss
+14:21:09 INFO market_data_fetching.market_data - Fetching batch of tickers 201-300 (CASY:CTSH)
