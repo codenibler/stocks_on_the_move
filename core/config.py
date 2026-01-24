@@ -42,6 +42,7 @@ class StrategyConfig:
 @dataclass(frozen=True)
 class RuntimeConfig:
     log_root: str
+    run_log_root: str
     log_level: str
 
 
@@ -111,5 +112,6 @@ def get_strategy_config() -> StrategyConfig:
 def get_runtime_config() -> RuntimeConfig:
     return RuntimeConfig(
         log_root=os.getenv("LOG_ROOT", "logs"),
+        run_log_root=os.getenv("RUN_LOG_ROOT", "run_logs"),
         log_level=os.getenv("LOG_LEVEL", "INFO"),
     )

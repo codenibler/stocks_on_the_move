@@ -215,7 +215,7 @@ def save_universe_snapshot(
             ]
         )
 
-    trading_path = os.path.join(output_dir, "trading212_symbols.csv")
+    trading_path = os.path.join(output_dir, "212instruments.csv")
     _write_csv(
         trading_path,
         ["ticker", "base_symbol", "name", "currency", "type", "short_name"],
@@ -257,7 +257,7 @@ def save_universe_snapshot(
     wiki_norm = {normalize_symbol(sym) for sym in wiki_symbols}
     unmatched = sorted(sym for sym in wiki_norm if sym and sym not in matched_symbols)
 
-    unmatched_path = os.path.join(output_dir, "unmatched.csv")
+    unmatched_path = os.path.join(output_dir, "unmatched_stocks.csv")
     _write_csv(unmatched_path, ["symbol"], [[symbol] for symbol in unmatched])
 
     return {
@@ -266,6 +266,34 @@ def save_universe_snapshot(
         "matched": matched_path,
         "unmatched": unmatched_path,
     }
+
+
+def save_unmatched_symbols(
+    wiki_symbols: Iterable[str],
+    matched_instruments: Iterable[Dict[str, Any]],
+    *,
+    output_dir: str,
+    filename: str = "unmatched_stocks.csv",
+) -> str:
+    os.makedirs(output_dir, exist_ok=True)
+    matched_symbols = {
+        normalize_symbol(extract_trading212_base_symbol(i.get("ticker", "")))
+        for i in matched_instruments
+    }
+    matched_symbols.update(
+        {
+            normalize_symbol(str(i.get("shortName")))
+            for i in matched_instruments
+            if i.get("shortName")
+        }
+    )
+    wiki_norm = {normalize_symbol(sym) for sym in wiki_symbols}
+    unmatched = sorted(sym for sym in wiki_norm if sym and sym not in matched_symbols)
+
+    output_path = os.path.join(output_dir, filename)
+    _write_csv(output_path, ["symbol"], [[symbol] for symbol in unmatched])
+    logger.info("Saved unmatched symbols: %s", output_path)
+    return output_path
 
 
 def extract_trading212_base_symbol(ticker: str) -> str:

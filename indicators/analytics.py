@@ -84,3 +84,31 @@ def has_large_gap(
     else:
         recent_gap = gap.tail(lookback_days)
     return bool((recent_gap >= threshold).any())
+
+
+def find_max_gap_percent(
+    df: pd.DataFrame,
+    *,
+    lookback_days: int,
+) -> Optional[float]:
+    if df is None or df.empty:
+        return None
+    if not {"Open", "Close"}.issubset(df.columns):
+        return None
+    prev_close = df["Close"].shift(1)
+    gap = (df["Open"] - prev_close).abs() / prev_close
+    gap = gap.replace([np.inf, -np.inf], np.nan)
+    if isinstance(df.index, pd.DatetimeIndex):
+        idx = pd.to_datetime(df.index, utc=True, errors="coerce")
+        gap = gap.copy()
+        gap.index = idx.tz_convert(None)
+        cutoff = (pd.Timestamp.now(tz="UTC") - pd.Timedelta(days=lookback_days)).tz_convert(None)
+        gap = gap[gap.index >= cutoff]
+    else:
+        gap = gap.tail(lookback_days)
+    if gap.empty:
+        return None
+    max_gap = gap.max()
+    if pd.isna(max_gap):
+        return None
+    return float(max_gap * 100.0)

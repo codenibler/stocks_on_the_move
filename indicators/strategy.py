@@ -134,7 +134,20 @@ def analyze_universe(
             lookback_days=config.gap_lookback_days,
             threshold=config.gap_threshold,
         ):
-            logger.info("Dropping %s: gap >= %.2f in last %s days", base_symbol, config.gap_threshold, config.gap_lookback_days)
+            gap_pct = analytics.find_max_gap_percent(
+                df_full,
+                lookback_days=config.gap_lookback_days,
+            )
+            if gap_pct is None:
+                logger.info("Dropping %s: gap >= %.2f in last %s days", base_symbol, config.gap_threshold, config.gap_lookback_days)
+            else:
+                logger.info(
+                    "Dropping %s: max gap %.2f%% >= %.2f in last %s days",
+                    base_symbol,
+                    gap_pct,
+                    config.gap_threshold,
+                    config.gap_lookback_days,
+                )
             drop_counts["gap"] = drop_counts.get("gap", 0) + 1
             continue
 

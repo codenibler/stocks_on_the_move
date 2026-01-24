@@ -25,10 +25,10 @@ def plot_momentum_buckets(
         return
 
     buckets = [
-        (0, bucket_size, "top_1_25"),
-        (bucket_size, bucket_size * 2, "top_25_50"),
-        (bucket_size * 2, bucket_size * 3, "top_50_75"),
-        (bucket_size * 3, bucket_size * 4, "top_75_100"),
+        (0, bucket_size, "top_25"),
+        (bucket_size, bucket_size * 2, "top_25to50"),
+        (bucket_size * 2, bucket_size * 3, "top50to75"),
+        (bucket_size * 3, bucket_size * 4, "top75to100"),
     ]
 
     charts_dir = os.path.join(output_dir, "momentum_charts")

@@ -1,0 +1,21 @@
+14:19:22 INFO root - Logging initialized. Log file: run_logs/2026-01-24/run_141922.log
+14:19:22 INFO __main__ - Run configuration: base_url=https://demo.trading212.com top_n=100 risk_fraction=0.02
+14:19:22 INFO __main__ - Lookbacks: history=6mo momentum=3mo sp500=1y
+14:19:22 INFO execution.trading212_client - Trading212 client configured for https://demo.trading212.com
+14:19:22 INFO __main__ - Scraping constituents from 3 wikipedia pages
+14:19:22 INFO stock_universe.constituents - Fetching constituents from https://en.wikipedia.org/wiki/List_of_S%26P_400_companies
+14:19:22 INFO stock_universe.constituents - Extracted 400 symbols from https://en.wikipedia.org/wiki/List_of_S%26P_400_companies
+14:19:22 INFO stock_universe.constituents - Fetching constituents from https://en.wikipedia.org/wiki/List_of_S%26P_500_companies
+14:19:23 INFO stock_universe.constituents - Extracted 503 symbols from https://en.wikipedia.org/wiki/List_of_S%26P_500_companies
+14:19:23 INFO stock_universe.constituents - Fetching constituents from https://en.wikipedia.org/wiki/List_of_S%26P_600_companies
+14:19:23 INFO stock_universe.constituents - Extracted 603 symbols from https://en.wikipedia.org/wiki/List_of_S%26P_600_companies
+14:19:23 INFO stock_universe.constituents - Total unique symbols collected: 1506
+14:19:24 INFO stock_universe.constituents - Filtered tradable instruments: 4994/13773 (missing_ticker=0, non_stock=5759, missing_currency=0, non_usd=3020)
+14:19:24 INFO stock_universe.constituents - Cross-referencing 1506 wiki symbols against 4994 instruments
+14:19:24 INFO stock_universe.constituents - Matched 1159 symbols via normalized base tickers.
+14:19:24 INFO stock_universe.constituents - Matched 0 symbols via dot/slash variants.
+14:19:24 INFO stock_universe.constituents - Matched 88 symbols via shortName metadata.
+14:19:24 INFO stock_universe.constituents - Matched 1247 Trading212 instruments to S&P constituents.
+14:19:24 INFO stock_universe.constituents - Saved unmatched symbols: logs/2026-01-24/symbols/unmatched_stocks.csv
+14:19:24 INFO indicators.strategy - Analyzing 1247 instruments for momentum
+14:19:24 INFO market_data_fetching.market_data - Fetching batch of tickers 1-100 (A:ARES)

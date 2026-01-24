@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 
 from indicators import analytics
 from indicators import strategy
@@ -60,7 +61,11 @@ def execute_orders(client: Trading212Client, orders, *, extended_hours: bool) ->
 
 def main() -> None:
     runtime_config = get_runtime_config()
-    log_dir = setup_logging(runtime_config.log_root, runtime_config.log_level)
+    log_dir = setup_logging(
+        runtime_config.log_root,
+        runtime_config.run_log_root,
+        runtime_config.log_level,
+    )
 
     strategy_config = get_strategy_config()
     trading_config = get_trading212_config()
@@ -82,6 +87,19 @@ def main() -> None:
     instruments = constituents.fetch_trading212_instruments(client)
     tradable = constituents.filter_tradable_instruments(instruments)
     matched = constituents.cross_reference_constituents(wiki_symbols, tradable)
+    symbols_dir = os.path.join(log_dir, "symbols")
+    constituents.save_universe_snapshot(
+        wiki_symbols,
+        tradable,
+        matched,
+        output_root=symbols_dir,
+        use_date_subdir=False,
+    )
+    constituents.save_unmatched_symbols(
+        wiki_symbols,
+        matched,
+        output_dir=symbols_dir,
+    )
 
     ranked = strategy.analyze_universe(matched, config=strategy_config, log_dir=log_dir)
     top_ranked = ranked[: strategy_config.top_n]

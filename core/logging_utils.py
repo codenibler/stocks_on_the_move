@@ -6,13 +6,16 @@ import warnings
 from datetime import datetime, date
 
 
-def setup_logging(log_root: str, log_level: str) -> str:
+def setup_logging(log_root: str, run_log_root: str, log_level: str) -> str:
     today = date.today().isoformat()
     log_dir = os.path.join(log_root, today)
     os.makedirs(log_dir, exist_ok=True)
 
+    run_log_dir = os.path.join(run_log_root, today)
+    os.makedirs(run_log_dir, exist_ok=True)
+
     timestamp = datetime.now().strftime("%H%M%S")
-    log_path = os.path.join(log_dir, f"run_{timestamp}.log")
+    log_path = os.path.join(run_log_dir, f"run_{timestamp}.log")
 
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, log_level.upper(), logging.INFO))
