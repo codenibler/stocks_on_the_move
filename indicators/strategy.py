@@ -10,7 +10,7 @@ from . import analytics
 from . import charts
 from core.config import StrategyConfig
 from core.classes import AnalyzedStock
-from market_data import market_data
+from market_data_fetching import market_data
 from stock_universe.constituents import extract_trading212_base_symbol
 
 logger = logging.getLogger(__name__)
@@ -49,6 +49,7 @@ def analyze_universe(
     logger.info("Analyzing %s instruments for momentum", len(instruments))
     results: List[AnalyzedStock] = []
     drop_counts: Dict[str, int] = {}
+    symbol_entries: List[tuple[dict, str]] = []
 
     for inst in instruments:
         ticker = inst.get("ticker")
@@ -59,14 +60,24 @@ def analyze_universe(
         if not base_symbol:
             drop_counts["missing_base_symbol"] = drop_counts.get("missing_base_symbol", 0) + 1
             continue
+        symbol_entries.append((inst, base_symbol))
 
-        yfinance_symbol, df_full = market_data.fetch_history_with_variants(
-            base_symbol,
-            period=config.history_lookback,
-            interval=config.price_interval,
-            retries=config.retries,
-            retry_sleep_seconds=config.retry_sleep_seconds,
-        )
+    resolved_histories = market_data.resolve_history_for_symbols(
+        {base_symbol for _, base_symbol in symbol_entries},
+        period=config.history_lookback,
+        interval=config.price_interval,
+        retries=config.retries,
+        retry_sleep_seconds=config.retry_sleep_seconds,
+        batch_size=config.batch_size,
+    )
+
+    for inst, base_symbol in symbol_entries:
+        resolved = resolved_histories.get(base_symbol)
+        if not resolved:
+            logger.info("Dropping %s: no yfinance data", base_symbol)
+            drop_counts["no_data"] = drop_counts.get("no_data", 0) + 1
+            continue
+        yfinance_symbol, df_full = resolved
         if df_full is None or df_full.empty:
             logger.info("Dropping %s: no yfinance data", base_symbol)
             drop_counts["no_data"] = drop_counts.get("no_data", 0) + 1

@@ -24,7 +24,6 @@ def plot_momentum_buckets(
         logger.warning("No ranked stocks available for charting")
         return
 
-    colors = ["#1f77b4", "#2ca02c", "#ff7f0e", "#d62728"]
     buckets = [
         (0, bucket_size, "top_1_25"),
         (bucket_size, bucket_size * 2, "top_25_50"),
@@ -32,7 +31,8 @@ def plot_momentum_buckets(
         (bucket_size * 3, bucket_size * 4, "top_75_100"),
     ]
 
-    os.makedirs(output_dir, exist_ok=True)
+    charts_dir = os.path.join(output_dir, "momentum_charts")
+    os.makedirs(charts_dir, exist_ok=True)
 
     for idx, (start, end, label) in enumerate(buckets):
         segment = ranked[start:end]
@@ -44,7 +44,9 @@ def plot_momentum_buckets(
         scores = [stock.score for stock in segment]
 
         fig, ax = plt.subplots(figsize=(12, 6))
-        ax.bar(range(len(scores)), scores, color=colors[idx % len(colors)])
+        norm = plt.Normalize(min(scores), max(scores))
+        colors = plt.cm.Blues(norm(scores))
+        ax.bar(range(len(scores)), scores, color=colors)
         ax.set_title(f"Momentum rankings {start + 1}-{min(end, len(ranked))}")
         ax.set_ylabel("Momentum score")
         ax.set_xticks(range(len(tickers)))
@@ -52,7 +54,7 @@ def plot_momentum_buckets(
         ax.grid(axis="y", linestyle="--", alpha=0.3)
         fig.tight_layout()
 
-        filename = os.path.join(output_dir, f"momentum_{label}.png")
+        filename = os.path.join(charts_dir, f"momentum_{label}.png")
         fig.savefig(filename)
         plt.close(fig)
         logger.info("Saved momentum chart: %s", filename)

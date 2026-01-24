@@ -6,7 +6,7 @@ from indicators import analytics
 from indicators import strategy
 from core.config import get_runtime_config, get_strategy_config, get_trading212_config
 from core.logging_utils import setup_logging
-from market_data import market_data
+from market_data_fetching import market_data
 from execution import portfolio
 from execution.trading212_client import Trading212Client, Trading212Error
 from stock_universe import constituents
@@ -26,15 +26,16 @@ def check_sp500_trend(strategy_config) -> bool:
     if df is None or df.empty:
         logger.warning("Unable to fetch S&P500 data, defaulting to risk-off")
         return False
-    close = df.get("Close")
-    if close is None or close.dropna().empty:
+    df = market_data.normalize_price_frame(df)
+    price_series = market_data.select_price_series(df)
+    if price_series is None or price_series.dropna().empty:
         logger.warning("S&P500 data missing Close values, defaulting to risk-off")
         return False
-    sma200 = analytics.calculate_sma(close, strategy_config.sma_long)
+    sma200 = analytics.calculate_sma(price_series, strategy_config.sma_long)
     if sma200 is None:
         logger.warning("S&P500 SMA%s unavailable, defaulting to risk-off", strategy_config.sma_long)
         return False
-    current_price = float(close.dropna().iloc[-1])
+    current_price = float(price_series.dropna().iloc[-1])
     logger.info("S&P500 last close %.2f vs SMA%s %.2f", current_price, strategy_config.sma_long, sma200)
     return current_price > sma200
 

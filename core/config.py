@@ -26,6 +26,7 @@ class StrategyConfig:
     annualization_factor: float
     retries: int
     retry_sleep_seconds: float
+    batch_size: int
     atr_period: int
     sma_short: int
     sma_long: int
@@ -93,6 +94,7 @@ def get_strategy_config() -> StrategyConfig:
         annualization_factor=float(os.getenv("ANNUALIZATION_FACTOR", "252")),
         retries=int(os.getenv("YFINANCE_RETRIES", "3")),
         retry_sleep_seconds=float(os.getenv("YFINANCE_RETRY_SLEEP", "1")),
+        batch_size=int(os.getenv("YFINANCE_BATCH_SIZE", "100")),
         atr_period=int(os.getenv("ATR_PERIOD", "20")),
         sma_short=int(os.getenv("SMA_SHORT", "100")),
         sma_long=int(os.getenv("SMA_LONG", "200")),
