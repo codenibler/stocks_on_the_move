@@ -49,16 +49,35 @@ def scrape_wikipedia_constituents(
     *,
     timeout_seconds: float = 30.0,
 ) -> Set[str]:
+    symbols, _ = scrape_wikipedia_constituents_with_sources(
+        urls,
+        timeout_seconds=timeout_seconds,
+    )
+    return symbols
+
+
+def scrape_wikipedia_constituents_with_sources(
+    urls: Iterable[str],
+    *,
+    timeout_seconds: float = 30.0,
+) -> tuple[Set[str], Dict[str, Set[str]]]:
     symbols: Set[str] = set()
+    index_membership: Dict[str, Set[str]] = {}
     for url in urls:
         logger.info("Fetching constituents from %s", url)
         html = _fetch_url(url, timeout_seconds=timeout_seconds)
         extracted = _extract_symbols_from_html(html, source_url=url)
+        index_label = _infer_index_label(url)
         logger.info("Extracted %s symbols from %s", len(extracted), url)
         symbols.update(extracted)
+        for symbol in extracted:
+            key = normalize_symbol(symbol)
+            if not key:
+                continue
+            index_membership.setdefault(key, set()).add(index_label)
 
     logger.info("Total unique symbols collected: %s", len(symbols))
-    return symbols
+    return symbols, index_membership
 
 
 def fetch_trading212_instruments(client: Trading212Client) -> List[Dict[str, Any]]:
@@ -190,6 +209,7 @@ def save_universe_snapshot(
     output_root: str = "stock_universe",
     snapshot_date: Optional[date] = None,
     use_date_subdir: bool = True,
+    index_membership: Optional[Dict[str, Iterable[str]]] = None,
 ) -> Dict[str, str]:
     snapshot = snapshot_date or date.today()
     output_dir = output_root
@@ -225,21 +245,30 @@ def save_universe_snapshot(
     matched_rows = []
     for inst in matched_instruments:
         ticker = inst.get("ticker", "")
+        base_symbol = normalize_symbol(extract_trading212_base_symbol(ticker))
+        short_name = inst.get("shortName", "")
+        indexes: List[str] = []
+        if index_membership:
+            indexes = list(index_membership.get(base_symbol, []))
+            if short_name:
+                indexes.extend(index_membership.get(normalize_symbol(str(short_name)), []))
+        indexes_value = "|".join(sorted(set(indexes)))
         matched_rows.append(
             [
                 ticker,
-                normalize_symbol(extract_trading212_base_symbol(ticker)),
+                base_symbol,
                 inst.get("name", ""),
                 inst.get("currencyCode", ""),
                 inst.get("type", ""),
-                inst.get("shortName", ""),
+                short_name,
+                indexes_value,
             ]
         )
 
     matched_path = os.path.join(output_dir, "matched.csv")
     _write_csv(
         matched_path,
-        ["ticker", "base_symbol", "name", "currency", "type", "short_name"],
+        ["ticker", "base_symbol", "name", "currency", "type", "short_name", "indexes"],
         matched_rows,
     )
 
@@ -321,6 +350,17 @@ def _extract_links(mapping: Dict[str, Any]) -> List[str]:
             continue
         links.append(str(value).strip())
     return links
+
+
+def _infer_index_label(url: str) -> str:
+    lower = url.lower()
+    if "s%26p_500" in lower or "s&p_500" in lower:
+        return "SP500"
+    if "s%26p_400" in lower or "s&p_400" in lower:
+        return "SP400"
+    if "s%26p_600" in lower or "s&p_600" in lower:
+        return "SP600"
+    return "UNIDENTIFIED"
 
 
 def _fetch_url(url: str, *, timeout_seconds: float, max_retries: int = 2) -> str:

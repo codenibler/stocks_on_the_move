@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import colorsys
+import csv
 import logging
 import os
-from typing import Iterable, List
+from typing import Dict, Iterable, List, Optional, Set
 
 import matplotlib
 
@@ -11,8 +13,11 @@ from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import font_manager
+from matplotlib import colors as mcolors
+from matplotlib.patches import Patch
 
 from config.classes import AnalyzedStock
+from stock_universe.constituents import extract_trading212_base_symbol, normalize_symbol
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +58,45 @@ def _apply_dark_style() -> None:
     matplotlib.rcParams["ytick.color"] = "#cbd5f5"
     matplotlib.rcParams["text.color"] = "#e5e7eb"
     _DARK_STYLE_SET = True
+
+
+def _color_with_lightness(base_color: str, lightness: float) -> tuple[float, float, float]:
+    r, g, b = mcolors.to_rgb(base_color)
+    h, l, s = colorsys.rgb_to_hls(r, g, b)
+    l = max(0.0, min(1.0, lightness))
+    return colorsys.hls_to_rgb(h, l, s)
+
+
+def _load_matched_index_map(matched_csv_path: str) -> Dict[str, Set[str]]:
+    if not os.path.isfile(matched_csv_path):
+        logger.warning("Matched symbols file not found for holdings pie: %s", matched_csv_path)
+        return {}
+    with open(matched_csv_path, newline="") as handle:
+        reader = csv.DictReader(handle)
+        if not reader.fieldnames or "indexes" not in reader.fieldnames:
+            logger.warning("Matched symbols file missing indexes column: %s", matched_csv_path)
+            return {}
+        mapping: Dict[str, Set[str]] = {}
+        for row in reader:
+            indexes_raw = (row.get("indexes") or "").strip()
+            if not indexes_raw:
+                continue
+            indexes = {item.strip() for item in indexes_raw.split("|") if item.strip()}
+            if not indexes:
+                continue
+            keys = [
+                row.get("ticker"),
+                row.get("base_symbol"),
+                row.get("short_name"),
+            ]
+            for key in keys:
+                if not key:
+                    continue
+                normalized = normalize_symbol(str(key))
+                if not normalized:
+                    continue
+                mapping.setdefault(normalized, set()).update(indexes)
+        return mapping
 
 
 def plot_momentum_buckets(
@@ -120,6 +164,7 @@ def plot_holdings_pie(
     *,
     output_dir: str,
     filename: str = "holdings_pie.png",
+    matched_csv_path: Optional[str] = None,
 ) -> None:
     _apply_dark_style()
     _configure_chart_font()
@@ -145,14 +190,58 @@ def plot_holdings_pie(
 
     holdings.sort(key=lambda item: item[1], reverse=True)
     labels, values = zip(*holdings)
-    min_value = min(values)
-    max_value = max(values)
-    if max_value == min_value:
-        normalized = np.full(len(values), 0.5)
+
+    pie_colors = None
+    index_map: Dict[str, Set[str]] = {}
+    matched_path = matched_csv_path or os.path.join(output_dir, "symbols", "matched.csv")
+    index_map = _load_matched_index_map(matched_path)
+    if index_map:
+        color_map = {
+            "SP500": "#3b82f6",
+            "SP400": "#22c55e",
+            "SP600": "#f59e0b",
+            "UNIDENTIFIED": "#6b7280",
+        }
+        counts = {"SP500": 0, "SP400": 0, "SP600": 0, "UNIDENTIFIED": 0}
+        min_value = min(values)
+        max_value = max(values)
+        if max_value == min_value:
+            normalized = np.full(len(values), 0.5)
+        else:
+            normalized = (np.array(values) - min_value) / (max_value - min_value)
+        colors: List[str] = []
+        for (ticker, _), weight in zip(holdings, normalized):
+            ticker_key = normalize_symbol(ticker)
+            base_symbol = normalize_symbol(extract_trading212_base_symbol(ticker))
+            indexes = set(index_map.get(ticker_key, set()) or index_map.get(base_symbol, set()))
+            if "SP500" in indexes:
+                label = "SP500"
+            elif "SP400" in indexes:
+                label = "SP400"
+            elif "SP600" in indexes:
+                label = "SP600"
+            else:
+                label = "UNIDENTIFIED"
+            counts[label] += 1
+            lightness = 0.35 + 0.5 * weight
+            colors.append(_color_with_lightness(color_map[label], lightness))
+        pie_colors = colors
+        logger.info(
+            "Holdings pie index counts: SP500=%s SP400=%s SP600=%s UNIDENTIFIED=%s",
+            counts["SP500"],
+            counts["SP400"],
+            counts["SP600"],
+            counts["UNIDENTIFIED"],
+        )
     else:
-        normalized = (np.array(values) - min_value) / (max_value - min_value)
-    inverted = 1.0 - normalized
-    pie_colors = plt.cm.Blues(0.35 + 0.65 * inverted)
+        min_value = min(values)
+        max_value = max(values)
+        if max_value == min_value:
+            normalized = np.full(len(values), 0.5)
+        else:
+            normalized = (np.array(values) - min_value) / (max_value - min_value)
+        inverted = 1.0 - normalized
+        pie_colors = plt.cm.Blues(0.35 + 0.65 * inverted)
 
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.pie(
@@ -167,6 +256,20 @@ def plot_holdings_pie(
     )
     ax.set_title("Holdings allocation")
     ax.axis("equal")
+    if index_map:
+        legend_handles = [
+            Patch(facecolor=color_map["SP500"], label="S&P 500"),
+            Patch(facecolor=color_map["SP400"], label="S&P 400"),
+            Patch(facecolor=color_map["SP600"], label="S&P 600"),
+            Patch(facecolor=color_map["UNIDENTIFIED"], label="UNIDENTIFIED"),
+        ]
+        ax.legend(
+            handles=legend_handles,
+            loc="upper center",
+            bbox_to_anchor=(0.5, -0.06),
+            ncol=4,
+            frameon=False,
+        )
     fig.tight_layout()
 
     output_path = os.path.join(charts_dir, filename)

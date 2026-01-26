@@ -48,6 +48,7 @@ class RuntimeConfig:
     log_root: str
     run_log_root: str
     log_level: str
+    holdings_pie_delay_seconds: float
 
 
 def _env_bool(name: str, default: bool = False) -> bool:
@@ -124,4 +125,5 @@ def get_runtime_config() -> RuntimeConfig:
         log_root=os.getenv("LOG_ROOT", "logs"),
         run_log_root=os.getenv("RUN_LOG_ROOT", "run_logs"),
         log_level=os.getenv("LOG_LEVEL", "INFO"),
+        holdings_pie_delay_seconds=float(os.getenv("HOLDINGS_PIE_DELAY_SECONDS", "15")),
     )

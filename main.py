@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import time
 
 from indicators import analytics
 from indicators import charts
@@ -93,7 +94,7 @@ def main() -> None:
 
     links = constituents.load_constituent_links()
     logger.info("Scraping constituents from %s wikipedia pages", len(links))
-    wiki_symbols = constituents.scrape_wikipedia_constituents(links)
+    wiki_symbols, index_membership = constituents.scrape_wikipedia_constituents_with_sources(links)
 
     instruments = constituents.fetch_trading212_instruments(client)
     tradable = constituents.filter_tradable_instruments(instruments)
@@ -105,6 +106,7 @@ def main() -> None:
         matched,
         output_root=symbols_dir,
         use_date_subdir=False,
+        index_membership=index_membership,
     )
     constituents.save_unmatched_symbols(
         wiki_symbols,
@@ -165,6 +167,7 @@ def main() -> None:
 
     if not risk_on:
         logger.info("S&P500 below SMA%s. Exiting after sells/rebalance.", strategy_config.sma_long)
+        time.sleep(runtime_config.holdings_pie_delay_seconds)
         updated_positions = client.get_positions()
         if isinstance(updated_positions, list):
             charts.plot_holdings_pie(updated_positions, output_dir=log_dir)
@@ -182,6 +185,7 @@ def main() -> None:
     else:
         logger.info("No new buy orders required")
 
+    time.sleep(runtime_config.holdings_pie_delay_seconds)
     updated_positions = client.get_positions()
     if isinstance(updated_positions, list):
         charts.plot_holdings_pie(updated_positions, output_dir=log_dir)
