@@ -45,7 +45,7 @@ def analyze_universe(
     *,
     config: StrategyConfig,
     log_dir: str,
-) -> Tuple[List[AnalyzedStock], List[str]]:
+) -> Tuple[List[AnalyzedStock], List[str], Dict[str, object]]:
     logger.info("Analyzing %s instruments for momentum", len(instruments))
     results: List[AnalyzedStock] = []
     drop_counts: Dict[str, int] = {}
@@ -189,7 +189,32 @@ def analyze_universe(
         output_dir=log_dir,
         bucket_size=config.chart_bucket,
     )
-    return ranked, duplicates
+    def _describe(values: List[float]) -> Optional[Dict[str, float]]:
+        if not values:
+            return None
+        series = pd.Series(values)
+        return {
+            "min": float(series.min()),
+            "max": float(series.max()),
+            "mean": float(series.mean()),
+            "median": float(series.median()),
+        }
+
+    summary = {
+        "instrument_count": len(instruments),
+        "symbol_entries": len(symbol_entries),
+        "resolved_histories": len(resolved_histories),
+        "drop_counts": drop_counts,
+        "duplicate_count": duplicate_count,
+        "duplicates": duplicates,
+        "ranked_count": len(ranked),
+        "momentum_stats": {
+            "score": _describe([stock.score for stock in ranked]),
+            "slope": _describe([stock.slope for stock in ranked]),
+            "r_squared": _describe([stock.r_squared for stock in ranked]),
+        },
+    }
+    return ranked, duplicates, summary
 
 
 def _chunked_list(items: List[str], size: int) -> List[List[str]]:

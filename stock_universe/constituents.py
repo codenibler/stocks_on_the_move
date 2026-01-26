@@ -127,7 +127,9 @@ def filter_tradable_instruments(instruments: Iterable[Dict[str, Any]]) -> List[D
 def cross_reference_constituents(
     wiki_symbols: Iterable[str],
     instruments: Iterable[Dict[str, Any]],
-) -> List[Dict[str, Any]]:
+    *,
+    return_stats: bool = False,
+) -> Any:
     instruments = list(instruments)
     normalized = {normalize_symbol(sym) for sym in wiki_symbols if sym}
     matched: List[Dict[str, Any]] = []
@@ -184,6 +186,14 @@ def cross_reference_constituents(
     logger.info("Matched %s symbols via dot/slash variants.", variant_matched)
     logger.info("Matched %s symbols via shortName metadata.", short_matched)
     logger.info("Matched %s Trading212 instruments to S&P constituents.", len(matched))
+    stats = {
+        "base_matched": base_matched,
+        "variant_matched": variant_matched,
+        "short_matched": short_matched,
+        "total_matched": len(matched),
+    }
+    if return_stats:
+        return matched, stats
     return matched
 
 
@@ -272,19 +282,7 @@ def save_universe_snapshot(
         matched_rows,
     )
 
-    matched_symbols = {
-        normalize_symbol(extract_trading212_base_symbol(i.get("ticker", "")))
-        for i in matched_instruments
-    }
-    matched_symbols.update(
-        {
-            normalize_symbol(str(i.get("shortName")))
-            for i in matched_instruments
-            if i.get("shortName")
-        }
-    )
-    wiki_norm = {normalize_symbol(sym) for sym in wiki_symbols}
-    unmatched = sorted(sym for sym in wiki_norm if sym and sym not in matched_symbols)
+    unmatched = compute_unmatched_symbols(wiki_symbols, matched_instruments)
 
     unmatched_path = os.path.join(output_dir, "unmatched_stocks.csv")
     _write_csv(unmatched_path, ["symbol"], [[symbol] for symbol in unmatched])
@@ -297,14 +295,10 @@ def save_universe_snapshot(
     }
 
 
-def save_unmatched_symbols(
+def compute_unmatched_symbols(
     wiki_symbols: Iterable[str],
     matched_instruments: Iterable[Dict[str, Any]],
-    *,
-    output_dir: str,
-    filename: str = "unmatched_stocks.csv",
-) -> str:
-    os.makedirs(output_dir, exist_ok=True)
+) -> List[str]:
     matched_symbols = {
         normalize_symbol(extract_trading212_base_symbol(i.get("ticker", "")))
         for i in matched_instruments
@@ -317,7 +311,18 @@ def save_unmatched_symbols(
         }
     )
     wiki_norm = {normalize_symbol(sym) for sym in wiki_symbols}
-    unmatched = sorted(sym for sym in wiki_norm if sym and sym not in matched_symbols)
+    return sorted(sym for sym in wiki_norm if sym and sym not in matched_symbols)
+
+
+def save_unmatched_symbols(
+    wiki_symbols: Iterable[str],
+    matched_instruments: Iterable[Dict[str, Any]],
+    *,
+    output_dir: str,
+    filename: str = "unmatched_stocks.csv",
+) -> str:
+    os.makedirs(output_dir, exist_ok=True)
+    unmatched = compute_unmatched_symbols(wiki_symbols, matched_instruments)
 
     output_path = os.path.join(output_dir, filename)
     _write_csv(output_path, ["symbol"], [[symbol] for symbol in unmatched])

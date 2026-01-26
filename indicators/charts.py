@@ -17,6 +17,7 @@ from matplotlib import colors as mcolors
 from matplotlib.patches import Patch
 
 from config.classes import AnalyzedStock
+from data_fetching import market_data
 from stock_universe.constituents import extract_trading212_base_symbol, normalize_symbol
 
 logger = logging.getLogger(__name__)
@@ -261,14 +262,19 @@ def plot_holdings_pie(
         for label, value in zip(labels, values)
     ]
 
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(8, 8.6))
     ax.pie(
         values,
         labels=labels,
         startangle=90,
         counterclock=False,
         colors=pie_colors,
-        textprops={"color": "#e5e7eb"},
+        textprops={
+            "color": "#e5e7eb",
+            "ha": "center",
+            "va": "center",
+            "multialignment": "center",
+        },
         wedgeprops={"edgecolor": "#0f1117", "linewidth": 0.5},
     )
     ax.set_title("Holdings allocation")
@@ -292,3 +298,198 @@ def plot_holdings_pie(
     fig.savefig(output_path)
     plt.close(fig)
     logger.info("Saved holdings pie chart: %s", output_path)
+
+
+def plot_index_exposure_bar(
+    positions: Iterable[dict],
+    *,
+    output_dir: str,
+    filename: str = "index_exposure_bar.png",
+    matched_csv_path: Optional[str] = None,
+) -> Optional[str]:
+    _apply_dark_style()
+    _configure_chart_font()
+    charts_dir = os.path.join(output_dir, "momentum_charts")
+    os.makedirs(charts_dir, exist_ok=True)
+
+    holdings: List[tuple[str, float]] = []
+    for position in positions:
+        instrument = position.get("instrument", {})
+        ticker = instrument.get("ticker")
+        qty = float(position.get("quantityAvailableForTrading") or 0.0)
+        price = position.get("currentPrice")
+        if not ticker or qty <= 0 or price is None:
+            continue
+        value = qty * float(price)
+        if value <= 0:
+            continue
+        holdings.append((ticker, value))
+
+    if not holdings:
+        logger.info("No holdings available for index exposure chart")
+        return None
+
+    matched_path = matched_csv_path or os.path.join(output_dir, "symbols", "matched.csv")
+    index_map = _load_matched_index_map(matched_path)
+    totals = {"SP500": 0.0, "SP400": 0.0, "SP600": 0.0, "UNIDENTIFIED": 0.0}
+
+    for ticker, value in holdings:
+        ticker_key = normalize_symbol(ticker)
+        base_symbol = normalize_symbol(extract_trading212_base_symbol(ticker))
+        indexes = set(index_map.get(ticker_key, set()) or index_map.get(base_symbol, set()))
+        if "SP500" in indexes:
+            totals["SP500"] += value
+        elif "SP400" in indexes:
+            totals["SP400"] += value
+        elif "SP600" in indexes:
+            totals["SP600"] += value
+        else:
+            totals["UNIDENTIFIED"] += value
+
+    total_value = sum(totals.values())
+    if total_value <= 0:
+        logger.info("Index exposure chart skipped due to zero total value")
+        return None
+
+    labels = ["S&P 500", "S&P 400", "S&P 600"]
+    values = [
+        (totals["SP500"] / total_value) * 100.0,
+        (totals["SP400"] / total_value) * 100.0,
+        (totals["SP600"] / total_value) * 100.0,
+    ]
+    colors = ["#3b82f6", "#22c55e", "#f59e0b"]
+    if totals["UNIDENTIFIED"] > 0:
+        labels.append("Unidentified")
+        values.append((totals["UNIDENTIFIED"] / total_value) * 100.0)
+        colors.append("#6b7280")
+
+    fig, ax = plt.subplots(figsize=(7, 4))
+    ax.bar(labels, values, color=colors, alpha=0.85)
+    ax.set_ylabel("Portfolio weight (%)")
+    ax.set_title("Holdings by index")
+    ax.set_ylim(0, max(values) * 1.25 if values else 1)
+    ax.grid(axis="y", linestyle="--", alpha=0.3, color="#2a2f3a")
+
+    for idx, value in enumerate(values):
+        ax.text(idx, value + (max(values) * 0.03 if values else 0.5), f"{value:.1f}%", ha="center", va="bottom")
+
+    fig.tight_layout()
+    output_path = os.path.join(charts_dir, filename)
+    fig.savefig(output_path)
+    plt.close(fig)
+    logger.info("Saved index exposure chart: %s", output_path)
+    return output_path
+
+
+def plot_index_price_charts(
+    index_tickers: Dict[str, str],
+    *,
+    output_dir: str,
+    filename: str = "index_price_charts.png",
+    period: str = "1y",
+    interval: str = "1d",
+    retries: int = 3,
+    retry_sleep_seconds: float = 1.0,
+) -> Optional[str]:
+    _apply_dark_style()
+    _configure_chart_font()
+    charts_dir = os.path.join(output_dir, "momentum_charts")
+    os.makedirs(charts_dir, exist_ok=True)
+
+    tickers = {label: ticker for label, ticker in index_tickers.items() if ticker}
+    if not tickers:
+        logger.info("No index tickers configured for price chart")
+        return None
+
+    fig, axes = plt.subplots(len(tickers), 1, figsize=(10, 8), sharex=True)
+    if len(tickers) == 1:
+        axes = [axes]
+
+    plotted = 0
+    color_map = {
+        "S&P 500": "#3b82f6",
+        "S&P 400": "#22c55e",
+        "S&P 600": "#f59e0b",
+    }
+    for ax, (label, ticker) in zip(axes, tickers.items()):
+        df = market_data.fetch_history_with_retries(
+            ticker,
+            period=period,
+            interval=interval,
+            retries=retries,
+            retry_sleep_seconds=retry_sleep_seconds,
+        )
+        if df is None or df.empty:
+            logger.warning("Index price chart missing data for %s (%s)", label, ticker)
+            ax.set_visible(False)
+            continue
+        df = market_data.normalize_price_frame(df)
+        price_series = market_data.select_price_series(df)
+        if price_series is None or price_series.dropna().empty:
+            logger.warning("Index price chart missing Close series for %s (%s)", label, ticker)
+            ax.set_visible(False)
+            continue
+        line_color = color_map.get(label, "#60a5fa")
+        ax.plot(price_series.index, price_series.values, color=line_color, linewidth=1.5)
+        ax.set_title(f"{label} ({ticker})")
+        ax.grid(axis="y", linestyle="--", alpha=0.3, color="#2a2f3a")
+        plotted += 1
+
+    if plotted == 0:
+        plt.close(fig)
+        logger.warning("No index price charts rendered due to missing data")
+        return None
+
+    fig.tight_layout()
+    output_path = os.path.join(charts_dir, filename)
+    fig.savefig(output_path)
+    plt.close(fig)
+    logger.info("Saved index price charts: %s", output_path)
+    return output_path
+
+
+def plot_drop_counts_bar(
+    drop_counts: Dict[str, int],
+    *,
+    output_dir: str,
+    filename: str = "drop_counts_bar.png",
+) -> Optional[str]:
+    _apply_dark_style()
+    _configure_chart_font()
+    charts_dir = os.path.join(output_dir, "momentum_charts")
+    os.makedirs(charts_dir, exist_ok=True)
+
+    if not drop_counts:
+        logger.info("No drop counts available for charting")
+        return None
+
+    labels = list(drop_counts.keys())
+    values = [drop_counts.get(label, 0) for label in labels]
+    if not any(values):
+        logger.info("Drop counts chart skipped due to zero values")
+        return None
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    cmap = plt.cm.Spectral
+    if len(values) > 1:
+        normalized = (np.array(values) - min(values)) / (max(values) - min(values) or 1)
+    else:
+        normalized = np.array([0.5])
+    colors = cmap(0.25 + 0.7 * normalized)
+    ax.bar(labels, values, color=colors, alpha=0.9)
+    ax.set_title("Drop counts by reason")
+    ax.set_ylabel("Count")
+    ax.grid(axis="y", linestyle="--", alpha=0.3, color="#2a2f3a")
+    ax.set_xticks(range(len(labels)))
+    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=9)
+
+    max_value = max(values) if values else 0
+    for idx, value in enumerate(values):
+        ax.text(idx, value + max_value * 0.03, str(value), ha="center", va="bottom", fontsize=9)
+
+    fig.tight_layout()
+    output_path = os.path.join(charts_dir, filename)
+    fig.savefig(output_path)
+    plt.close(fig)
+    logger.info("Saved drop counts chart: %s", output_path)
+    return output_path

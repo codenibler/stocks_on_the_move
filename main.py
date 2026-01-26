@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 import os
 import time
+from datetime import date
+from typing import Any, Dict, List
 
 from indicators import analytics
 from indicators import charts
@@ -12,13 +14,14 @@ from config.logging_utils import setup_logging
 from data_fetching import market_data
 from execution import portfolio
 from execution.trading212_client import Trading212Client, Trading212Error
+from reports import generate_rebalance_report
 from stock_universe import constituents
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
 
-def check_sp500_trend(strategy_config) -> bool:
+def check_sp500_trend(strategy_config) -> tuple[bool, float | None, float | None]:
     logger.info("Checking S&P500 trend using %s", strategy_config.sp500_ticker)
     df = market_data.fetch_history_with_retries(
         strategy_config.sp500_ticker,
@@ -29,16 +32,16 @@ def check_sp500_trend(strategy_config) -> bool:
     )
     if df is None or df.empty:
         logger.warning("Unable to fetch S&P500 data, defaulting to risk-off")
-        return False
+        return False, None, None
     df = market_data.normalize_price_frame(df)
     price_series = market_data.select_price_series(df)
     if price_series is None or price_series.dropna().empty:
         logger.warning("S&P500 data missing Close values, defaulting to risk-off")
-        return False
+        return False, None, None
     sma200 = analytics.calculate_sma(price_series, strategy_config.sma_long)
     if sma200 is None:
         logger.warning("S&P500 SMA%s unavailable, defaulting to risk-off", strategy_config.sma_long)
-        return False
+        return False, None, None
     current_price = float(price_series.dropna().iloc[-1])
     logger.info("S&P500 last close %.2f vs SMA%s %.2f", current_price, strategy_config.sma_long, sma200)
     risk_on = current_price >= sma200
@@ -49,11 +52,22 @@ def check_sp500_trend(strategy_config) -> bool:
         strategy_config.sma_long,
         ">= " if risk_on else "< ",
     )
-    return risk_on
+    return risk_on, current_price, sma200
 
 
-def execute_orders(client: Trading212Client, orders, *, extended_hours: bool) -> None:
+def execute_orders(client: Trading212Client, orders, *, extended_hours: bool, stage: str) -> List[Dict[str, Any]]:
+    results: List[Dict[str, Any]] = []
     for order in orders:
+        side = "BUY" if order.quantity > 0 else "SELL"
+        entry = {
+            "stage": stage,
+            "side": side,
+            "ticker": order.ticker,
+            "quantity": order.quantity,
+            "order_id": None,
+            "status": None,
+            "error": None,
+        }
         try:
             response = client.place_market_order(
                 ticker=order.ticker,
@@ -65,9 +79,15 @@ def execute_orders(client: Trading212Client, orders, *, extended_hours: bool) ->
             if isinstance(response, dict):
                 order_id = response.get("id")
                 status = response.get("status")
+            entry["order_id"] = order_id
+            entry["status"] = status
             logger.info("Order placed for %s qty=%s id=%s status=%s", order.ticker, order.quantity, order_id, status)
         except Trading212Error as exc:
+            entry["error"] = str(exc)
+            entry["status"] = "ERROR"
             logger.error("Order failed for %s qty=%s: %s", order.ticker, order.quantity, exc)
+        results.append(entry)
+    return results
 
 
 def _sleep_with_progress(seconds: float, *, label: str) -> None:
@@ -107,10 +127,25 @@ def main() -> None:
     links = constituents.load_constituent_links()
     logger.info("Scraping constituents from %s wikipedia pages", len(links))
     wiki_symbols, index_membership = constituents.scrape_wikipedia_constituents_with_sources(links)
+    index_counts = {"SP500": 0, "SP400": 0, "SP600": 0, "UNIDENTIFIED": 0}
+    for indexes in index_membership.values():
+        if not indexes:
+            index_counts["UNIDENTIFIED"] += 1
+            continue
+        for index_label in indexes:
+            if index_label in index_counts:
+                index_counts[index_label] += 1
+            else:
+                index_counts["UNIDENTIFIED"] += 1
 
     instruments = constituents.fetch_trading212_instruments(client)
     tradable = constituents.filter_tradable_instruments(instruments)
-    matched = constituents.cross_reference_constituents(wiki_symbols, tradable)
+    matched_result = constituents.cross_reference_constituents(wiki_symbols, tradable, return_stats=True)
+    if isinstance(matched_result, tuple):
+        matched, match_stats = matched_result
+    else:
+        matched = matched_result
+        match_stats = {}
     symbols_dir = os.path.join(log_dir, "symbols")
     constituents.save_universe_snapshot(
         wiki_symbols,
@@ -125,26 +160,44 @@ def main() -> None:
         matched,
         output_dir=symbols_dir,
     )
+    unmatched_symbols = constituents.compute_unmatched_symbols(wiki_symbols, matched)
 
-    ranked, duplicate_tickers = strategy.analyze_universe(
+    ranked, duplicate_tickers, analysis_summary = strategy.analyze_universe(
         matched,
         config=strategy_config,
         log_dir=log_dir,
+    )
+    drop_counts_chart_path = charts.plot_drop_counts_bar(
+        analysis_summary.get("drop_counts", {}) if isinstance(analysis_summary, dict) else {},
+        output_dir=log_dir,
     )
     top_ranked = ranked[: strategy_config.top_n]
     top_tickers = [stock.ticker for stock in top_ranked]
     logger.info("Top %s tickers selected", len(top_tickers))
 
-    risk_on = check_sp500_trend(strategy_config)
+    risk_on, sp500_price, sp500_sma = check_sp500_trend(strategy_config)
 
     positions = client.get_positions()
     if not isinstance(positions, list):
         raise Trading212Error("Positions response was not a list.")
     logger.info("Retrieved %s open positions", len(positions))
+    charts.plot_holdings_pie(
+        positions,
+        output_dir=log_dir,
+        filename="pre_rebalance_pie_chart.png",
+    )
 
+    order_results: List[Dict[str, Any]] = []
     sell_orders = portfolio.build_sell_orders(positions, keep_tickers=top_tickers)
     if sell_orders:
-        execute_orders(client, sell_orders, extended_hours=trading_config.extended_hours)
+        order_results.extend(
+            execute_orders(
+                client,
+                sell_orders,
+                extended_hours=trading_config.extended_hours,
+                stage="initial_sell",
+            )
+        )
     else:
         logger.info("No sell orders required")
 
@@ -173,7 +226,14 @@ def main() -> None:
     )
 
     if rebalance_sell_orders:
-        execute_orders(client, rebalance_sell_orders, extended_hours=trading_config.extended_hours)
+        order_results.extend(
+            execute_orders(
+                client,
+                rebalance_sell_orders,
+                extended_hours=trading_config.extended_hours,
+                stage="rebalance_sell",
+            )
+        )
     else:
         logger.info("No rebalance sell orders required")
 
@@ -187,17 +247,78 @@ def main() -> None:
         updated_positions = client.get_positions()
         if isinstance(updated_positions, list):
             charts.plot_holdings_pie(updated_positions, output_dir=log_dir)
+            index_exposure_path = charts.plot_index_exposure_bar(updated_positions, output_dir=log_dir)
         else:
             logger.warning("Unable to refresh positions for holdings pie chart.")
+            updated_positions = []
+            index_exposure_path = None
+
+        index_price_path = charts.plot_index_price_charts(
+            {
+                "S&P 500": strategy_config.sp500_ticker,
+                "S&P 400": strategy_config.sp400_ticker,
+                "S&P 600": strategy_config.sp600_ticker,
+            },
+            output_dir=log_dir,
+            period="1y",
+            interval=strategy_config.price_interval,
+            retries=strategy_config.retries,
+            retry_sleep_seconds=strategy_config.retry_sleep_seconds,
+        )
+
+        momentum_charts = [
+            os.path.join(log_dir, "momentum_charts", name)
+            for name in ("top_25.png", "top_25to50.png", "top50to75.png", "top75to100.png")
+        ]
+        generate_rebalance_report(
+            output_dir=log_dir,
+            report_date=date.today(),
+            universe_summary={
+                "scraped_count": len(wiki_symbols),
+                "matched_count": len(matched),
+                "unmatched_count": len(unmatched_symbols),
+                "match_stats": match_stats,
+                "index_counts": index_counts,
+            },
+            analysis_summary=analysis_summary,
+            order_results=order_results,
+            regime_summary={
+                "risk_on": False,
+                "price": sp500_price,
+                "sma": sp500_sma,
+                "sma_window": strategy_config.sma_long,
+                "ticker": strategy_config.sp500_ticker,
+            },
+            momentum_chart_paths=momentum_charts,
+            pre_pie_path=os.path.join(log_dir, "momentum_charts", "pre_rebalance_pie_chart.png"),
+            post_pie_path=os.path.join(log_dir, "momentum_charts", "holdings_pie.png"),
+            index_exposure_path=index_exposure_path,
+            index_price_path=index_price_path,
+            drop_counts_chart_path=drop_counts_chart_path,
+        )
         return
 
     if rebalance_buy_orders:
-        execute_orders(client, rebalance_buy_orders, extended_hours=trading_config.extended_hours)
+        order_results.extend(
+            execute_orders(
+                client,
+                rebalance_buy_orders,
+                extended_hours=trading_config.extended_hours,
+                stage="rebalance_buy",
+            )
+        )
     else:
         logger.info("No rebalance buy orders required")
 
     if new_buy_orders:
-        execute_orders(client, new_buy_orders, extended_hours=trading_config.extended_hours)
+        order_results.extend(
+            execute_orders(
+                client,
+                new_buy_orders,
+                extended_hours=trading_config.extended_hours,
+                stage="new_buy",
+            )
+        )
     else:
         logger.info("No new buy orders required")
 
@@ -209,8 +330,55 @@ def main() -> None:
     updated_positions = client.get_positions()
     if isinstance(updated_positions, list):
         charts.plot_holdings_pie(updated_positions, output_dir=log_dir)
+        index_exposure_path = charts.plot_index_exposure_bar(updated_positions, output_dir=log_dir)
     else:
         logger.warning("Unable to refresh positions for holdings pie chart.")
+        updated_positions = []
+        index_exposure_path = None
+
+    index_price_path = charts.plot_index_price_charts(
+        {
+            "S&P 500": strategy_config.sp500_ticker,
+            "S&P 400": strategy_config.sp400_ticker,
+            "S&P 600": strategy_config.sp600_ticker,
+        },
+        output_dir=log_dir,
+        period="1y",
+        interval=strategy_config.price_interval,
+        retries=strategy_config.retries,
+        retry_sleep_seconds=strategy_config.retry_sleep_seconds,
+    )
+
+    momentum_charts = [
+        os.path.join(log_dir, "momentum_charts", name)
+        for name in ("top_25.png", "top_25to50.png", "top50to75.png", "top75to100.png")
+    ]
+    generate_rebalance_report(
+        output_dir=log_dir,
+        report_date=date.today(),
+        universe_summary={
+            "scraped_count": len(wiki_symbols),
+            "matched_count": len(matched),
+            "unmatched_count": len(unmatched_symbols),
+            "match_stats": match_stats,
+            "index_counts": index_counts,
+        },
+        analysis_summary=analysis_summary,
+        order_results=order_results,
+        regime_summary={
+            "risk_on": risk_on,
+            "price": sp500_price,
+            "sma": sp500_sma,
+            "sma_window": strategy_config.sma_long,
+            "ticker": strategy_config.sp500_ticker,
+        },
+        momentum_chart_paths=momentum_charts,
+        pre_pie_path=os.path.join(log_dir, "momentum_charts", "pre_rebalance_pie_chart.png"),
+        post_pie_path=os.path.join(log_dir, "momentum_charts", "holdings_pie.png"),
+        index_exposure_path=index_exposure_path,
+        index_price_path=index_price_path,
+        drop_counts_chart_path=drop_counts_chart_path,
+    )
 
     logger.info("Run complete. Remaining cash estimate: %.2f", remaining_cash)
 
