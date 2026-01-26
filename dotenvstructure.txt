@@ -36,12 +36,22 @@ REBALANCE_THRESHOLD=0.01    # Rebalance threshold.
 MAX_POSITION_FRACTION=0.10  # Max position fraction.
 SP500_TICKER=^GSPC          # S&P500 ticker on yfinance.
 SP500_LOOKBACK=1y           # S&P500 lookback for yfinance data fetch.
+SP400_TICKER=^SP400         # S&P400 ticker on yfinance.
+SP600_TICKER=^SP600         # S&P600 ticker on yfinance.
 
 # ============ Charting ============
-CHART_FONT='Cascadia Code'       # I love this font. (You must add your own to venv/lib/python3.11/site_packages/matplotlib/mpl-data/fonts) if not pre-loaded.)
+CHART_FONT='Cascadia Code'       # Chart font family.
+CHART_FONT_PATH=                 # Optional .ttf path if font isn't installed.
 
 # ============ Runtime Logging ============
 LOG_ROOT=logs               # Logs root.
 RUN_LOG_ROOT=run_logs       # Run log folder.
 LOG_LEVEL=INFO              # Log level.
 HOLDINGS_PIE_DELAY_SECONDS=30  # Delay before holdings pie (seconds).
+
+# ============ Telegram Notifications ============
+TELEGRAM_ENABLED=false          # Enable Telegram notifications.
+TELEGRAM_USER_ID=               # userinfobot ID for private messages.
+TELEGRAM_API_TOKEN=             # Bot token from BotFather.
+TELEGRAM_TIMEOUT_SECONDS=30     # Telegram request timeout (seconds).
+TELEGRAM_SEND_DELAY_SECONDS=1.0 # Delay between Telegram sends (seconds).

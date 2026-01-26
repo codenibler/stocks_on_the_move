@@ -210,13 +210,13 @@ def generate_rebalance_report(
         summary_line_height = 0.028
         summary_lines = [
             ("Universe scraped: {} symbols".format(scraped_count), True),
-            (f"  • S&P 500: {index_counts.get('SP500', 0)}", False),
-            (f"  • S&P 400: {index_counts.get('SP400', 0)}", False),
-            (f"  • S&P 600: {index_counts.get('SP600', 0)}", False),
+            (f"  - S&P 500: {index_counts.get('SP500', 0)}", False),
+            (f"  - S&P 400: {index_counts.get('SP400', 0)}", False),
+            (f"  - S&P 600: {index_counts.get('SP600', 0)}", False),
             ("Matched instruments: {}".format(matched_count), True),
-            (f"  • Normalized base ticker matches: {match_stats.get('base_matched', 0)}", False),
-            (f"  • Dot/slash variant matches: {match_stats.get('variant_matched', 0)}", False),
-            (f"  • ShortName metadata matches: {match_stats.get('short_matched', 0)}", False),
+            (f"  - Normalized base ticker matches: {match_stats.get('base_matched', 0)}", False),
+            (f"  - Dot/slash variant matches: {match_stats.get('variant_matched', 0)}", False),
+            (f"  - ShortName metadata matches: {match_stats.get('short_matched', 0)}", False),
             (f"Unmatched symbols: {universe_summary.get('unmatched_count', 0)}", True),
         ]
         y = summary_start_y
@@ -233,7 +233,7 @@ def generate_rebalance_report(
             )
         else:
             regime_text += f"{regime_ticker} data unavailable; defaulted BELOW SMA{regime_window}"
-        fig.text(0.06, 0.64, "●", color="#22c55e", fontsize=12)
+        fig.text(0.06, 0.64, "o", color="#22c55e", fontsize=12)
         fig.text(0.075, 0.64, regime_text, color=TEXT, fontsize=11)
 
         if index_price_path:

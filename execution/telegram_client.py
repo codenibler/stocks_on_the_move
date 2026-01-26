@@ -22,7 +22,7 @@ class TelegramClient:
         self.session = requests.Session()
 
     def send_message(self, chat_id: str, text: str) -> None:
-        self._post("sendMessage", data={"chat_id": chat_id, "text": text})
+        self._post("sendMessage", data={"chat_id": chat_id, "text": text, "parse_mode": "HTML"})
 
     def send_photo(self, chat_id: str, photo_path: str, caption: Optional[str] = None) -> None:
         data = {"chat_id": chat_id}
@@ -62,22 +62,34 @@ def send_rebalance_report(
     send_delay_seconds: float = 1.0,
     caption: Optional[str] = None,
     message_text: Optional[str] = None,
+    message_blocks: Optional[list[dict]] = None,
+    send_pages: bool = False,
 ) -> None:
     client = TelegramClient(api_token=api_token)
-    if message_text:
+    if message_blocks:
+        for block in message_blocks:
+            if block.get("type") == "text":
+                client.send_message(chat_id, block.get("text", ""))
+            elif block.get("type") == "photo":
+                client.send_photo(chat_id, block.get("path", ""), caption=block.get("caption"))
+            elif block.get("type") == "document":
+                client.send_document(chat_id, block.get("path", ""), caption=block.get("caption"))
+            time.sleep(send_delay_seconds)
+    elif message_text:
         client.send_message(chat_id, message_text)
         time.sleep(send_delay_seconds)
-    page_paths = sorted(glob.glob(os.path.join(pages_dir, "page_*.png")))
-    if page_paths:
-        total_pages = len(page_paths)
-        for idx, page_path in enumerate(page_paths, start=1):
-            page_caption = None
-            if idx == 1:
-                page_caption = caption or f"Rebalance report ({total_pages} pages)"
-            client.send_photo(chat_id, page_path, caption=page_caption)
-            time.sleep(send_delay_seconds)
-    else:
-        logger.warning("No report page images found in %s", pages_dir)
+    if send_pages:
+        page_paths = sorted(glob.glob(os.path.join(pages_dir, "page_*.png")))
+        if page_paths:
+            total_pages = len(page_paths)
+            for idx, page_path in enumerate(page_paths, start=1):
+                page_caption = None
+                if idx == 1:
+                    page_caption = caption or f"Rebalance report ({total_pages} pages)"
+                client.send_photo(chat_id, page_path, caption=page_caption)
+                time.sleep(send_delay_seconds)
+        else:
+            logger.warning("No report page images found in %s", pages_dir)
 
     if os.path.isfile(report_path):
         client.send_document(chat_id, report_path, caption="Rebalance report (PDF)")

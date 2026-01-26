@@ -81,6 +81,7 @@ Finally, a PDF report is generated with all charts, order summaries, and the ind
 All run outputs live under logs/{today}. The main things you’ll care about:
 - logs/{today}/rebalance_report.pdf
 - logs/{today}/momentum_charts/ (top 25/50/75/100, pies, drop counts, index charts)
+- logs/{today}/report_pages/ (PNG pages used for Telegram)
 - logs/{today}/symbols/ (matched, unmatched, and universe snapshots)
 - logs/{today}/run_logs/ (raw run logs)
 
@@ -88,6 +89,12 @@ All run outputs live under logs/{today}. The main things you’ll care about:
 Everything is configured through .env. If you don’t have one, copy dotenvstructure.txt and rename it to .env. I’d start by editing:
 - Trading212 credentials and environment
 - Top N, SMA, gap threshold, and risk fraction
+- SP400/SP600 tickers (used for index charts)
+- Chart font / chart font path
+- Telegram bot settings (if you want notifications)
+
+## Telegram Setup (Optional)
+If you want Telegram alerts, you’ll need to create your own bot via @botfather, copy the API token it returns, and then get your Telegram user ID through @userinfobot. Paste both values into the .env (TELEGRAM_API_TOKEN and TELEGRAM_USER_ID), set TELEGRAM_ENABLED=true, and you should be good to go.
 
 ## Running locally
 Typical setup:

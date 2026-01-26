@@ -137,31 +137,33 @@ def _format_telegram_message(
     regime_ticker = regime_summary.get("ticker", "^GSPC")
     regime_risk_on = bool(regime_summary.get("risk_on"))
     comparator = ">=" if regime_risk_on else "<"
+    emoji = "🟢" if regime_risk_on else "🔴"
     if isinstance(regime_price, (int, float)) and isinstance(regime_sma, (int, float)):
         regime_text = (
-            f"Regime Filter: {regime_ticker} last close {regime_price:.2f} "
+            f"{emoji} Regime Filter: {regime_ticker} last close {regime_price:.2f} "
             f"{comparator} SMA{regime_window} {regime_sma:.2f}"
         )
     else:
-        regime_text = f"Regime Filter: {regime_ticker} data unavailable (SMA{regime_window})"
+        regime_text = f"{emoji} Regime Filter: {regime_ticker} data unavailable (SMA{regime_window})"
 
     lines = [
         "Hey boss, here's your portfolio!",
-        f"Just rebalanced on {now}, heres what you need to know:",
         "",
-        f"Universe scraped: {scraped} symbols",
+        f"These are the results from your {now} rebalance:",
+        "",
+        f"<b>Universe Scraped</b>: {scraped} symbols",
         f"    S&P 500: {index_counts.get('SP500', 0)}",
         f"    S&P 400: {index_counts.get('SP400', 0)}",
         f"    S&P 600: {index_counts.get('SP600', 0)}",
-        f"Matched instruments: {matched}",
+        f"<b>Matched Instruments</b>: {matched}",
         f"    Normalized base ticker matches: {match_stats.get('base_matched', 0)}",
         f"    Dot/slash variant matches: {match_stats.get('variant_matched', 0)}",
         f"    ShortName metadata matches: {match_stats.get('short_matched', 0)}",
-        f"Unmatched symbols: {unmatched}",
+        f"<b>Unmatched Symbols</b>: {unmatched}",
         regime_text,
         "",
         "Here's the state of your risk gate:",
-        "index_price_chart.",
+        "index_price_charts.png",
         "",
         f"Of the {matched} instruments, {ranked_count} remain. These were the reasons for dropouts:",
     ]
@@ -209,7 +211,10 @@ def _format_telegram_message(
         [
             "",
             "These were the Top 100 momentum ranking stocks:",
-            "top_25.png + other 3 png files with top preforming momentum stocks.",
+            "top_25.png",
+            "top_25to50.png",
+            "top50to75.png",
+            "top75to100.png",
             "",
             "this was your portfolio before today's rebalance:",
             "pre_rebalance_pie_chart.png",
@@ -218,12 +223,44 @@ def _format_telegram_message(
             "Order_submission_summary, as png.",
             "",
             "This is your portfolio now, after the rebalance:",
+            "holdings_pie.png",
             "",
             "And this is how they're spread out on the indices.",
+            "index_exposure_bar.png",
         ]
     )
 
     return "\n".join(lines)
+
+
+def _build_telegram_blocks(message_text: str, *, image_markers: list[tuple[str, Optional[str]]]) -> list[dict]:
+    blocks: list[dict] = []
+    remaining = message_text
+    while remaining:
+        next_marker = None
+        next_pos = None
+        next_path = None
+        for marker, path in image_markers:
+            if not marker or not path:
+                continue
+            pos = remaining.find(marker)
+            if pos == -1:
+                continue
+            if next_pos is None or pos < next_pos:
+                next_pos = pos
+                next_marker = marker
+                next_path = path
+        if next_marker is None or next_pos is None:
+            text = remaining.strip()
+            if text:
+                blocks.append({"type": "text", "text": text})
+            break
+        before = remaining[:next_pos].strip()
+        if before:
+            blocks.append({"type": "text", "text": before})
+        blocks.append({"type": "photo", "path": next_path})
+        remaining = remaining[next_pos + len(next_marker):]
+    return blocks
 
 
 def _send_telegram_report(
@@ -231,7 +268,7 @@ def _send_telegram_report(
     *,
     report_path: str,
     pages_dir: str,
-    message_text: str,
+    message_blocks: list[dict],
 ) -> None:
     if not telegram_config.enabled:
         return
@@ -245,10 +282,16 @@ def _send_telegram_report(
             report_path=report_path,
             pages_dir=pages_dir,
             send_delay_seconds=telegram_config.send_delay_seconds,
-            message_text=message_text,
+            message_blocks=message_blocks,
         )
     except TelegramError as exc:
         logger.warning("Telegram notification failed: %s", exc)
+
+
+def _existing_path(path: Optional[str]) -> Optional[str]:
+    if path and os.path.isfile(path):
+        return path
+    return None
 
 
 def main() -> None:
@@ -322,6 +365,13 @@ def main() -> None:
         analysis_summary.get("drop_counts", {}) if isinstance(analysis_summary, dict) else {},
         output_dir=log_dir,
     )
+    universe_summary = {
+        "scraped_count": len(wiki_symbols),
+        "matched_count": len(matched),
+        "unmatched_count": len(unmatched_symbols),
+        "match_stats": match_stats,
+        "index_counts": index_counts,
+    }
     top_ranked = ranked[: strategy_config.top_n]
     top_tickers = [stock.ticker for stock in top_ranked]
     logger.info("Top %s tickers selected", len(top_tickers))
@@ -441,25 +491,20 @@ def main() -> None:
             os.path.join(log_dir, "momentum_charts", name)
             for name in ("top_25.png", "top_25to50.png", "top50to75.png", "top75to100.png")
         ]
+        regime_summary = {
+            "risk_on": False,
+            "price": sp500_price,
+            "sma": sp500_sma,
+            "sma_window": strategy_config.sma_long,
+            "ticker": strategy_config.sp500_ticker,
+        }
         report_path = generate_rebalance_report(
             output_dir=log_dir,
             report_date=date.today(),
-            universe_summary={
-                "scraped_count": len(wiki_symbols),
-                "matched_count": len(matched),
-                "unmatched_count": len(unmatched_symbols),
-                "match_stats": match_stats,
-                "index_counts": index_counts,
-            },
+            universe_summary=universe_summary,
             analysis_summary=analysis_summary,
             order_results=order_results,
-            regime_summary={
-                "risk_on": False,
-                "price": sp500_price,
-                "sma": sp500_sma,
-                "sma_window": strategy_config.sma_long,
-                "ticker": strategy_config.sp500_ticker,
-            },
+            regime_summary=regime_summary,
             momentum_chart_paths=momentum_charts,
             pre_pie_path=os.path.join(log_dir, "momentum_charts", "pre_rebalance_pie_chart.png"),
             post_pie_path=os.path.join(log_dir, "momentum_charts", "holdings_pie.png"),
@@ -468,10 +513,30 @@ def main() -> None:
             drop_counts_chart_path=drop_counts_chart_path,
             page_images_dir=os.path.join(log_dir, "report_pages"),
         )
+        message_text = _format_telegram_message(
+            universe_summary=universe_summary,
+            analysis_summary=analysis_summary,
+            regime_summary=regime_summary,
+        )
+        message_blocks = _build_telegram_blocks(
+            message_text,
+            image_markers=[
+                ("index_price_charts.png", _existing_path(index_price_path)),
+                ("drop_counts_bar.png", _existing_path(drop_counts_chart_path)),
+                ("top_25.png", _existing_path(os.path.join(log_dir, "momentum_charts", "top_25.png"))),
+                ("top_25to50.png", _existing_path(os.path.join(log_dir, "momentum_charts", "top_25to50.png"))),
+                ("top50to75.png", _existing_path(os.path.join(log_dir, "momentum_charts", "top50to75.png"))),
+                ("top75to100.png", _existing_path(os.path.join(log_dir, "momentum_charts", "top75to100.png"))),
+                ("pre_rebalance_pie_chart.png", _existing_path(os.path.join(log_dir, "momentum_charts", "pre_rebalance_pie_chart.png"))),
+                ("holdings_pie.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_pie.png"))),
+                ("index_exposure_bar.png", _existing_path(index_exposure_path)),
+            ],
+        )
         _send_telegram_report(
             telegram_config,
             report_path=report_path,
             pages_dir=os.path.join(log_dir, "report_pages"),
+            message_blocks=message_blocks,
         )
         return
 
@@ -543,25 +608,20 @@ def main() -> None:
         os.path.join(log_dir, "momentum_charts", name)
         for name in ("top_25.png", "top_25to50.png", "top50to75.png", "top75to100.png")
     ]
+    regime_summary = {
+        "risk_on": risk_on,
+        "price": sp500_price,
+        "sma": sp500_sma,
+        "sma_window": strategy_config.sma_long,
+        "ticker": strategy_config.sp500_ticker,
+    }
     report_path = generate_rebalance_report(
         output_dir=log_dir,
         report_date=date.today(),
-        universe_summary={
-            "scraped_count": len(wiki_symbols),
-            "matched_count": len(matched),
-            "unmatched_count": len(unmatched_symbols),
-            "match_stats": match_stats,
-            "index_counts": index_counts,
-        },
+        universe_summary=universe_summary,
         analysis_summary=analysis_summary,
         order_results=order_results,
-        regime_summary={
-            "risk_on": risk_on,
-            "price": sp500_price,
-            "sma": sp500_sma,
-            "sma_window": strategy_config.sma_long,
-            "ticker": strategy_config.sp500_ticker,
-        },
+        regime_summary=regime_summary,
         momentum_chart_paths=momentum_charts,
         pre_pie_path=os.path.join(log_dir, "momentum_charts", "pre_rebalance_pie_chart.png"),
         post_pie_path=os.path.join(log_dir, "momentum_charts", "holdings_pie.png"),
@@ -570,10 +630,30 @@ def main() -> None:
         drop_counts_chart_path=drop_counts_chart_path,
         page_images_dir=os.path.join(log_dir, "report_pages"),
     )
+    message_text = _format_telegram_message(
+        universe_summary=universe_summary,
+        analysis_summary=analysis_summary,
+        regime_summary=regime_summary,
+    )
+    message_blocks = _build_telegram_blocks(
+        message_text,
+        image_markers=[
+            ("index_price_charts.png", _existing_path(index_price_path)),
+            ("drop_counts_bar.png", _existing_path(drop_counts_chart_path)),
+            ("top_25.png", _existing_path(os.path.join(log_dir, "momentum_charts", "top_25.png"))),
+            ("top_25to50.png", _existing_path(os.path.join(log_dir, "momentum_charts", "top_25to50.png"))),
+            ("top50to75.png", _existing_path(os.path.join(log_dir, "momentum_charts", "top50to75.png"))),
+            ("top75to100.png", _existing_path(os.path.join(log_dir, "momentum_charts", "top75to100.png"))),
+            ("pre_rebalance_pie_chart.png", _existing_path(os.path.join(log_dir, "momentum_charts", "pre_rebalance_pie_chart.png"))),
+            ("holdings_pie.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_pie.png"))),
+            ("index_exposure_bar.png", _existing_path(index_exposure_path)),
+        ],
+    )
     _send_telegram_report(
         telegram_config,
         report_path=report_path,
         pages_dir=os.path.join(log_dir, "report_pages"),
+        message_blocks=message_blocks,
     )
 
     logger.info("Run complete. Remaining cash estimate: %.2f", remaining_cash)
