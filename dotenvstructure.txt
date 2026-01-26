@@ -44,4 +44,4 @@ CHART_FONT='Cascadia Code'       # I love this font. (You must add your own to v
 LOG_ROOT=logs               # Logs root.
 RUN_LOG_ROOT=run_logs       # Run log folder.
 LOG_LEVEL=INFO              # Log level.
-HOLDINGS_PIE_DELAY_SECONDS=15  # Delay before holdings pie (seconds).
+HOLDINGS_PIE_DELAY_SECONDS=30  # Delay before holdings pie (seconds).

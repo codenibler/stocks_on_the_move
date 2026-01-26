@@ -188,9 +188,6 @@ def plot_holdings_pie(
         logger.info("No holdings available for pie chart")
         return
 
-    holdings.sort(key=lambda item: item[1], reverse=True)
-    labels, values = zip(*holdings)
-
     pie_colors = None
     index_map: Dict[str, Set[str]] = {}
     matched_path = matched_csv_path or os.path.join(output_dir, "symbols", "matched.csv")
@@ -203,14 +200,9 @@ def plot_holdings_pie(
             "UNIDENTIFIED": "#6b7280",
         }
         counts = {"SP500": 0, "SP400": 0, "SP600": 0, "UNIDENTIFIED": 0}
-        min_value = min(values)
-        max_value = max(values)
-        if max_value == min_value:
-            normalized = np.full(len(values), 0.5)
-        else:
-            normalized = (np.array(values) - min_value) / (max_value - min_value)
-        colors: List[str] = []
-        for (ticker, _), weight in zip(holdings, normalized):
+        ordered_labels = ["SP500", "SP400", "SP600"]
+        labeled_holdings: List[tuple[str, float, str]] = []
+        for ticker, value in holdings:
             ticker_key = normalize_symbol(ticker)
             base_symbol = normalize_symbol(extract_trading212_base_symbol(ticker))
             indexes = set(index_map.get(ticker_key, set()) or index_map.get(base_symbol, set()))
@@ -222,8 +214,27 @@ def plot_holdings_pie(
                 label = "SP600"
             else:
                 label = "UNIDENTIFIED"
-            counts[label] += 1
-            lightness = 0.35 + 0.5 * weight
+            labeled_holdings.append((ticker, value, label))
+
+        ordered_holdings: List[tuple[str, float, str]] = []
+        for label in ordered_labels:
+            group = [item for item in labeled_holdings if item[2] == label]
+            group.sort(key=lambda item: item[1], reverse=True)
+            counts[label] += len(group)
+            ordered_holdings.extend(group)
+        counts["UNIDENTIFIED"] += sum(1 for item in labeled_holdings if item[2] == "UNIDENTIFIED")
+
+        labels = [item[0] for item in ordered_holdings]
+        values = [item[1] for item in ordered_holdings]
+        min_value = min(values)
+        max_value = max(values)
+        if max_value == min_value:
+            normalized = np.full(len(values), 0.5)
+        else:
+            normalized = (np.array(values) - min_value) / (max_value - min_value)
+        colors: List[str] = []
+        for (_, _, label), weight in zip(ordered_holdings, normalized):
+            lightness = 0.85 - 0.5 * weight
             colors.append(_color_with_lightness(color_map[label], lightness))
         pie_colors = colors
         logger.info(
@@ -234,20 +245,26 @@ def plot_holdings_pie(
             counts["UNIDENTIFIED"],
         )
     else:
+        holdings.sort(key=lambda item: item[1], reverse=True)
+        labels, values = zip(*holdings)
         min_value = min(values)
         max_value = max(values)
         if max_value == min_value:
             normalized = np.full(len(values), 0.5)
         else:
             normalized = (np.array(values) - min_value) / (max_value - min_value)
-        inverted = 1.0 - normalized
-        pie_colors = plt.cm.Blues(0.35 + 0.65 * inverted)
+        pie_colors = plt.cm.Blues(0.35 + 0.65 * normalized)
+
+    total_value = float(sum(values))
+    labels = [
+        f"{label}\n{(value / total_value) * 100:.1f}%"
+        for label, value in zip(labels, values)
+    ]
 
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.pie(
         values,
         labels=labels,
-        autopct="%1.1f%%",
         startangle=90,
         counterclock=False,
         colors=pie_colors,
@@ -258,16 +275,15 @@ def plot_holdings_pie(
     ax.axis("equal")
     if index_map:
         legend_handles = [
-            Patch(facecolor=color_map["SP500"], label="S&P 500"),
-            Patch(facecolor=color_map["SP400"], label="S&P 400"),
-            Patch(facecolor=color_map["SP600"], label="S&P 600"),
-            Patch(facecolor=color_map["UNIDENTIFIED"], label="UNIDENTIFIED"),
+            Patch(facecolor=color_map["SP500"], label="S&P 500 (Large Caps)"),
+            Patch(facecolor=color_map["SP400"], label="S&P 400 (Mid Caps)"),
+            Patch(facecolor=color_map["SP600"], label="S&P 600 (Small Caps)"),
         ]
         ax.legend(
             handles=legend_handles,
             loc="upper center",
             bbox_to_anchor=(0.5, -0.06),
-            ncol=4,
+            ncol=3,
             frameon=False,
         )
     fig.tight_layout()

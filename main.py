@@ -13,6 +13,7 @@ from data_fetching import market_data
 from execution import portfolio
 from execution.trading212_client import Trading212Client, Trading212Error
 from stock_universe import constituents
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +68,17 @@ def execute_orders(client: Trading212Client, orders, *, extended_hours: bool) ->
             logger.info("Order placed for %s qty=%s id=%s status=%s", order.ticker, order.quantity, order_id, status)
         except Trading212Error as exc:
             logger.error("Order failed for %s qty=%s: %s", order.ticker, order.quantity, exc)
+
+
+def _sleep_with_progress(seconds: float, *, label: str) -> None:
+    total_seconds = max(0.0, seconds)
+    whole_seconds = int(total_seconds)
+    remainder = total_seconds - whole_seconds
+    if whole_seconds > 0:
+        for _ in tqdm(range(whole_seconds), desc=label, unit="s"):
+            time.sleep(1)
+    if remainder > 0:
+        time.sleep(remainder)
 
 
 def main() -> None:
@@ -167,7 +179,11 @@ def main() -> None:
 
     if not risk_on:
         logger.info("S&P500 below SMA%s. Exiting after sells/rebalance.", strategy_config.sma_long)
-        time.sleep(runtime_config.holdings_pie_delay_seconds)
+        logger.info(
+            "Waiting %.1f seconds before fetching positions for holdings pie chart",
+            runtime_config.holdings_pie_delay_seconds,
+        )
+        _sleep_with_progress(runtime_config.holdings_pie_delay_seconds, label="Waiting for fills")
         updated_positions = client.get_positions()
         if isinstance(updated_positions, list):
             charts.plot_holdings_pie(updated_positions, output_dir=log_dir)
@@ -185,7 +201,11 @@ def main() -> None:
     else:
         logger.info("No new buy orders required")
 
-    time.sleep(runtime_config.holdings_pie_delay_seconds)
+    logger.info(
+        "Waiting %.1f seconds before fetching positions for holdings pie chart",
+        runtime_config.holdings_pie_delay_seconds,
+    )
+    _sleep_with_progress(runtime_config.holdings_pie_delay_seconds, label="Waiting for fills")
     updated_positions = client.get_positions()
     if isinstance(updated_positions, list):
         charts.plot_holdings_pie(updated_positions, output_dir=log_dir)
