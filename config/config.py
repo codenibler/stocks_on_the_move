@@ -53,6 +53,15 @@ class RuntimeConfig:
     holdings_pie_delay_seconds: float
 
 
+@dataclass(frozen=True)
+class TelegramConfig:
+    enabled: bool
+    api_token: str
+    user_id: str
+    timeout_seconds: float
+    send_delay_seconds: float
+
+
 def _env_bool(name: str, default: bool = False) -> bool:
     raw = os.getenv(name)
     if raw is None:
@@ -130,4 +139,14 @@ def get_runtime_config() -> RuntimeConfig:
         run_log_root=os.getenv("RUN_LOG_ROOT", "run_logs"),
         log_level=os.getenv("LOG_LEVEL", "INFO"),
         holdings_pie_delay_seconds=float(os.getenv("HOLDINGS_PIE_DELAY_SECONDS", "15")),
+    )
+
+
+def get_telegram_config() -> TelegramConfig:
+    return TelegramConfig(
+        enabled=_env_bool("TELEGRAM_ENABLED", default=False),
+        api_token=os.getenv("TELEGRAM_API_TOKEN", ""),
+        user_id=os.getenv("TELEGRAM_USER_ID", ""),
+        timeout_seconds=float(os.getenv("TELEGRAM_TIMEOUT_SECONDS", "30")),
+        send_delay_seconds=float(os.getenv("TELEGRAM_SEND_DELAY_SECONDS", "1.0")),
     )

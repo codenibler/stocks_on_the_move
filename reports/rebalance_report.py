@@ -98,6 +98,24 @@ def _draw_text(
         )
 
 
+def _finalize_page(
+    fig: plt.Figure,
+    pdf: PdfPages,
+    *,
+    page_index: int,
+    page_images_dir: Optional[str],
+    page_paths: List[str],
+) -> int:
+    pdf.savefig(fig)
+    if page_images_dir:
+        os.makedirs(page_images_dir, exist_ok=True)
+        image_path = os.path.join(page_images_dir, f"page_{page_index:02d}.png")
+        fig.savefig(image_path, dpi=220, bbox_inches="tight")
+        page_paths.append(image_path)
+    plt.close(fig)
+    return page_index + 1
+
+
 def _load_image(path: Optional[str]) -> Optional[object]:
     if not path or not os.path.isfile(path):
         if path:
@@ -150,6 +168,7 @@ def generate_rebalance_report(
     index_exposure_path: Optional[str],
     index_price_path: Optional[str],
     drop_counts_chart_path: Optional[str],
+    page_images_dir: Optional[str] = None,
 ) -> str:
     _configure_font()
 
@@ -181,6 +200,8 @@ def generate_rebalance_report(
     ]
     error_total = sum(drop_counts.get(key, 0) for key in error_keys)
 
+    page_paths: List[str] = []
+    page_index = 1
     with PdfPages(report_path) as pdf:
         fig = _new_page(f"Rebalance Report {report_date.isoformat()}")
         scraped_count = universe_summary.get("scraped_count", 0)
@@ -225,8 +246,13 @@ def generate_rebalance_report(
         else:
             fig.text(0.06, 0.12, "Index price chart not available.", color=MUTED, fontsize=10)
 
-        pdf.savefig(fig)
-        plt.close(fig)
+        page_index = _finalize_page(
+            fig,
+            pdf,
+            page_index=page_index,
+            page_images_dir=page_images_dir,
+            page_paths=page_paths,
+        )
 
         fig = _new_page("Momentum Filtering Results")
         fig.text(0.06, 0.88, "Drop Counts", color=ACCENT, fontsize=13, fontweight="bold")
@@ -281,8 +307,13 @@ def generate_rebalance_report(
                     ]
                 )
             _draw_lines(fig, stats_lines, start_y=0.19, line_height=0.026, size=9)
-        pdf.savefig(fig)
-        plt.close(fig)
+        page_index = _finalize_page(
+            fig,
+            pdf,
+            page_index=page_index,
+            page_images_dir=page_images_dir,
+            page_paths=page_paths,
+        )
 
         chart_pairs = _chunk(momentum_chart_paths, 2)
         for idx, pair in enumerate(chart_pairs, start=1):
@@ -295,8 +326,13 @@ def generate_rebalance_report(
                 ax.set_axis_off()
                 if img is not None:
                     ax.imshow(img)
-            pdf.savefig(fig)
-            plt.close(fig)
+            page_index = _finalize_page(
+                fig,
+                pdf,
+                page_index=page_index,
+                page_images_dir=page_images_dir,
+                page_paths=page_paths,
+            )
 
         fig = _new_page("Portfolio Before Rebalance")
         img = _load_image(pre_pie_path)
@@ -307,8 +343,13 @@ def generate_rebalance_report(
             ax.imshow(img)
         else:
             fig.text(0.06, 0.5, "Pre-rebalance pie chart not available.", color=MUTED, fontsize=12)
-        pdf.savefig(fig)
-        plt.close(fig)
+        page_index = _finalize_page(
+            fig,
+            pdf,
+            page_index=page_index,
+            page_images_dir=page_images_dir,
+            page_paths=page_paths,
+        )
 
         orders_per_page = 26
         order_pages = _chunk(order_results, orders_per_page) if order_results else [[]]
@@ -338,8 +379,13 @@ def generate_rebalance_report(
                     else:
                         cell.set_facecolor(BACKGROUND)
                         cell.set_text_props(color=TEXT)
-            pdf.savefig(fig)
-            plt.close(fig)
+            page_index = _finalize_page(
+                fig,
+                pdf,
+                page_index=page_index,
+                page_images_dir=page_images_dir,
+                page_paths=page_paths,
+            )
 
         fig = _new_page("Portfolio After Rebalance")
         slots = [(0.1, 0.54, 0.8, 0.38), (0.16, 0.14, 0.68, 0.3)]
@@ -352,8 +398,13 @@ def generate_rebalance_report(
                 ax.imshow(img)
         if post_pie_path is None:
             fig.text(0.06, 0.5, "Post-rebalance pie chart not available.", color=MUTED, fontsize=12)
-        pdf.savefig(fig)
-        plt.close(fig)
+        page_index = _finalize_page(
+            fig,
+            pdf,
+            page_index=page_index,
+            page_images_dir=page_images_dir,
+            page_paths=page_paths,
+        )
 
     logger.info("Saved rebalance report: %s", report_path)
     return report_path

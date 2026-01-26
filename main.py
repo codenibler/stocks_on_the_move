@@ -3,16 +3,22 @@ from __future__ import annotations
 import logging
 import os
 import time
-from datetime import date
+from datetime import date, datetime
 from typing import Any, Dict, List
 
 from indicators import analytics
 from indicators import charts
 from indicators import strategy
-from config.config import get_runtime_config, get_strategy_config, get_trading212_config
+from config.config import (
+    get_runtime_config,
+    get_strategy_config,
+    get_telegram_config,
+    get_trading212_config,
+)
 from config.logging_utils import setup_logging
 from data_fetching import market_data
 from execution import portfolio
+from execution.telegram_client import send_rebalance_report, TelegramError
 from execution.trading212_client import Trading212Client, Trading212Error
 from reports import generate_rebalance_report
 from stock_universe import constituents
@@ -105,6 +111,146 @@ def _sleep_for_summary_rate_limit() -> None:
     time.sleep(5)
 
 
+def _format_telegram_message(
+    *,
+    universe_summary: Dict[str, Any],
+    analysis_summary: Dict[str, Any],
+    regime_summary: Dict[str, Any],
+) -> str:
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    scraped = universe_summary.get("scraped_count", 0)
+    matched = universe_summary.get("matched_count", 0)
+    unmatched = universe_summary.get("unmatched_count", 0)
+    index_counts = universe_summary.get("index_counts", {}) or {}
+    match_stats = universe_summary.get("match_stats", {}) or {}
+    drop_counts = analysis_summary.get("drop_counts", {}) or {}
+    ranked_count = analysis_summary.get("ranked_count", 0)
+    duplicate_count = analysis_summary.get("duplicate_count", 0)
+    momentum_stats = analysis_summary.get("momentum_stats", {}) or {}
+    score_stats = momentum_stats.get("score") or {}
+    slope_stats = momentum_stats.get("slope") or {}
+    r2_stats = momentum_stats.get("r_squared") or {}
+
+    regime_price = regime_summary.get("price")
+    regime_sma = regime_summary.get("sma")
+    regime_window = regime_summary.get("sma_window")
+    regime_ticker = regime_summary.get("ticker", "^GSPC")
+    regime_risk_on = bool(regime_summary.get("risk_on"))
+    comparator = ">=" if regime_risk_on else "<"
+    if isinstance(regime_price, (int, float)) and isinstance(regime_sma, (int, float)):
+        regime_text = (
+            f"Regime Filter: {regime_ticker} last close {regime_price:.2f} "
+            f"{comparator} SMA{regime_window} {regime_sma:.2f}"
+        )
+    else:
+        regime_text = f"Regime Filter: {regime_ticker} data unavailable (SMA{regime_window})"
+
+    lines = [
+        "Hey boss, here's your portfolio!",
+        f"Just rebalanced on {now}, heres what you need to know:",
+        "",
+        f"Universe scraped: {scraped} symbols",
+        f"    S&P 500: {index_counts.get('SP500', 0)}",
+        f"    S&P 400: {index_counts.get('SP400', 0)}",
+        f"    S&P 600: {index_counts.get('SP600', 0)}",
+        f"Matched instruments: {matched}",
+        f"    Normalized base ticker matches: {match_stats.get('base_matched', 0)}",
+        f"    Dot/slash variant matches: {match_stats.get('variant_matched', 0)}",
+        f"    ShortName metadata matches: {match_stats.get('short_matched', 0)}",
+        f"Unmatched symbols: {unmatched}",
+        regime_text,
+        "",
+        "Here's the state of your risk gate:",
+        "index_price_chart.",
+        "",
+        f"Of the {matched} instruments, {ranked_count} remain. These were the reasons for dropouts:",
+    ]
+
+    for key in sorted(drop_counts.keys()):
+        lines.append(f"{key}: {drop_counts.get(key, 0)}")
+    lines.append("drop_counts_bar.png")
+
+    error_keys = [
+        "no_data",
+        "no_momentum_data",
+        "nan_close",
+        "momentum_failed",
+        "atr_missing",
+        "missing_close",
+        "sma_missing",
+        "missing_ticker",
+        "missing_base_symbol",
+    ]
+
+    lines.extend(
+        [
+            "",
+            "Summary",
+            f"Errors during momentum prep: {sum(drop_counts.get(k, 0) for k in error_keys)}",
+            f"Below SMA filter: {drop_counts.get('below_sma', 0)}",
+            f"Gap >= 15% filter: {drop_counts.get('gap', 0)}",
+            f"Ranked stocks: {ranked_count}",
+            f"Duplicate tickers removed: {duplicate_count}",
+            "Momentum Stats",
+        ]
+    )
+
+    if score_stats:
+        lines.append(f"Score min/max: {score_stats.get('min', 0):.4f} / {score_stats.get('max', 0):.4f}")
+        lines.append(f"Score mean/median: {score_stats.get('mean', 0):.4f} / {score_stats.get('median', 0):.4f}")
+    if slope_stats:
+        lines.append(f"Slope min/max: {slope_stats.get('min', 0):.6f} / {slope_stats.get('max', 0):.6f}")
+        lines.append(f"Slope mean/median: {slope_stats.get('mean', 0):.6f} / {slope_stats.get('median', 0):.6f}")
+    if r2_stats:
+        lines.append(f"R^2 min/max: {r2_stats.get('min', 0):.4f} / {r2_stats.get('max', 0):.4f}")
+        lines.append(f"R^2 mean/median: {r2_stats.get('mean', 0):.4f} / {r2_stats.get('median', 0):.4f}")
+
+    lines.extend(
+        [
+            "",
+            "These were the Top 100 momentum ranking stocks:",
+            "top_25.png + other 3 png files with top preforming momentum stocks.",
+            "",
+            "this was your portfolio before today's rebalance:",
+            "pre_rebalance_pie_chart.png",
+            "",
+            "And these were the orders we sent in:",
+            "Order_submission_summary, as png.",
+            "",
+            "This is your portfolio now, after the rebalance:",
+            "",
+            "And this is how they're spread out on the indices.",
+        ]
+    )
+
+    return "\n".join(lines)
+
+
+def _send_telegram_report(
+    telegram_config,
+    *,
+    report_path: str,
+    pages_dir: str,
+    message_text: str,
+) -> None:
+    if not telegram_config.enabled:
+        return
+    if not telegram_config.api_token or not telegram_config.user_id:
+        logger.warning("Telegram enabled but missing TELEGRAM_API_TOKEN or TELEGRAM_USER_ID.")
+        return
+    try:
+        send_rebalance_report(
+            api_token=telegram_config.api_token,
+            chat_id=str(telegram_config.user_id),
+            report_path=report_path,
+            pages_dir=pages_dir,
+            send_delay_seconds=telegram_config.send_delay_seconds,
+            message_text=message_text,
+        )
+    except TelegramError as exc:
+        logger.warning("Telegram notification failed: %s", exc)
+
+
 def main() -> None:
     runtime_config = get_runtime_config()
     log_dir = setup_logging(
@@ -115,6 +261,7 @@ def main() -> None:
 
     strategy_config = get_strategy_config()
     trading_config = get_trading212_config()
+    telegram_config = get_telegram_config()
 
     logger.info("Run configuration: base_url=%s top_n=%s risk_fraction=%.2f", trading_config.base_url, strategy_config.top_n, strategy_config.risk_fraction)
     logger.info("Lookbacks: history=%s momentum=%s sp500=%s", strategy_config.history_lookback, strategy_config.momentum_lookback, strategy_config.sp500_lookback)
@@ -294,7 +441,7 @@ def main() -> None:
             os.path.join(log_dir, "momentum_charts", name)
             for name in ("top_25.png", "top_25to50.png", "top50to75.png", "top75to100.png")
         ]
-        generate_rebalance_report(
+        report_path = generate_rebalance_report(
             output_dir=log_dir,
             report_date=date.today(),
             universe_summary={
@@ -319,6 +466,12 @@ def main() -> None:
             index_exposure_path=index_exposure_path,
             index_price_path=index_price_path,
             drop_counts_chart_path=drop_counts_chart_path,
+            page_images_dir=os.path.join(log_dir, "report_pages"),
+        )
+        _send_telegram_report(
+            telegram_config,
+            report_path=report_path,
+            pages_dir=os.path.join(log_dir, "report_pages"),
         )
         return
 
@@ -390,7 +543,7 @@ def main() -> None:
         os.path.join(log_dir, "momentum_charts", name)
         for name in ("top_25.png", "top_25to50.png", "top50to75.png", "top75to100.png")
     ]
-    generate_rebalance_report(
+    report_path = generate_rebalance_report(
         output_dir=log_dir,
         report_date=date.today(),
         universe_summary={
@@ -415,6 +568,12 @@ def main() -> None:
         index_exposure_path=index_exposure_path,
         index_price_path=index_price_path,
         drop_counts_chart_path=drop_counts_chart_path,
+        page_images_dir=os.path.join(log_dir, "report_pages"),
+    )
+    _send_telegram_report(
+        telegram_config,
+        report_path=report_path,
+        pages_dir=os.path.join(log_dir, "report_pages"),
     )
 
     logger.info("Run complete. Remaining cash estimate: %.2f", remaining_cash)

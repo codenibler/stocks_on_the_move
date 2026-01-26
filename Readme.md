@@ -1,10 +1,10 @@
 # Stocks on the Move (Trading212 Demo)
 
 ## DISCLAIMER (READ FIRST)
-Before anything else, use this at your own discretion. I highly recommend you to play with the parameters in ./env and test on a practice Trading212 account before deploying on your Invest / Stocks ISA account, to make sure that it meets your risk profile and strategy behavior needs. 
+Use this at your own discretion. I recommend you to play with the parameters in .env and test on a practice Trading212 account before deploying on your Invest / Stocks ISA account, to make sure that it meets your risk profile and strategy behavior needs. 
 
 ## What this is
-Ok. With that out of the way, welcome! This is a live implementation of a strategy strongly mirroring Andreas Clenow's [Stocks on the Move](https://www.clenow.com/books) equity momentum strategy. Oversimplified, the strategy collects all tickers in the S&P500 and computes a momentum score for each. This score consists of a linear regression of a natural log of the daily price series for the last 90 days, multiplied by R² to penalize choppy trends. 
+Ok. With that out of the way, welcome! This is a live implementation strongly mirroring Andreas Clenow's [Stocks on the Move](https://www.clenow.com/books) equity momentum strategy. Oversimplified, the strategy collects all tickers in the S&P500 and computes a momentum score for each. This score consists of a linear regression of a natural log of the daily price series for the last 90 days, multiplied by R² to penalize choppy trends. 
 
 ```python
 # Momentum calculation 
@@ -26,7 +26,8 @@ This list is then ranked by descending momentum. In the case that the S&P500 is 
 
 ```python
 position_size = (risk_factor * total_equity) / ATR20 
-# risk_factor is a parameter in .env, and ATR20 is the Average True Range indicator over the last 20 1d candles for the given stock. 
+# risk_factor is a parameter in .env, and ATR20 is the Average True Range 
+# indicator over the last 20 1d candles for the given stock. 
 ```
 The rest of the logic is more case-specific, and if you even made it this far, just read the book at this point... The way I personally manage my portfolio with this strategy is by hosting on [Railway](https://railway.com/?referralCode=QJ3qb6&gad_source=1) and setting a scheduler to execute at a random moment during regular market hours, a kind of wild form of [Staggered Rebalancing](https://www.thinknewfound.com/rebalance-timing-luck) to avoid rebalance timing luck.. Now, however, are the main differences from the original implementation of [Stocks on the Move](https://www.clenow.com/books). 
 - This implementation considers the S&P1500, a composite of the S&P500 Large Caps, S&P400 Mid Caps, and S&P600 Small Caps. 
@@ -43,6 +44,12 @@ The script proceeds to scrape all constituents from the Wikipedia pages for the 
 ### 3) Pull market data (yfinance) for momentum window
 With this filtered stock universe, we batch request the last 6mo of 1d candles for stocks, and retry on failed requests. 
 
+### 4) Compute momentum, ATR, SMA, and gap filters
+When collected, we compute momentum scores and the ATR20 with the algorithm mentioned above. Stocks are dropped from our rankings if they don't comply with SMA100 and gap requirements. 
+
+### 5) Rank momentum & generate momentum charts
+Stocks are then ranked by descending momentum, and bar charts are generated with top100 stocks and their scores. 
+
 ### 6) Compute momentum & apply filters
 When collected, we compute momentum scores and the ATR20 with the algorithm mentioned above. Stocks are dropped from our rankings if they don't comply with SMA100 and gap requirements.
 
@@ -50,40 +57,42 @@ When collected, we compute momentum scores and the ATR20 with the algorithm ment
 Stocks are then ranked by descending momentum, and bar charts are generated with top100 stocks and their scores. 
 
 ### 8) Risk gate: S&P 500 vs 200‑SMA
-Risk gate is executed.
+Risk gate is executed. If above 200SMA, new positions are considered. Otherwise, only closing of existent positions is. 
 
 ### 9) Snapshot portfolio before rebalance
-<!-- Pre‑rebalance holdings pie -->
+We take a snapshot of holdings before any new orders are sent, and save a pre-rebalance pie chart.
 
 ### 10) Sell positions not in top 100
-<!-- Sell orders for dropouts -->
+If a holding isn't present in the top 100 momentum list, we sell it. This also implicitly drops names that were incompliant with our SMA100 and gap filters, as they never made the ranking.
 
-### 11) Calculate cash + total equity
-<!-- availableToTrade + holdings value -->
-
-### 12) Size positions & build rebalance orders
-<!-- ATR position sizing + rebalance threshold -->
+### 11) Compute total_equity and Size Positions
+We pull availableToTrade cash and compute total equity (cash + holdings value). This is the base for position sizing, done with ATR. Orders are built for rebalances (buys/sells) and new positions. Rebalance threshold and max position caps are applied here.
 
 ### 13) Submit rebalance orders
-<!-- Rebalance sells, rebalance buys, new buys -->
+Orders are sent in three waves: sells, rebalance sells/buys, and new buys. Everything is market orders via the Trading212 API.
 
 ### 14) Snapshot portfolio after rebalance
-<!-- Post‑rebalance holdings pie + index exposure bar -->
+We refresh positions, save a post-rebalance pie chart, and generate the holdings by index bar chart (now including CASH).
 
 ### 15) Generate rebalance report PDF
-<!-- Includes charts, order summaries, and index price action -->
+Finally, a PDF report is generated with all charts, order summaries, and the index price action section.
 
 ## Outputs & artifacts
-<!-- logs/{today}, report files, charts, symbols snapshots -->
+All run outputs live under logs/{today}. The main things you’ll care about:
+- logs/{today}/rebalance_report.pdf
+- logs/{today}/momentum_charts/ (top 25/50/75/100, pies, drop counts, index charts)
+- logs/{today}/symbols/ (matched, unmatched, and universe snapshots)
+- logs/{today}/run_logs/ (raw run logs)
 
 ## Configuration
-<!-- .env keys, defaults, and examples -->
+Everything is configured through .env. If you don’t have one, copy dotenvstructure.txt and rename it to .env. I’d start by editing:
+- Trading212 credentials and environment
+- Top N, SMA, gap threshold, and risk fraction
 
 ## Running locally
-<!-- Setup steps and how to run main.py -->
-
-## Testing
-<!-- How to run tests (if any) -->
-
-## Known limitations / TODO
-<!-- Open items, known gaps, future improvements -->
+Typical setup:
+1) python3 -m venv venv
+2) source venv/bin/activate
+3) pip install -r requirements.txt
+4) copy dotenvstructure.txt -> .env and fill it out
+5) python3 main.py
