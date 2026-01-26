@@ -44,7 +44,7 @@ class RebalanceOrdersTest(unittest.TestCase):
             "B_US_EQ": 10.0,
             "C_US_EQ": 30.0,
         }
-        buy_orders, sell_orders, remaining_cash = portfolio.build_rebalance_orders(
+        new_buy_orders, rebalance_buy_orders, sell_orders, remaining_cash = portfolio.build_rebalance_orders(
             ranked,
             positions_by_ticker=positions,
             cash=500.0,
@@ -56,8 +56,9 @@ class RebalanceOrdersTest(unittest.TestCase):
             max_position_fraction=0.10,
         )
 
-        self.assertEqual([order.ticker for order in buy_orders], ["B_US_EQ"])
-        self.assertAlmostEqual(buy_orders[0].quantity, 10.0, places=3)
+        self.assertEqual(len(new_buy_orders), 0)
+        self.assertEqual([order.ticker for order in rebalance_buy_orders], ["B_US_EQ"])
+        self.assertAlmostEqual(rebalance_buy_orders[0].quantity, 10.0, places=3)
 
         self.assertEqual([order.ticker for order in sell_orders], ["C_US_EQ"])
         self.assertAlmostEqual(sell_orders[0].quantity, -10.0, places=3)
@@ -66,7 +67,7 @@ class RebalanceOrdersTest(unittest.TestCase):
 
     def test_partial_buy_when_cash_is_limited(self) -> None:
         ranked = [_stock("D_US_EQ", atr20=2.0, price=20.0, score=1.0)]
-        buy_orders, sell_orders, remaining_cash = portfolio.build_rebalance_orders(
+        new_buy_orders, rebalance_buy_orders, sell_orders, remaining_cash = portfolio.build_rebalance_orders(
             ranked,
             positions_by_ticker={},
             cash=200.0,
@@ -79,8 +80,9 @@ class RebalanceOrdersTest(unittest.TestCase):
         )
 
         self.assertEqual(len(sell_orders), 0)
-        self.assertEqual(len(buy_orders), 1)
-        self.assertAlmostEqual(buy_orders[0].quantity, 10.0, places=3)
+        self.assertEqual(len(rebalance_buy_orders), 0)
+        self.assertEqual(len(new_buy_orders), 1)
+        self.assertAlmostEqual(new_buy_orders[0].quantity, 10.0, places=3)
         self.assertAlmostEqual(remaining_cash, 0.0, places=2)
 
 

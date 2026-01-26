@@ -83,8 +83,9 @@ def build_rebalance_orders(
     gap_lookback_days: int,
     rebalance_threshold: float,
     max_position_fraction: float,
-) -> Tuple[List[OrderRequest], List[OrderRequest], float]:
-    buy_orders: List[OrderRequest] = []
+) -> Tuple[List[OrderRequest], List[OrderRequest], List[OrderRequest], float]:
+    new_buy_orders: List[OrderRequest] = []
+    rebalance_buy_orders: List[OrderRequest] = []
     sell_orders: List[OrderRequest] = []
     remaining_cash = cash
     seen: set[str] = set()
@@ -116,6 +117,7 @@ def build_rebalance_orders(
             target_qty,
         )
         current_qty = positions_by_ticker.get(stock.ticker, 0.0)
+        is_existing = current_qty > 0
         delta_qty = target_qty - current_qty
         change_pct = None
         if current_qty > 0:
@@ -132,12 +134,13 @@ def build_rebalance_orders(
             "delta_qty": delta_qty,
             "change_pct": change_pct,
             "should_adjust": should_adjust,
+            "is_existing": is_existing,
         })
 
     expected_sell = sum(
         abs(plan["delta_qty"]) * plan["stock"].current_price
         for plan in plans
-        if plan["should_adjust"] and plan["delta_qty"] < 0
+        if plan["should_adjust"] and plan["delta_qty"] < 0 and plan["is_existing"]
     )
     if expected_sell > 0:
         remaining_cash += expected_sell
@@ -146,6 +149,8 @@ def build_rebalance_orders(
         if not plan["should_adjust"]:
             continue
         if plan["delta_qty"] >= 0:
+            continue
+        if not plan["is_existing"]:
             continue
         stock = plan["stock"]
         sell_qty = round(abs(plan["delta_qty"]), 3)
@@ -167,6 +172,8 @@ def build_rebalance_orders(
         if not plan["should_adjust"]:
             continue
         if plan["delta_qty"] <= 0:
+            continue
+        if not plan["is_existing"]:
             continue
         stock = plan["stock"]
         current_qty = plan["current_qty"]
@@ -191,13 +198,60 @@ def build_rebalance_orders(
         if delta_qty <= 0:
             break
         delta_qty = round(delta_qty, 3)
-        buy_orders.append(OrderRequest(ticker=stock.ticker, quantity=delta_qty))
+        rebalance_buy_orders.append(OrderRequest(ticker=stock.ticker, quantity=delta_qty))
         remaining_cash -= required_cash
         gap_text = "n/a"
         if stock.max_gap_percent is not None:
             gap_text = f"{stock.max_gap_percent:.3f}%"
         logger.info(
-            "Scheduled buy for %s | qty=%.3f | price=%.3f | score=%.3f | atr20=%.3f | sma100=%.3f | max_gap_%sd=%s "
+            "Scheduled rebalance buy for %s | qty=%.3f | price=%.3f | score=%.3f | atr20=%.3f | sma100=%.3f | max_gap_%sd=%s "
+            "| target_qty=%.3f | current_qty=%.3f | required_cash=%.3f | cash_left=%.3f | name=%s | r2=%.3f | slope=%.3f",
+            stock.ticker,
+            delta_qty,
+            stock.current_price,
+            stock.score,
+            stock.atr20,
+            stock.sma100,
+            gap_lookback_days,
+            gap_text,
+            target_qty,
+            current_qty,
+            required_cash,
+            remaining_cash,
+            stock.name,
+            stock.r_squared,
+            stock.slope,
+        )
+        if remaining_cash <= 0:
+            break
+
+    for plan in plans:
+        if not plan["should_adjust"]:
+            continue
+        if plan["delta_qty"] <= 0:
+            continue
+        if plan["is_existing"]:
+            continue
+        stock = plan["stock"]
+        current_qty = plan["current_qty"]
+        target_qty = plan["target_qty"]
+        delta_qty = plan["delta_qty"]
+        required_cash = delta_qty * stock.current_price
+        if required_cash <= 0:
+            continue
+        if required_cash > remaining_cash:
+            delta_qty = remaining_cash / stock.current_price
+            required_cash = delta_qty * stock.current_price
+        if delta_qty <= 0:
+            break
+        delta_qty = round(delta_qty, 3)
+        new_buy_orders.append(OrderRequest(ticker=stock.ticker, quantity=delta_qty))
+        remaining_cash -= required_cash
+        gap_text = "n/a"
+        if stock.max_gap_percent is not None:
+            gap_text = f"{stock.max_gap_percent:.3f}%"
+        logger.info(
+            "Scheduled new buy for %s | qty=%.3f | price=%.3f | score=%.3f | atr20=%.3f | sma100=%.3f | max_gap_%sd=%s "
             "| target_qty=%.3f | current_qty=%.3f | required_cash=%.3f | cash_left=%.3f | name=%s | r2=%.3f | slope=%.3f",
             stock.ticker,
             delta_qty,
@@ -219,5 +273,6 @@ def build_rebalance_orders(
             break
 
     logger.info("Total rebalance sell orders scheduled: %s", len(sell_orders))
-    logger.info("Total buy orders scheduled: %s", len(buy_orders))
-    return buy_orders, sell_orders, remaining_cash
+    logger.info("Total rebalance buy orders scheduled: %s", len(rebalance_buy_orders))
+    logger.info("Total new buy orders scheduled: %s", len(new_buy_orders))
+    return new_buy_orders, rebalance_buy_orders, sell_orders, remaining_cash

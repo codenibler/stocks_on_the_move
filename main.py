@@ -146,7 +146,7 @@ def main() -> None:
     logger.info("Cash available=%.2f holdings value=%.2f total equity=%.2f", cash, holdings_value, total_equity)
 
     positions_map = portfolio.extract_position_map(positions, allowed_tickers=top_tickers)
-    buy_orders, rebalance_sell_orders, remaining_cash = portfolio.build_rebalance_orders(
+    new_buy_orders, rebalance_buy_orders, rebalance_sell_orders, remaining_cash = portfolio.build_rebalance_orders(
         ranked,
         positions_by_ticker=positions_map,
         cash=float(cash),
@@ -172,10 +172,15 @@ def main() -> None:
             logger.warning("Unable to refresh positions for holdings pie chart.")
         return
 
-    if buy_orders:
-        execute_orders(client, buy_orders, extended_hours=trading_config.extended_hours)
+    if rebalance_buy_orders:
+        execute_orders(client, rebalance_buy_orders, extended_hours=trading_config.extended_hours)
     else:
-        logger.info("No buy orders required")
+        logger.info("No rebalance buy orders required")
+
+    if new_buy_orders:
+        execute_orders(client, new_buy_orders, extended_hours=trading_config.extended_hours)
+    else:
+        logger.info("No new buy orders required")
 
     updated_positions = client.get_positions()
     if isinstance(updated_positions, list):
