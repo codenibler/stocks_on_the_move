@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv(override=True)
 _DARK_STYLE_SET = False
+_CHART_DPI = 220
 
 
 def _configure_chart_font() -> None:
@@ -61,10 +62,21 @@ def _apply_dark_style() -> None:
     _DARK_STYLE_SET = True
 
 
+def _save_figure(fig: plt.Figure, path: str) -> None:
+    fig.savefig(path, dpi=_CHART_DPI, bbox_inches="tight")
+
+
 def _color_with_lightness(base_color: str, lightness: float) -> tuple[float, float, float]:
     r, g, b = mcolors.to_rgb(base_color)
     h, l, s = colorsys.rgb_to_hls(r, g, b)
     l = max(0.0, min(1.0, lightness))
+    return colorsys.hls_to_rgb(h, l, s)
+
+
+def _lighten_color(base_color: str, amount: float = 0.1) -> tuple[float, float, float]:
+    r, g, b = mcolors.to_rgb(base_color)
+    h, l, s = colorsys.rgb_to_hls(r, g, b)
+    l = max(0.0, min(1.0, l + amount))
     return colorsys.hls_to_rgb(h, l, s)
 
 
@@ -155,7 +167,7 @@ def plot_momentum_buckets(
         fig.tight_layout()
 
         filename = os.path.join(charts_dir, f"{label}.png")
-        fig.savefig(filename)
+        _save_figure(fig, filename)
         plt.close(fig)
         logger.info("Saved momentum chart: %s", filename)
 
@@ -166,6 +178,7 @@ def plot_holdings_pie(
     output_dir: str,
     filename: str = "holdings_pie.png",
     matched_csv_path: Optional[str] = None,
+    cash_value: Optional[float] = None,
 ) -> None:
     _apply_dark_style()
     _configure_chart_font()
@@ -185,6 +198,8 @@ def plot_holdings_pie(
             continue
         holdings.append((ticker, value))
 
+    if cash_value is not None and cash_value > 0:
+        holdings.append(("CASH", float(cash_value)))
     if not holdings:
         logger.info("No holdings available for pie chart")
         return
@@ -199,22 +214,26 @@ def plot_holdings_pie(
             "SP400": "#22c55e",
             "SP600": "#f59e0b",
             "UNIDENTIFIED": "#6b7280",
+            "CASH": "#9ca3af",
         }
-        counts = {"SP500": 0, "SP400": 0, "SP600": 0, "UNIDENTIFIED": 0}
-        ordered_labels = ["SP500", "SP400", "SP600"]
+        counts = {"SP500": 0, "SP400": 0, "SP600": 0, "UNIDENTIFIED": 0, "CASH": 0}
+        ordered_labels = ["SP500", "SP400", "SP600", "CASH"]
         labeled_holdings: List[tuple[str, float, str]] = []
         for ticker, value in holdings:
             ticker_key = normalize_symbol(ticker)
             base_symbol = normalize_symbol(extract_trading212_base_symbol(ticker))
-            indexes = set(index_map.get(ticker_key, set()) or index_map.get(base_symbol, set()))
-            if "SP500" in indexes:
-                label = "SP500"
-            elif "SP400" in indexes:
-                label = "SP400"
-            elif "SP600" in indexes:
-                label = "SP600"
+            if ticker_key == "CASH":
+                label = "CASH"
             else:
-                label = "UNIDENTIFIED"
+                indexes = set(index_map.get(ticker_key, set()) or index_map.get(base_symbol, set()))
+                if "SP500" in indexes:
+                    label = "SP500"
+                elif "SP400" in indexes:
+                    label = "SP400"
+                elif "SP600" in indexes:
+                    label = "SP600"
+                else:
+                    label = "UNIDENTIFIED"
             labeled_holdings.append((ticker, value, label))
 
         ordered_holdings: List[tuple[str, float, str]] = []
@@ -224,6 +243,7 @@ def plot_holdings_pie(
             counts[label] += len(group)
             ordered_holdings.extend(group)
         counts["UNIDENTIFIED"] += sum(1 for item in labeled_holdings if item[2] == "UNIDENTIFIED")
+        counts["CASH"] += sum(1 for item in labeled_holdings if item[2] == "CASH")
 
         labels = [item[0] for item in ordered_holdings]
         values = [item[1] for item in ordered_holdings]
@@ -239,11 +259,12 @@ def plot_holdings_pie(
             colors.append(_color_with_lightness(color_map[label], lightness))
         pie_colors = colors
         logger.info(
-            "Holdings pie index counts: SP500=%s SP400=%s SP600=%s UNIDENTIFIED=%s",
+            "Holdings pie index counts: SP500=%s SP400=%s SP600=%s UNIDENTIFIED=%s CASH=%s",
             counts["SP500"],
             counts["SP400"],
             counts["SP600"],
             counts["UNIDENTIFIED"],
+            counts["CASH"],
         )
     else:
         holdings.sort(key=lambda item: item[1], reverse=True)
@@ -295,7 +316,7 @@ def plot_holdings_pie(
     fig.tight_layout()
 
     output_path = os.path.join(charts_dir, filename)
-    fig.savefig(output_path)
+    _save_figure(fig, output_path)
     plt.close(fig)
     logger.info("Saved holdings pie chart: %s", output_path)
 
@@ -306,6 +327,7 @@ def plot_index_exposure_bar(
     output_dir: str,
     filename: str = "index_exposure_bar.png",
     matched_csv_path: Optional[str] = None,
+    cash_value: Optional[float] = None,
 ) -> Optional[str]:
     _apply_dark_style()
     _configure_chart_font()
@@ -331,7 +353,7 @@ def plot_index_exposure_bar(
 
     matched_path = matched_csv_path or os.path.join(output_dir, "symbols", "matched.csv")
     index_map = _load_matched_index_map(matched_path)
-    totals = {"SP500": 0.0, "SP400": 0.0, "SP600": 0.0, "UNIDENTIFIED": 0.0}
+    totals = {"SP500": 0.0, "SP400": 0.0, "SP600": 0.0, "UNIDENTIFIED": 0.0, "CASH": 0.0}
 
     for ticker, value in holdings:
         ticker_key = normalize_symbol(ticker)
@@ -345,6 +367,9 @@ def plot_index_exposure_bar(
             totals["SP600"] += value
         else:
             totals["UNIDENTIFIED"] += value
+
+    if cash_value is not None and cash_value > 0:
+        totals["CASH"] = float(cash_value)
 
     total_value = sum(totals.values())
     if total_value <= 0:
@@ -362,6 +387,10 @@ def plot_index_exposure_bar(
         labels.append("Unidentified")
         values.append((totals["UNIDENTIFIED"] / total_value) * 100.0)
         colors.append("#6b7280")
+    if totals["CASH"] > 0:
+        labels.append("CASH")
+        values.append((totals["CASH"] / total_value) * 100.0)
+        colors.append("#9ca3af")
 
     fig, ax = plt.subplots(figsize=(7, 4))
     ax.bar(labels, values, color=colors, alpha=0.85)
@@ -375,7 +404,7 @@ def plot_index_exposure_bar(
 
     fig.tight_layout()
     output_path = os.path.join(charts_dir, filename)
-    fig.savefig(output_path)
+    _save_figure(fig, output_path)
     plt.close(fig)
     logger.info("Saved index exposure chart: %s", output_path)
     return output_path
@@ -386,7 +415,7 @@ def plot_index_price_charts(
     *,
     output_dir: str,
     filename: str = "index_price_charts.png",
-    period: str = "1y",
+    period: str = "565d",
     interval: str = "1d",
     retries: int = 3,
     retry_sleep_seconds: float = 1.0,
@@ -430,9 +459,14 @@ def plot_index_price_charts(
             ax.set_visible(False)
             continue
         line_color = color_map.get(label, "#60a5fa")
-        ax.plot(price_series.index, price_series.values, color=line_color, linewidth=1.5)
+        ax.plot(price_series.index, price_series.values, color=line_color, linewidth=1.6, label="Price")
+        ema200 = price_series.ewm(span=200, adjust=False, min_periods=1).mean()
+        if ema200 is not None and not ema200.dropna().empty:
+            ema_color = _lighten_color(line_color, 0.1)
+            ax.plot(ema200.index, ema200.values, color=ema_color, linewidth=1.2, label="EMA200")
         ax.set_title(f"{label} ({ticker})")
         ax.grid(axis="y", linestyle="--", alpha=0.3, color="#2a2f3a")
+        ax.legend(loc="upper left", frameon=False, fontsize=8)
         plotted += 1
 
     if plotted == 0:
@@ -442,7 +476,7 @@ def plot_index_price_charts(
 
     fig.tight_layout()
     output_path = os.path.join(charts_dir, filename)
-    fig.savefig(output_path)
+    _save_figure(fig, output_path)
     plt.close(fig)
     logger.info("Saved index price charts: %s", output_path)
     return output_path
@@ -489,7 +523,7 @@ def plot_drop_counts_bar(
 
     fig.tight_layout()
     output_path = os.path.join(charts_dir, filename)
-    fig.savefig(output_path)
+    _save_figure(fig, output_path)
     plt.close(fig)
     logger.info("Saved drop counts chart: %s", output_path)
     return output_path

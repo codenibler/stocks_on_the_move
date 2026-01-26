@@ -101,6 +101,10 @@ def _sleep_with_progress(seconds: float, *, label: str) -> None:
         time.sleep(remainder)
 
 
+def _sleep_for_summary_rate_limit() -> None:
+    time.sleep(5)
+
+
 def main() -> None:
     runtime_config = get_runtime_config()
     log_dir = setup_logging(
@@ -181,10 +185,16 @@ def main() -> None:
     if not isinstance(positions, list):
         raise Trading212Error("Positions response was not a list.")
     logger.info("Retrieved %s open positions", len(positions))
+    pre_cash = None
+    _sleep_for_summary_rate_limit()
+    summary_pre = client.get_account_summary()
+    if isinstance(summary_pre, dict):
+        pre_cash = summary_pre.get("cash", {}).get("availableToTrade")
     charts.plot_holdings_pie(
         positions,
         output_dir=log_dir,
         filename="pre_rebalance_pie_chart.png",
+        cash_value=float(pre_cash) if pre_cash is not None else None,
     )
 
     order_results: List[Dict[str, Any]] = []
@@ -201,6 +211,7 @@ def main() -> None:
     else:
         logger.info("No sell orders required")
 
+    _sleep_for_summary_rate_limit()
     summary = client.get_account_summary()
     cash = None
     if isinstance(summary, dict):
@@ -245,9 +256,22 @@ def main() -> None:
         )
         _sleep_with_progress(runtime_config.holdings_pie_delay_seconds, label="Waiting for fills")
         updated_positions = client.get_positions()
+        cash_for_chart = None
+        _sleep_for_summary_rate_limit()
+        summary_after = client.get_account_summary()
+        if isinstance(summary_after, dict):
+            cash_for_chart = summary_after.get("cash", {}).get("availableToTrade")
         if isinstance(updated_positions, list):
-            charts.plot_holdings_pie(updated_positions, output_dir=log_dir)
-            index_exposure_path = charts.plot_index_exposure_bar(updated_positions, output_dir=log_dir)
+            charts.plot_holdings_pie(
+                updated_positions,
+                output_dir=log_dir,
+                cash_value=float(cash_for_chart) if cash_for_chart is not None else None,
+            )
+            index_exposure_path = charts.plot_index_exposure_bar(
+                updated_positions,
+                output_dir=log_dir,
+                cash_value=float(cash_for_chart) if cash_for_chart is not None else None,
+            )
         else:
             logger.warning("Unable to refresh positions for holdings pie chart.")
             updated_positions = []
@@ -260,7 +284,7 @@ def main() -> None:
                 "S&P 600": strategy_config.sp600_ticker,
             },
             output_dir=log_dir,
-            period="1y",
+            period=f"{365 + strategy_config.sma_long}d",
             interval=strategy_config.price_interval,
             retries=strategy_config.retries,
             retry_sleep_seconds=strategy_config.retry_sleep_seconds,
@@ -328,9 +352,22 @@ def main() -> None:
     )
     _sleep_with_progress(runtime_config.holdings_pie_delay_seconds, label="Waiting for fills")
     updated_positions = client.get_positions()
+    cash_for_chart = None
+    _sleep_for_summary_rate_limit()
+    summary_after = client.get_account_summary()
+    if isinstance(summary_after, dict):
+        cash_for_chart = summary_after.get("cash", {}).get("availableToTrade")
     if isinstance(updated_positions, list):
-        charts.plot_holdings_pie(updated_positions, output_dir=log_dir)
-        index_exposure_path = charts.plot_index_exposure_bar(updated_positions, output_dir=log_dir)
+        charts.plot_holdings_pie(
+            updated_positions,
+            output_dir=log_dir,
+            cash_value=float(cash_for_chart) if cash_for_chart is not None else None,
+        )
+        index_exposure_path = charts.plot_index_exposure_bar(
+            updated_positions,
+            output_dir=log_dir,
+            cash_value=float(cash_for_chart) if cash_for_chart is not None else None,
+        )
     else:
         logger.warning("Unable to refresh positions for holdings pie chart.")
         updated_positions = []
@@ -343,7 +380,7 @@ def main() -> None:
             "S&P 600": strategy_config.sp600_ticker,
         },
         output_dir=log_dir,
-        period="1y",
+        period=f"{365 + strategy_config.sma_long}d",
         interval=strategy_config.price_interval,
         retries=strategy_config.retries,
         retry_sleep_seconds=strategy_config.retry_sleep_seconds,

@@ -13,6 +13,7 @@ import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 from matplotlib import font_manager
 from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.lines import Line2D
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +64,38 @@ def _draw_lines(fig: plt.Figure, lines: Iterable[str], *, start_y: float, line_h
     for line in lines:
         fig.text(0.06, y, line, color=TEXT, fontsize=size)
         y -= line_height
+
+
+def _draw_text(
+    fig: plt.Figure,
+    x: float,
+    y: float,
+    text: str,
+    *,
+    size: int,
+    color: str = TEXT,
+    underline: bool = False,
+    underline_pad: float = 0.004,
+    underline_width: float = 1.0,
+) -> None:
+    text_obj = fig.text(x, y, text, color=color, fontsize=size)
+    if underline:
+        fig.canvas.draw()
+        renderer = fig.canvas.get_renderer()
+        bbox = text_obj.get_window_extent(renderer=renderer)
+        inv = fig.transFigure.inverted()
+        x0, y0 = inv.transform((bbox.x0, bbox.y0))
+        x1, _ = inv.transform((bbox.x1, bbox.y0))
+        y_line = y0 - underline_pad
+        fig.add_artist(
+            Line2D(
+                [x0, x1],
+                [y_line, y_line],
+                transform=fig.transFigure,
+                color=color,
+                linewidth=underline_width,
+            )
+        )
 
 
 def _load_image(path: Optional[str]) -> Optional[object]:
@@ -152,18 +185,23 @@ def generate_rebalance_report(
         fig = _new_page(f"Rebalance Report {report_date.isoformat()}")
         scraped_count = universe_summary.get("scraped_count", 0)
         matched_count = universe_summary.get("matched_count", 0)
+        summary_start_y = 0.9
+        summary_line_height = 0.028
         summary_lines = [
-            f"Universe scraped: {scraped_count} symbols",
-            f"  • S&P 500: {index_counts.get('SP500', 0)}",
-            f"  • S&P 400: {index_counts.get('SP400', 0)}",
-            f"  • S&P 600: {index_counts.get('SP600', 0)}",
-            f"Matched instruments: {matched_count}",
-            f"  • Normalized base ticker matches: {match_stats.get('base_matched', 0)}",
-            f"  • Dot/slash variant matches: {match_stats.get('variant_matched', 0)}",
-            f"  • ShortName metadata matches: {match_stats.get('short_matched', 0)}",
-            f"Unmatched symbols: {universe_summary.get('unmatched_count', 0)}",
+            ("Universe scraped: {} symbols".format(scraped_count), True),
+            (f"  • S&P 500: {index_counts.get('SP500', 0)}", False),
+            (f"  • S&P 400: {index_counts.get('SP400', 0)}", False),
+            (f"  • S&P 600: {index_counts.get('SP600', 0)}", False),
+            ("Matched instruments: {}".format(matched_count), True),
+            (f"  • Normalized base ticker matches: {match_stats.get('base_matched', 0)}", False),
+            (f"  • Dot/slash variant matches: {match_stats.get('variant_matched', 0)}", False),
+            (f"  • ShortName metadata matches: {match_stats.get('short_matched', 0)}", False),
+            (f"Unmatched symbols: {universe_summary.get('unmatched_count', 0)}", True),
         ]
-        _draw_lines(fig, summary_lines, start_y=0.9, line_height=0.028, size=11)
+        y = summary_start_y
+        for line, underline in summary_lines:
+            _draw_text(fig, 0.06, y, line, size=11, underline=underline)
+            y -= summary_line_height
 
         regime_text = "Regime Filter: "
         if isinstance(regime_price, (int, float)) and isinstance(regime_sma, (int, float)):
@@ -174,13 +212,24 @@ def generate_rebalance_report(
             )
         else:
             regime_text += f"{regime_ticker} data unavailable; defaulted BELOW SMA{regime_window}"
-        fig.text(0.06, 0.64, regime_text, color=TEXT, fontsize=11)
+        fig.text(0.06, 0.64, "●", color="#22c55e", fontsize=12)
+        fig.text(0.075, 0.64, regime_text, color=TEXT, fontsize=11)
+
+        if index_price_path:
+            img = _load_image(index_price_path)
+            ax = fig.add_axes((0.08, 0.08, 0.84, 0.46))
+            ax.set_facecolor(BACKGROUND)
+            ax.set_axis_off()
+            if img is not None:
+                ax.imshow(img)
+        else:
+            fig.text(0.06, 0.12, "Index price chart not available.", color=MUTED, fontsize=10)
 
         pdf.savefig(fig)
         plt.close(fig)
 
-        fig = _new_page("Momentum filtering results")
-        fig.text(0.06, 0.88, "Drop counts", color=ACCENT, fontsize=13, fontweight="bold")
+        fig = _new_page("Momentum Filtering Results")
+        fig.text(0.06, 0.88, "Drop Counts", color=ACCENT, fontsize=13, fontweight="bold")
         if drop_counts_chart_path:
             img = _load_image(drop_counts_chart_path)
             ax = fig.add_axes((0.08, 0.5, 0.84, 0.34))
@@ -208,7 +257,7 @@ def generate_rebalance_report(
         slope_stats = momentum_stats.get("slope")
         r2_stats = momentum_stats.get("r_squared")
         if score_stats or slope_stats or r2_stats:
-            fig.text(0.06, 0.23, "Momentum stats", color=ACCENT, fontsize=13, fontweight="bold")
+            fig.text(0.06, 0.23, "Momentum Stats", color=ACCENT, fontsize=13, fontweight="bold")
             stats_lines = []
             if score_stats:
                 stats_lines.extend(
@@ -237,8 +286,8 @@ def generate_rebalance_report(
 
         chart_pairs = _chunk(momentum_chart_paths, 2)
         for idx, pair in enumerate(chart_pairs, start=1):
-            fig = _new_page(f"Momentum rankings (top 100) - page {idx}")
-        slots = [(0.08, 0.53, 0.84, 0.34), (0.08, 0.1, 0.84, 0.34)]
+            fig = _new_page(f"Momentum Rankings (Top 100) - Page {idx}")
+            slots = [(0.08, 0.53, 0.84, 0.34), (0.08, 0.1, 0.84, 0.34)]
             for slot, path in zip(slots, pair):
                 img = _load_image(path)
                 ax = fig.add_axes(slot)
@@ -249,7 +298,7 @@ def generate_rebalance_report(
             pdf.savefig(fig)
             plt.close(fig)
 
-        fig = _new_page("Portfolio before rebalance")
+        fig = _new_page("Portfolio Before Rebalance")
         img = _load_image(pre_pie_path)
         ax = fig.add_axes((0.14, 0.18, 0.72, 0.72))
         ax.set_facecolor(BACKGROUND)
@@ -264,8 +313,8 @@ def generate_rebalance_report(
         orders_per_page = 26
         order_pages = _chunk(order_results, orders_per_page) if order_results else [[]]
         for page_idx, orders in enumerate(order_pages, start=1):
-            fig = _new_page(f"Order submission summary {page_idx}")
-            ax = fig.add_axes((0.04, 0.06, 0.92, 0.82))
+            fig = _new_page(f"Order Submission Summary {page_idx}")
+            ax = fig.add_axes((0.04, 0.22, 0.92, 0.7))
             ax.set_facecolor(BACKGROUND)
             ax.set_axis_off()
             if not orders:
@@ -292,7 +341,7 @@ def generate_rebalance_report(
             pdf.savefig(fig)
             plt.close(fig)
 
-        fig = _new_page("Portfolio after rebalance")
+        fig = _new_page("Portfolio After Rebalance")
         slots = [(0.1, 0.54, 0.8, 0.38), (0.16, 0.14, 0.68, 0.3)]
         for slot, path in zip(slots, [post_pie_path, index_exposure_path]):
             img = _load_image(path)
@@ -303,18 +352,6 @@ def generate_rebalance_report(
                 ax.imshow(img)
         if post_pie_path is None:
             fig.text(0.06, 0.5, "Post-rebalance pie chart not available.", color=MUTED, fontsize=12)
-        pdf.savefig(fig)
-        plt.close(fig)
-
-        fig = _new_page("Index price action (1y)")
-        img = _load_image(index_price_path)
-        ax = fig.add_axes((0.08, 0.14, 0.84, 0.7))
-        ax.set_facecolor(BACKGROUND)
-        ax.set_axis_off()
-        if img is not None:
-            ax.imshow(img)
-        else:
-            fig.text(0.06, 0.5, "Index price chart not available.", color=MUTED, fontsize=12)
         pdf.savefig(fig)
         plt.close(fig)
 
