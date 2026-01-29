@@ -5,6 +5,7 @@ import os
 import time
 from datetime import date, datetime
 from typing import Any, Dict, List
+import yfinance as yf
 
 from indicators import analytics
 from indicators import charts
@@ -25,6 +26,7 @@ from stock_universe import constituents
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
+yf.enable_debug_mode()
 
 RANKING_CHART_FILENAMES = (
     "top1to25momentum.png",

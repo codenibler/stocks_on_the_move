@@ -13,7 +13,7 @@ from fake_useragent import UserAgent
 logger = logging.getLogger(__name__)
 
 _USER_AGENT: Optional[UserAgent] = None
-
+_YF_CACHE_APPLIED = False
 
 def _get_env_float(name: str, default: float) -> float:
     raw = os.getenv(name)
@@ -54,6 +54,30 @@ def _apply_yfinance_user_agent() -> None:
         session.headers.update({"User-Agent": user_agent})
     except Exception as exc:
         logger.warning("Failed to set yfinance User-Agent: %s", exc)
+
+
+def _apply_yfinance_cache_dir() -> None:
+    global _YF_CACHE_APPLIED
+    if _YF_CACHE_APPLIED:
+        return
+    cache_dir = os.getenv("YF_CACHE_DIR")
+    if not cache_dir:
+        return
+    resolved = os.path.abspath(cache_dir)
+    try:
+        os.makedirs(resolved, exist_ok=True)
+        from yfinance import cache as yf_cache
+
+        yf_cache.set_cache_location(resolved)
+        logger.info("Set yfinance cache location to %s", resolved)
+    except Exception as exc:
+        logger.warning("Failed to set yfinance cache location to %s: %s", resolved, exc)
+    _YF_CACHE_APPLIED = True
+
+
+def _prepare_yfinance_session() -> None:
+    _apply_yfinance_cache_dir()
+    _apply_yfinance_user_agent()
 
 
 def _batch_sleep_bounds() -> tuple[float, float]:
@@ -115,7 +139,7 @@ def fetch_history_with_retries(
                 interval,
                 attempt,
             )
-            _apply_yfinance_user_agent()
+            _prepare_yfinance_session()
             df = yf.download(
                 ticker,
                 period=period,
@@ -232,14 +256,14 @@ def fetch_history_batch(
                     chunk[0],
                     chunk[-1],
                 )
-            _apply_yfinance_user_agent()
+            _prepare_yfinance_session()
             batch_df = yf.download(
                 chunk,
                 period=period,
                 interval=interval,
                 progress=False,
                 auto_adjust=False,
-                threads=True,
+                threads=False,
                 group_by="ticker",
             )
             batch_frames = _split_batch_dataframe(batch_df, chunk)
