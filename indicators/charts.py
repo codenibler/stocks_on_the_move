@@ -212,6 +212,7 @@ def plot_momentum_extremes_summary(
         format_str = f"{{:{number_format}}}"
         labels = [item[0] for item in items]
         values = [item[1] for item in items]
+        value_strings = [format_str.format(value) for value in values]
         positions = np.arange(len(labels))
         ax.barh(positions, values, color=color, alpha=0.85)
         ax.set_yticks(positions)
@@ -219,13 +220,19 @@ def plot_momentum_extremes_summary(
         ax.set_title(title, fontsize=11)
         ax.grid(axis="x", linestyle="--", alpha=0.3, color="#2a2f3a")
         ax.axvline(0, color="#2a2f3a", linewidth=1)
-        span = (max(values) - min(values)) if values else 0
-        pad = span * 0.04 if span else (abs(max(values)) or 1.0) * 0.06
+        min_val = min(values)
+        max_val = max(values)
+        span = max_val - min_val
+        scale = max(abs(max_val), abs(min_val), 1e-6)
+        pad = max(span * 0.35, scale * 0.35, 0.05)
+        text_pad = pad * 0.4
+        ax.set_xlim(min_val - pad, max_val + pad)
         for idx, value in enumerate(values):
+            text = value_strings[idx]
             if value >= 0:
-                ax.text(value + pad, idx, format_str.format(value), va="center", ha="left", fontsize=8)
+                ax.text(value + text_pad, idx, text, va="center", ha="left", fontsize=8)
             else:
-                ax.text(value - pad, idx, format_str.format(value), va="center", ha="right", fontsize=8)
+                ax.text(value - text_pad, idx, text, va="center", ha="right", fontsize=8)
         ax.invert_yaxis()
 
     score_values = [(stock.base_symbol, stock.score) for stock in ranked]
@@ -252,8 +259,13 @@ def plot_momentum_extremes_summary(
         bottom_color: str,
         footer_label: str,
     ) -> str:
-        fig, axes = plt.subplots(1, 2, figsize=(12, 5))
         format_str = f"{{:{number_format}}}"
+        label_len = max([len(label) for label, _ in (top + bottom)] or [4])
+        value_len = max([len(format_str.format(value)) for _, value in (top + bottom)] or [4])
+        width = 11.5 + (label_len * 0.18) + (value_len * 0.45)
+        width = max(12.0, min(width, 28.0))
+        fig, axes = plt.subplots(1, 2, figsize=(width, 5.2))
+        fig.subplots_adjust(wspace=0.35)
         _plot_panel(
             axes[0],
             top,
@@ -339,7 +351,7 @@ def plot_holdings_pie(
 ) -> None:
     _apply_dark_style()
     _configure_chart_font()
-    charts_dir = os.path.join(output_dir, "momentum_charts")
+    charts_dir = os.path.join(output_dir, "momentum_charts", "holdings_charts")
     os.makedirs(charts_dir, exist_ok=True)
 
     holdings: List[tuple[str, float]] = []
@@ -488,7 +500,7 @@ def plot_index_exposure_bar(
 ) -> Optional[str]:
     _apply_dark_style()
     _configure_chart_font()
-    charts_dir = os.path.join(output_dir, "momentum_charts")
+    charts_dir = os.path.join(output_dir, "momentum_charts", "holdings_charts")
     os.makedirs(charts_dir, exist_ok=True)
 
     holdings: List[tuple[str, float]] = []
@@ -579,7 +591,7 @@ def plot_index_price_charts(
 ) -> Optional[str]:
     _apply_dark_style()
     _configure_chart_font()
-    charts_dir = os.path.join(output_dir, "momentum_charts")
+    charts_dir = os.path.join(output_dir, "momentum_charts", "holdings_charts")
     os.makedirs(charts_dir, exist_ok=True)
 
     tickers = {label: ticker for label, ticker in index_tickers.items() if ticker}

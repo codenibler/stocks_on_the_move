@@ -286,6 +286,7 @@ def _send_telegram_report(
         logger.warning("Telegram enabled but missing TELEGRAM_API_TOKEN or TELEGRAM_USER_ID.")
         return
     try:
+        _send_telegram_alert(telegram_config, message="====================")
         send_rebalance_report(
             api_token=telegram_config.api_token,
             chat_id=str(telegram_config.user_id),
@@ -294,6 +295,7 @@ def _send_telegram_report(
             send_delay_seconds=telegram_config.send_delay_seconds,
             message_blocks=message_blocks,
         )
+        _send_telegram_alert(telegram_config, message="====================")
     except TelegramError as exc:
         logger.warning("Telegram notification failed: %s", exc)
 
@@ -420,7 +422,10 @@ def main() -> None:
             no_data_threshold,
             drop_counts.get("no_data"),
         )
-        _send_telegram_alert(telegram_config, message="Dawg, check the script out. Aint working.")
+        _send_telegram_alert(
+            telegram_config,
+            message="====================\nDawg, check the script out. Shit hit the fan.\n=====================",
+        )
         return
     universe_summary = {
         "scraped_count": len(wiki_symbols),
@@ -563,8 +568,8 @@ def main() -> None:
             order_results=order_results,
             regime_summary=regime_summary,
             momentum_chart_paths=momentum_charts,
-            pre_pie_path=os.path.join(log_dir, "momentum_charts", "pre_rebalance_pie_chart.png"),
-            post_pie_path=os.path.join(log_dir, "momentum_charts", "holdings_pie.png"),
+            pre_pie_path=os.path.join(log_dir, "momentum_charts", "holdings_charts", "pre_rebalance_pie_chart.png"),
+            post_pie_path=os.path.join(log_dir, "momentum_charts", "holdings_charts", "holdings_pie.png"),
             index_exposure_path=index_exposure_path,
             index_price_path=index_price_path,
             drop_counts_chart_path=drop_counts_chart_path,
@@ -588,8 +593,8 @@ def main() -> None:
                 ("momentum_slopes.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_slopes.png"))),
                 ("momentum_r2.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_r2.png"))),
                 *ranking_markers,
-                ("pre_rebalance_pie_chart.png", _existing_path(os.path.join(log_dir, "momentum_charts", "pre_rebalance_pie_chart.png"))),
-                ("holdings_pie.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_pie.png"))),
+                ("pre_rebalance_pie_chart.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_charts", "pre_rebalance_pie_chart.png"))),
+                ("holdings_pie.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_charts", "holdings_pie.png"))),
                 ("index_exposure_bar.png", _existing_path(index_exposure_path)),
             ],
         )
@@ -684,8 +689,8 @@ def main() -> None:
         order_results=order_results,
         regime_summary=regime_summary,
         momentum_chart_paths=momentum_charts,
-        pre_pie_path=os.path.join(log_dir, "momentum_charts", "pre_rebalance_pie_chart.png"),
-        post_pie_path=os.path.join(log_dir, "momentum_charts", "holdings_pie.png"),
+        pre_pie_path=os.path.join(log_dir, "momentum_charts", "holdings_charts", "pre_rebalance_pie_chart.png"),
+        post_pie_path=os.path.join(log_dir, "momentum_charts", "holdings_charts", "holdings_pie.png"),
         index_exposure_path=index_exposure_path,
         index_price_path=index_price_path,
         drop_counts_chart_path=drop_counts_chart_path,
@@ -709,8 +714,8 @@ def main() -> None:
             ("momentum_slopes.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_slopes.png"))),
             ("momentum_r2.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_r2.png"))),
             *ranking_markers,
-            ("pre_rebalance_pie_chart.png", _existing_path(os.path.join(log_dir, "momentum_charts", "pre_rebalance_pie_chart.png"))),
-            ("holdings_pie.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_pie.png"))),
+            ("pre_rebalance_pie_chart.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_charts", "pre_rebalance_pie_chart.png"))),
+            ("holdings_pie.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_charts", "holdings_pie.png"))),
             ("index_exposure_bar.png", _existing_path(index_exposure_path)),
         ],
     )
