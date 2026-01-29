@@ -36,6 +36,8 @@ CHART_BUCKET=25             # Number of stocks in each chart.
 RISK_FRACTION=0.001         # Risk factor.
 REBALANCE_THRESHOLD=0.01    # Rebalance threshold.
 MAX_POSITION_FRACTION=0.10  # Max position fraction.
+NO_DATA_ABORT_THRESHOLD=250 # If 250+ stocks yield no data from yf, somethings wrong. 
+                            # Notify telegram bot and quit program immediatel at this threshold. 
 SP500_TICKER=^GSPC          # S&P500 ticker on yfinance.
 SP500_LOOKBACK=1y           # S&P500 lookback for yfinance data fetch.
 SP400_TICKER=^SP400         # S&P400 ticker on yfinance.

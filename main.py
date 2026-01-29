@@ -18,7 +18,7 @@ from config.config import (
 from config.logging_utils import setup_logging
 from data_fetching import market_data
 from execution import portfolio
-from execution.telegram_client import send_rebalance_report, TelegramError
+from execution.telegram_client import TelegramClient, send_rebalance_report, TelegramError
 from execution.trading212_client import Trading212Client, Trading212Error
 from reports import generate_rebalance_report
 from stock_universe import constituents
@@ -200,7 +200,7 @@ def _format_telegram_message(
             f"Gap >= 15% filter: {drop_counts.get('gap', 0)}",
             f"Ranked stocks: {ranked_count}",
             f"Duplicate tickers removed: {duplicate_count}",
-            "Momentum Stats",
+            "<b>Momentum Stats</b>:",
         ]
     )
 
@@ -213,6 +213,13 @@ def _format_telegram_message(
     if r2_stats:
         lines.append(f"R^2 min/max: {r2_stats.get('min', 0):.4f} / {r2_stats.get('max', 0):.4f}")
         lines.append(f"R^2 mean/median: {r2_stats.get('mean', 0):.4f} / {r2_stats.get('median', 0):.4f}")
+    lines.extend(
+        [
+            "momentum_scores.png",
+            "momentum_slopes.png",
+            "momentum_r2.png",
+        ]
+    )
 
     lines.extend(["", "These were the Top 100 momentum ranking stocks:"])
     lines.extend(RANKING_CHART_FILENAMES)
@@ -289,6 +296,19 @@ def _send_telegram_report(
         )
     except TelegramError as exc:
         logger.warning("Telegram notification failed: %s", exc)
+
+
+def _send_telegram_alert(telegram_config, *, message: str) -> None:
+    if not telegram_config.enabled:
+        return
+    if not telegram_config.api_token or not telegram_config.user_id:
+        logger.warning("Telegram enabled but missing TELEGRAM_API_TOKEN or TELEGRAM_USER_ID.")
+        return
+    try:
+        client = TelegramClient(api_token=telegram_config.api_token, timeout_seconds=telegram_config.timeout_seconds)
+        client.send_message(str(telegram_config.user_id), message)
+    except TelegramError as exc:
+        logger.warning("Telegram alert failed: %s", exc)
 
 
 def _existing_path(path: Optional[str]) -> Optional[str]:
@@ -393,6 +413,15 @@ def main() -> None:
         },
         output_dir=log_dir,
     )
+    no_data_threshold = max(0, int(strategy_config.no_data_abort_threshold))
+    if no_data_threshold and drop_counts.get("no_data", 0) > no_data_threshold:
+        logger.error(
+            "Aborting run: no_data drop count exceeded %s (no_data=%s)",
+            no_data_threshold,
+            drop_counts.get("no_data"),
+        )
+        _send_telegram_alert(telegram_config, message="Dawg, check the script out. Aint working.")
+        return
     universe_summary = {
         "scraped_count": len(wiki_symbols),
         "matched_count": len(matched),
@@ -516,7 +545,7 @@ def main() -> None:
         )
 
         momentum_charts = [
-            os.path.join(log_dir, "momentum_charts", "Rankings", name)
+            os.path.join(log_dir, "momentum_charts", "rankings", name)
             for name in RANKING_CHART_FILENAMES
         ]
         regime_summary = {
@@ -547,7 +576,7 @@ def main() -> None:
             regime_summary=regime_summary,
         )
         ranking_markers = [
-            (name, _existing_path(os.path.join(log_dir, "momentum_charts", "Rankings", name)))
+            (name, _existing_path(os.path.join(log_dir, "momentum_charts", "rankings", name)))
             for name in RANKING_CHART_FILENAMES
         ]
         message_blocks = _build_telegram_blocks(
@@ -555,6 +584,9 @@ def main() -> None:
             image_markers=[
                 ("index_price_charts.png", _existing_path(index_price_path)),
                 ("dropCountsBarChart.png", _existing_path(drop_counts_chart_path)),
+                ("momentum_scores.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_scores.png"))),
+                ("momentum_slopes.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_slopes.png"))),
+                ("momentum_r2.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_r2.png"))),
                 *ranking_markers,
                 ("pre_rebalance_pie_chart.png", _existing_path(os.path.join(log_dir, "momentum_charts", "pre_rebalance_pie_chart.png"))),
                 ("holdings_pie.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_pie.png"))),
@@ -634,7 +666,7 @@ def main() -> None:
     )
 
     momentum_charts = [
-        os.path.join(log_dir, "momentum_charts", "Rankings", name)
+        os.path.join(log_dir, "momentum_charts", "rankings", name)
         for name in RANKING_CHART_FILENAMES
     ]
     regime_summary = {
@@ -665,7 +697,7 @@ def main() -> None:
         regime_summary=regime_summary,
     )
     ranking_markers = [
-        (name, _existing_path(os.path.join(log_dir, "momentum_charts", "Rankings", name)))
+        (name, _existing_path(os.path.join(log_dir, "momentum_charts", "rankings", name)))
         for name in RANKING_CHART_FILENAMES
     ]
     message_blocks = _build_telegram_blocks(
@@ -673,6 +705,9 @@ def main() -> None:
         image_markers=[
             ("index_price_charts.png", _existing_path(index_price_path)),
             ("dropCountsBarChart.png", _existing_path(drop_counts_chart_path)),
+            ("momentum_scores.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_scores.png"))),
+            ("momentum_slopes.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_slopes.png"))),
+            ("momentum_r2.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_r2.png"))),
             *ranking_markers,
             ("pre_rebalance_pie_chart.png", _existing_path(os.path.join(log_dir, "momentum_charts", "pre_rebalance_pie_chart.png"))),
             ("holdings_pie.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_pie.png"))),

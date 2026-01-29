@@ -43,6 +43,7 @@ class StrategyConfig:
     sp600_ticker: str
     rebalance_threshold: float
     max_position_fraction: float
+    no_data_abort_threshold: int
 
 
 @dataclass(frozen=True)
@@ -130,6 +131,7 @@ def get_strategy_config() -> StrategyConfig:
         sp600_ticker=os.getenv("SP600_TICKER", "^SP600"),
         rebalance_threshold=float(os.getenv("REBALANCE_THRESHOLD", "0.01")),
         max_position_fraction=float(os.getenv("MAX_POSITION_FRACTION", "0.10")),
+        no_data_abort_threshold=int(os.getenv("NO_DATA_ABORT_THRESHOLD", "250")),
     )
 
 
