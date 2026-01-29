@@ -221,8 +221,3 @@ def analyze_universe(
     }
     return ranked, duplicates, summary
 
-
-def _chunked_list(items: List[str], size: int) -> List[List[str]]:
-    if size <= 0:
-        return [items]
-    return [items[idx : idx + size] for idx in range(0, len(items), size)]

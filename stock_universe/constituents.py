@@ -197,20 +197,6 @@ def cross_reference_constituents(
     return matched
 
 
-def get_tradeable_constituents(
-    client: Trading212Client,
-    *,
-    env_path: str = ".env",
-    timeout_seconds: float = 30.0,
-) -> List[Dict[str, Any]]:
-    links = load_constituent_links(env_path)
-    wiki_symbols = scrape_wikipedia_constituents(links, timeout_seconds=timeout_seconds)
-    instruments = fetch_trading212_instruments(client)
-    tradable = filter_tradable_instruments(instruments)
-    matched = cross_reference_constituents(wiki_symbols, tradable)
-    return matched
-
-
 def save_universe_snapshot(
     wiki_symbols: Iterable[str],
     tradable_instruments: Iterable[Dict[str, Any]],

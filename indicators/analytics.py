@@ -61,31 +61,6 @@ def calculate_sma(close: pd.Series, period: int) -> Optional[float]:
     return float(value)
 
 
-def has_large_gap(
-    df: pd.DataFrame,
-    *,
-    lookback_days: int,
-    threshold: float,
-) -> bool:
-    if df is None or df.empty:
-        return False
-    if not {"Open", "Close"}.issubset(df.columns):
-        logger.warning("Gap detection missing required columns")
-        return False
-    prev_close = df["Close"].shift(1)
-    gap = (df["Open"] - prev_close).abs() / prev_close
-    gap = gap.replace([np.inf, -np.inf], np.nan)
-    if isinstance(df.index, pd.DatetimeIndex):
-        idx = pd.to_datetime(df.index, utc=True, errors="coerce")
-        gap = gap.copy()
-        gap.index = idx.tz_convert(None)
-        cutoff = (pd.Timestamp.now(tz="UTC") - pd.Timedelta(days=lookback_days)).tz_convert(None)
-        recent_gap = gap[gap.index >= cutoff]
-    else:
-        recent_gap = gap.tail(lookback_days)
-    return bool((recent_gap >= threshold).any())
-
-
 def find_max_gap_percent(
     df: pd.DataFrame,
     *,

@@ -15,6 +15,12 @@ logger = logging.getLogger(__name__)
 _USER_AGENT: Optional[UserAgent] = None
 _YF_CACHE_APPLIED = False
 
+def _get_env_bool(name: str, default: bool) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "y", "on"}
+
 def _get_env_float(name: str, default: float) -> float:
     raw = os.getenv(name)
     if raw is None:
@@ -78,6 +84,10 @@ def _apply_yfinance_cache_dir() -> None:
 def _prepare_yfinance_session() -> None:
     _apply_yfinance_cache_dir()
     _apply_yfinance_user_agent()
+
+
+def _yfinance_threads_enabled() -> bool:
+    return _get_env_bool("YFINANCE_THREADS", default=False)
 
 
 def _batch_sleep_bounds() -> tuple[float, float]:
@@ -146,7 +156,7 @@ def fetch_history_with_retries(
                 interval=interval,
                 progress=False,
                 auto_adjust=False,
-                threads=False,
+                threads=_yfinance_threads_enabled(),
             )
             if df is None or df.empty:
                 logger.warning("Empty yfinance data for %s; skipping retries", ticker)
@@ -162,30 +172,6 @@ def fetch_history_with_retries(
             logger.warning("Error fetching %s on attempt %s: %s", ticker, attempt, exc)
         time.sleep(retry_sleep_seconds)
     return None
-
-
-def fetch_history_with_tickers(
-    base_symbol: str,
-    *,
-    period: str,
-    interval: str,
-    retries: int,
-    retry_sleep_seconds: float,
-) -> Tuple[Optional[str], Optional[pd.DataFrame]]:
-    tickers = build_yfinance_tickers(base_symbol)
-    for ticker in tickers:
-        df = fetch_history_with_retries(
-            ticker,
-            period=period,
-            interval=interval,
-            retries=retries,
-            retry_sleep_seconds=retry_sleep_seconds,
-        )
-        if df is not None and not df.empty:
-            logger.info("Resolved %s to yfinance ticker %s", base_symbol, ticker)
-            return ticker, df
-        logger.info("No data for yfinance ticker %s (base %s)", ticker, base_symbol)
-    return None, None
 
 
 def resolve_history_for_symbols(
@@ -263,7 +249,7 @@ def fetch_history_batch(
                 interval=interval,
                 progress=False,
                 auto_adjust=False,
-                threads=False,
+                threads=_yfinance_threads_enabled(),
                 group_by="ticker",
             )
             batch_frames = _split_batch_dataframe(batch_df, chunk)

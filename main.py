@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import html
 import logging
 import os
 import time
 from datetime import date, datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 import yfinance as yf
 
 from indicators import analytics
@@ -26,7 +27,27 @@ from stock_universe import constituents
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
-yf.enable_debug_mode()
+
+def _env_bool(name: str, default: bool = False) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def _env_float(name: str, default: float) -> float:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        logger.warning("Invalid %s value %r; using default %.2f", name, raw, default)
+        return default
+
+
+if _env_bool("YFINANCE_DEBUG_MODE_ON", default=False) or _env_bool("DEBUG_MODE_ON", default=False):
+    yf.enable_debug_mode()
 
 RANKING_CHART_FILENAMES = (
     "top1to25momentum.png",
@@ -117,7 +138,8 @@ def _sleep_with_progress(seconds: float, *, label: str) -> None:
 
 
 def _sleep_for_summary_rate_limit() -> None:
-    time.sleep(5)
+    delay = max(0.0, _env_float("SUMMARY_RATE_LIMIT_SECONDS", 5.0))
+    time.sleep(delay)
 
 
 def _format_telegram_message(
@@ -232,6 +254,7 @@ def _format_telegram_message(
             "pre_rebalance_pie_chart.png",
             "",
             "And these were the orders we sent in:",
+            "order_summary_code",
             "Order_submission_summary, as png.",
             "",
             "This is your portfolio now, after the rebalance:",
@@ -245,15 +268,20 @@ def _format_telegram_message(
     return "\n".join(lines)
 
 
-def _build_telegram_blocks(message_text: str, *, image_markers: list[tuple[str, Optional[str]]]) -> list[dict]:
+def _build_telegram_blocks(
+    message_text: str,
+    *,
+    attachments: Sequence[Tuple[str, object, str]],
+) -> list[dict]:
     blocks: list[dict] = []
     remaining = message_text
     while remaining:
         next_marker = None
         next_pos = None
-        next_path = None
-        for marker, path in image_markers:
-            if not marker or not path:
+        next_payload = None
+        next_type = None
+        for marker, payload, attach_type in attachments:
+            if not marker or payload is None:
                 continue
             pos = remaining.find(marker)
             if pos == -1:
@@ -261,7 +289,8 @@ def _build_telegram_blocks(message_text: str, *, image_markers: list[tuple[str, 
             if next_pos is None or pos < next_pos:
                 next_pos = pos
                 next_marker = marker
-                next_path = path
+                next_payload = payload
+                next_type = attach_type
         if next_marker is None or next_pos is None:
             text = remaining.strip()
             if text:
@@ -270,7 +299,14 @@ def _build_telegram_blocks(message_text: str, *, image_markers: list[tuple[str, 
         before = remaining[:next_pos].strip()
         if before:
             blocks.append({"type": "text", "text": before})
-        blocks.append({"type": "photo", "path": next_path})
+        if next_type == "text":
+            if isinstance(next_payload, list):
+                for item in next_payload:
+                    blocks.append({"type": "text", "text": str(item)})
+            else:
+                blocks.append({"type": "text", "text": str(next_payload)})
+        else:
+            blocks.append({"type": next_type or "photo", "path": str(next_payload)})
         remaining = remaining[next_pos + len(next_marker):]
     return blocks
 
@@ -281,6 +317,7 @@ def _send_telegram_report(
     report_path: str,
     pages_dir: str,
     message_blocks: list[dict],
+    pre_pdf_blocks: Optional[list[dict]] = None,
 ) -> None:
     if not telegram_config.enabled:
         return
@@ -296,6 +333,7 @@ def _send_telegram_report(
             pages_dir=pages_dir,
             send_delay_seconds=telegram_config.send_delay_seconds,
             message_blocks=message_blocks,
+            pre_pdf_blocks=pre_pdf_blocks,
         )
         _send_telegram_alert(telegram_config, message="====================")
     except TelegramError as exc:
@@ -319,6 +357,157 @@ def _existing_path(path: Optional[str]) -> Optional[str]:
     if path and os.path.isfile(path):
         return path
     return None
+
+
+def _build_ticker_name_map(
+    instruments: Sequence[dict],
+    ranked: Sequence[object],
+    positions: Sequence[dict],
+) -> Dict[str, str]:
+    name_map: Dict[str, str] = {}
+    for inst in instruments:
+        ticker = inst.get("ticker")
+        if not ticker:
+            continue
+        name = inst.get("shortName") or inst.get("name")
+        if name:
+            name_map.setdefault(ticker, str(name))
+    for stock in ranked:
+        ticker = getattr(stock, "ticker", None)
+        if not ticker:
+            continue
+        name = getattr(stock, "name", None)
+        if name:
+            name_map.setdefault(str(ticker), str(name))
+    for position in positions:
+        instrument = position.get("instrument", {})
+        ticker = instrument.get("ticker")
+        if not ticker:
+            continue
+        name = instrument.get("shortName") or instrument.get("name")
+        if name:
+            name_map.setdefault(str(ticker), str(name))
+    return name_map
+
+
+def _format_qty(qty: float) -> str:
+    value = abs(qty)
+    text = f"{value:.3f}"
+    text = text.rstrip("0").rstrip(".")
+    return text if text else "0"
+
+
+def _format_order_table(order_results: Sequence[Dict[str, Any]], name_map: Dict[str, str]) -> str:
+    rows: list[tuple[str, str, str, str]] = []
+    for order in order_results:
+        ticker = order.get("ticker")
+        qty_raw = order.get("quantity")
+        if not ticker or qty_raw is None:
+            continue
+        try:
+            qty = float(qty_raw)
+        except (TypeError, ValueError):
+            continue
+        orb = "🟢" if qty > 0 else "🔴"
+        name = name_map.get(str(ticker), "")
+        qty_text = _format_qty(qty)
+        rows.append((orb, str(ticker), str(name), qty_text))
+
+    header_ticker = "Ticker"
+    header_company = "Company"
+    header_qty = "QTY"
+    ticker_width = max(len(header_ticker), *(len(row[1]) for row in rows)) if rows else len(header_ticker)
+    company_width = max(len(header_company), *(len(row[2]) for row in rows)) if rows else len(header_company)
+    qty_width = max(len(header_qty), *(len(row[3]) for row in rows)) if rows else len(header_qty)
+
+    header = f"{header_ticker:<{ticker_width}}  {header_company:<{company_width}}  {header_qty:>{qty_width}}"
+    separator = "-" * len(header)
+    lines = [header, separator]
+    if not rows:
+        lines.append("No orders sent.")
+        return "\n".join(lines)
+
+    for orb, ticker, company, qty in rows:
+        lines.append(
+            f"{orb} {ticker:<{ticker_width}}  {company:<{company_width}}  {qty:>{qty_width}}"
+        )
+    return "\n".join(lines)
+
+
+def _split_preformatted_blocks(text: str, *, max_chars: int = 3800) -> list[str]:
+    escaped = html.escape(text)
+    if not escaped:
+        return ["<pre></pre>"]
+    lines = escaped.splitlines()
+    blocks: list[str] = []
+    current: list[str] = []
+    current_len = 0
+    for line in lines:
+        line_len = len(line) + 1
+        if current and current_len + line_len > max_chars:
+            blocks.append("<pre>" + "\n".join(current) + "</pre>")
+            current = [line]
+            current_len = len(line)
+        else:
+            current.append(line)
+            current_len += line_len
+    if current:
+        blocks.append("<pre>" + "\n".join(current) + "</pre>")
+    return blocks
+
+
+def _format_order_code_blocks(
+    *,
+    order_results: Sequence[Dict[str, Any]],
+    name_map: Dict[str, str],
+    max_chars: int = 3800,
+) -> list[str]:
+    table = _format_order_table(order_results, name_map)
+    if not table:
+        return ["<pre>No orders sent.</pre>"]
+    return _split_preformatted_blocks(table, max_chars=max_chars)
+
+
+def _format_pending_positions_blocks(
+    order_results: Sequence[Dict[str, Any]],
+    name_map: Dict[str, str],
+    *,
+    max_chars: int = 3800,
+) -> list[str]:
+    lines = ["These are the positions still pending:"]
+    pending_rows: list[str] = []
+    for order in order_results:
+        ticker = order.get("ticker")
+        qty_raw = order.get("quantity")
+        status = order.get("status")
+        if not ticker or qty_raw is None:
+            continue
+        if not _is_pending_status(status):
+            continue
+        try:
+            qty = float(qty_raw)
+        except (TypeError, ValueError):
+            continue
+        name = name_map.get(str(ticker), "")
+        pending_rows.append(f"🟡 {ticker}, {name}, {_format_qty(qty)}")
+    if not pending_rows:
+        lines.append("None.")
+    else:
+        lines.extend(pending_rows)
+    return _split_preformatted_blocks("\n".join(lines), max_chars=max_chars)
+
+
+def _is_pending_status(status: Optional[str]) -> bool:
+    if status is None:
+        return True
+    if not isinstance(status, str):
+        return True
+    normalized = status.strip().upper()
+    if normalized in {"FILLED", "EXECUTED", "COMPLETED", "SUCCESS", "CLOSED"}:
+        return False
+    if normalized in {"REJECTED", "CANCELLED", "CANCELED", "ERROR", "FAILED", "DECLINED"}:
+        return False
+    return True
 
 
 def main() -> None:
@@ -446,6 +635,7 @@ def main() -> None:
     if not isinstance(positions, list):
         raise Trading212Error("Positions response was not a list.")
     logger.info("Retrieved %s open positions", len(positions))
+    ticker_name_map = _build_ticker_name_map(matched, ranked, positions)
     pre_cash = None
     _sleep_for_summary_rate_limit()
     summary_pre = client.get_account_summary()
@@ -551,6 +741,10 @@ def main() -> None:
             retry_sleep_seconds=strategy_config.retry_sleep_seconds,
         )
 
+        order_summary_blocks = _format_order_code_blocks(
+            order_results=order_results,
+            name_map=ticker_name_map,
+        )
         momentum_charts = [
             os.path.join(log_dir, "momentum_charts", "rankings", name)
             for name in RANKING_CHART_FILENAMES
@@ -586,18 +780,20 @@ def main() -> None:
             (name, _existing_path(os.path.join(log_dir, "momentum_charts", "rankings", name)))
             for name in RANKING_CHART_FILENAMES
         ]
+        pending_blocks = _format_pending_positions_blocks(order_results, ticker_name_map)
         message_blocks = _build_telegram_blocks(
             message_text,
-            image_markers=[
-                ("index_price_charts.png", _existing_path(index_price_path)),
-                ("dropCountsBarChart.png", _existing_path(drop_counts_chart_path)),
-                ("momentum_scores.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_scores.png"))),
-                ("momentum_slopes.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_slopes.png"))),
-                ("momentum_r2.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_r2.png"))),
-                *ranking_markers,
-                ("pre_rebalance_pie_chart.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_charts", "pre_rebalance_pie_chart.png"))),
-                ("holdings_pie.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_charts", "holdings_pie.png"))),
-                ("index_exposure_bar.png", _existing_path(index_exposure_path)),
+            attachments=[
+                ("index_price_charts.png", _existing_path(index_price_path), "photo"),
+                ("dropCountsBarChart.png", _existing_path(drop_counts_chart_path), "photo"),
+                ("momentum_scores.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_scores.png")), "photo"),
+                ("momentum_slopes.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_slopes.png")), "photo"),
+                ("momentum_r2.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_r2.png")), "photo"),
+                *[(marker, path, "photo") for marker, path in ranking_markers],
+                ("pre_rebalance_pie_chart.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_charts", "pre_rebalance_pie_chart.png")), "photo"),
+                ("order_summary_code", order_summary_blocks, "text"),
+                ("holdings_pie.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_charts", "holdings_pie.png")), "photo"),
+                ("index_exposure_bar.png", _existing_path(index_exposure_path), "photo"),
             ],
         )
         _send_telegram_report(
@@ -605,6 +801,7 @@ def main() -> None:
             report_path=report_path,
             pages_dir=os.path.join(log_dir, "report_pages"),
             message_blocks=message_blocks,
+            pre_pdf_blocks=[{"type": "text", "text": block} for block in pending_blocks],
         )
         return
 
@@ -672,6 +869,10 @@ def main() -> None:
         retry_sleep_seconds=strategy_config.retry_sleep_seconds,
     )
 
+    order_summary_blocks = _format_order_code_blocks(
+        order_results=order_results,
+        name_map=ticker_name_map,
+    )
     momentum_charts = [
         os.path.join(log_dir, "momentum_charts", "rankings", name)
         for name in RANKING_CHART_FILENAMES
@@ -707,18 +908,20 @@ def main() -> None:
         (name, _existing_path(os.path.join(log_dir, "momentum_charts", "rankings", name)))
         for name in RANKING_CHART_FILENAMES
     ]
+    pending_blocks = _format_pending_positions_blocks(order_results, ticker_name_map)
     message_blocks = _build_telegram_blocks(
         message_text,
-        image_markers=[
-            ("index_price_charts.png", _existing_path(index_price_path)),
-            ("dropCountsBarChart.png", _existing_path(drop_counts_chart_path)),
-            ("momentum_scores.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_scores.png"))),
-            ("momentum_slopes.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_slopes.png"))),
-            ("momentum_r2.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_r2.png"))),
-            *ranking_markers,
-            ("pre_rebalance_pie_chart.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_charts", "pre_rebalance_pie_chart.png"))),
-            ("holdings_pie.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_charts", "holdings_pie.png"))),
-            ("index_exposure_bar.png", _existing_path(index_exposure_path)),
+        attachments=[
+            ("index_price_charts.png", _existing_path(index_price_path), "photo"),
+            ("dropCountsBarChart.png", _existing_path(drop_counts_chart_path), "photo"),
+            ("momentum_scores.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_scores.png")), "photo"),
+            ("momentum_slopes.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_slopes.png")), "photo"),
+            ("momentum_r2.png", _existing_path(os.path.join(log_dir, "momentum_charts", "regression_metrics", "momentum_r2.png")), "photo"),
+            *[(marker, path, "photo") for marker, path in ranking_markers],
+            ("pre_rebalance_pie_chart.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_charts", "pre_rebalance_pie_chart.png")), "photo"),
+            ("order_summary_code", order_summary_blocks, "text"),
+            ("holdings_pie.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_charts", "holdings_pie.png")), "photo"),
+            ("index_exposure_bar.png", _existing_path(index_exposure_path), "photo"),
         ],
     )
     _send_telegram_report(
@@ -726,6 +929,7 @@ def main() -> None:
         report_path=report_path,
         pages_dir=os.path.join(log_dir, "report_pages"),
         message_blocks=message_blocks,
+        pre_pdf_blocks=[{"type": "text", "text": block} for block in pending_blocks],
     )
 
     logger.info("Run complete. Remaining cash estimate: %.2f", remaining_cash)

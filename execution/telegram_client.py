@@ -63,6 +63,7 @@ def send_rebalance_report(
     caption: Optional[str] = None,
     message_text: Optional[str] = None,
     message_blocks: Optional[list[dict]] = None,
+    pre_pdf_blocks: Optional[list[dict]] = None,
     send_pages: bool = False,
 ) -> None:
     client = TelegramClient(api_token=api_token)
@@ -90,6 +91,16 @@ def send_rebalance_report(
                 time.sleep(send_delay_seconds)
         else:
             logger.warning("No report page images found in %s", pages_dir)
+
+    if pre_pdf_blocks:
+        for block in pre_pdf_blocks:
+            if block.get("type") == "text":
+                client.send_message(chat_id, block.get("text", ""))
+            elif block.get("type") == "photo":
+                client.send_photo(chat_id, block.get("path", ""), caption=block.get("caption"))
+            elif block.get("type") == "document":
+                client.send_document(chat_id, block.get("path", ""), caption=block.get("caption"))
+            time.sleep(send_delay_seconds)
 
     if os.path.isfile(report_path):
         client.send_document(chat_id, report_path, caption="Rebalance report (PDF)")
