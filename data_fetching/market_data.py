@@ -1,13 +1,80 @@
 from __future__ import annotations
 
 import logging
+import os
+import random
 import time
 from typing import Dict, Iterable, List, Optional, Tuple
 
 import pandas as pd
 import yfinance as yf
+from fake_useragent import UserAgent
 
 logger = logging.getLogger(__name__)
+
+_USER_AGENT: Optional[UserAgent] = None
+
+
+def _get_env_float(name: str, default: float) -> float:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        logger.warning("Invalid %s value %r; using default %.2f", name, raw, default)
+        return default
+
+
+def _get_random_user_agent() -> Optional[str]:
+    global _USER_AGENT
+    if _USER_AGENT is None:
+        try:
+            _USER_AGENT = UserAgent()
+        except Exception as exc:
+            logger.warning("Failed to initialize fake-useragent: %s", exc)
+            return None
+    try:
+        return _USER_AGENT.random
+    except Exception as exc:
+        logger.warning("Failed to generate random user agent: %s", exc)
+        return None
+
+
+def _apply_yfinance_user_agent() -> None:
+    user_agent = _get_random_user_agent()
+    if not user_agent:
+        return
+    try:
+        from yfinance.data import YfData
+
+        session = YfData()._session
+        if session is None:
+            return
+        session.headers.update({"User-Agent": user_agent})
+    except Exception as exc:
+        logger.warning("Failed to set yfinance User-Agent: %s", exc)
+
+
+def _batch_sleep_bounds() -> tuple[float, float]:
+    lower = _get_env_float("YFINANCE_BATCH_SLEEP_LOWER", 1.0)
+    upper = _get_env_float("YFINANCE_BATCH_SLEEP_UPPER", 5.0)
+    if lower < 0:
+        lower = 0.0
+    if upper < lower:
+        upper = lower
+    return lower, upper
+
+
+def _sleep_between_batches() -> None:
+    lower, upper = _batch_sleep_bounds()
+    if upper <= 0:
+        return
+    delay = random.uniform(lower, upper)
+    if delay <= 0:
+        return
+    logger.info("Sleeping %.3f seconds before next yfinance batch", delay)
+    time.sleep(delay)
 
 
 def build_yfinance_tickers(base_symbol: str) -> List[str]:
@@ -48,6 +115,7 @@ def fetch_history_with_retries(
                 interval,
                 attempt,
             )
+            _apply_yfinance_user_agent()
             df = yf.download(
                 ticker,
                 period=period,
@@ -150,7 +218,8 @@ def fetch_history_batch(
 ) -> Dict[str, Tuple[str, pd.DataFrame]]:
     results: Dict[str, Tuple[str, pd.DataFrame]] = {}
     sorted_tickers = sorted(tickers)
-    for chunk_index, chunk in enumerate(_chunked(sorted_tickers, batch_size)):
+    chunks = list(_chunked(sorted_tickers, batch_size))
+    for chunk_index, chunk in enumerate(chunks):
         batch_frames: Dict[str, pd.DataFrame] = {}
         try:
             if chunk:
@@ -163,6 +232,7 @@ def fetch_history_batch(
                     chunk[0],
                     chunk[-1],
                 )
+            _apply_yfinance_user_agent()
             batch_df = yf.download(
                 chunk,
                 period=period,
@@ -215,6 +285,8 @@ def fetch_history_batch(
             if df is None or df.empty:
                 continue
             results[ticker] = (used_ticker, df)
+        if chunk_index < len(chunks) - 1:
+            _sleep_between_batches()
     return results
 
 

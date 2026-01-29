@@ -189,6 +189,11 @@ def analyze_universe(
         output_dir=log_dir,
         bucket_size=config.chart_bucket,
     )
+    charts.plot_momentum_extremes_summary(
+        ranked,
+        output_dir=log_dir,
+        count=5,
+    )
     def _describe(values: List[float]) -> Optional[Dict[str, float]]:
         if not values:
             return None

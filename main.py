@@ -26,6 +26,13 @@ from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
+RANKING_CHART_FILENAMES = (
+    "top1to25momentum.png",
+    "top26to50momentum.png",
+    "top51to75momentum.png",
+    "top76to100momentum.png",
+)
+
 
 def check_sp500_trend(strategy_config) -> tuple[bool, float | None, float | None]:
     logger.info("Checking S&P500 trend using %s", strategy_config.sp500_ticker)
@@ -170,7 +177,7 @@ def _format_telegram_message(
 
     for key in sorted(drop_counts.keys()):
         lines.append(f"{key}: {drop_counts.get(key, 0)}")
-    lines.append("drop_counts_bar.png")
+    lines.append("dropCountsBarChart.png")
 
     error_keys = [
         "no_data",
@@ -207,14 +214,10 @@ def _format_telegram_message(
         lines.append(f"R^2 min/max: {r2_stats.get('min', 0):.4f} / {r2_stats.get('max', 0):.4f}")
         lines.append(f"R^2 mean/median: {r2_stats.get('mean', 0):.4f} / {r2_stats.get('median', 0):.4f}")
 
+    lines.extend(["", "These were the Top 100 momentum ranking stocks:"])
+    lines.extend(RANKING_CHART_FILENAMES)
     lines.extend(
         [
-            "",
-            "These were the Top 100 momentum ranking stocks:",
-            "top_25.png",
-            "top_25to50.png",
-            "top50to75.png",
-            "top75to100.png",
             "",
             "this was your portfolio before today's rebalance:",
             "pre_rebalance_pie_chart.png",
@@ -361,8 +364,33 @@ def main() -> None:
         config=strategy_config,
         log_dir=log_dir,
     )
+    drop_counts = analysis_summary.get("drop_counts", {}) if isinstance(analysis_summary, dict) else {}
     drop_counts_chart_path = charts.plot_drop_counts_bar(
-        analysis_summary.get("drop_counts", {}) if isinstance(analysis_summary, dict) else {},
+        drop_counts,
+        output_dir=log_dir,
+    )
+    error_keys = [
+        "no_data",
+        "no_momentum_data",
+        "nan_close",
+        "momentum_failed",
+        "atr_missing",
+        "missing_close",
+        "sma_missing",
+        "missing_ticker",
+        "missing_base_symbol",
+    ]
+    error_total = sum(drop_counts.get(key, 0) for key in error_keys)
+    ranked_count = analysis_summary.get("ranked_count", 0) if isinstance(analysis_summary, dict) else 0
+    duplicate_count = analysis_summary.get("duplicate_count", 0) if isinstance(analysis_summary, dict) else 0
+    charts.plot_summary_counts(
+        {
+            "Errors": error_total,
+            "Below SMA": drop_counts.get("below_sma", 0),
+            "Gap >= 15%": drop_counts.get("gap", 0),
+            "Ranked": ranked_count,
+            "Duplicates": duplicate_count,
+        },
         output_dir=log_dir,
     )
     universe_summary = {
@@ -488,8 +516,8 @@ def main() -> None:
         )
 
         momentum_charts = [
-            os.path.join(log_dir, "momentum_charts", name)
-            for name in ("top_25.png", "top_25to50.png", "top50to75.png", "top75to100.png")
+            os.path.join(log_dir, "momentum_charts", "Rankings", name)
+            for name in RANKING_CHART_FILENAMES
         ]
         regime_summary = {
             "risk_on": False,
@@ -518,15 +546,16 @@ def main() -> None:
             analysis_summary=analysis_summary,
             regime_summary=regime_summary,
         )
+        ranking_markers = [
+            (name, _existing_path(os.path.join(log_dir, "momentum_charts", "Rankings", name)))
+            for name in RANKING_CHART_FILENAMES
+        ]
         message_blocks = _build_telegram_blocks(
             message_text,
             image_markers=[
                 ("index_price_charts.png", _existing_path(index_price_path)),
-                ("drop_counts_bar.png", _existing_path(drop_counts_chart_path)),
-                ("top_25.png", _existing_path(os.path.join(log_dir, "momentum_charts", "top_25.png"))),
-                ("top_25to50.png", _existing_path(os.path.join(log_dir, "momentum_charts", "top_25to50.png"))),
-                ("top50to75.png", _existing_path(os.path.join(log_dir, "momentum_charts", "top50to75.png"))),
-                ("top75to100.png", _existing_path(os.path.join(log_dir, "momentum_charts", "top75to100.png"))),
+                ("dropCountsBarChart.png", _existing_path(drop_counts_chart_path)),
+                *ranking_markers,
                 ("pre_rebalance_pie_chart.png", _existing_path(os.path.join(log_dir, "momentum_charts", "pre_rebalance_pie_chart.png"))),
                 ("holdings_pie.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_pie.png"))),
                 ("index_exposure_bar.png", _existing_path(index_exposure_path)),
@@ -605,8 +634,8 @@ def main() -> None:
     )
 
     momentum_charts = [
-        os.path.join(log_dir, "momentum_charts", name)
-        for name in ("top_25.png", "top_25to50.png", "top50to75.png", "top75to100.png")
+        os.path.join(log_dir, "momentum_charts", "Rankings", name)
+        for name in RANKING_CHART_FILENAMES
     ]
     regime_summary = {
         "risk_on": risk_on,
@@ -635,15 +664,16 @@ def main() -> None:
         analysis_summary=analysis_summary,
         regime_summary=regime_summary,
     )
+    ranking_markers = [
+        (name, _existing_path(os.path.join(log_dir, "momentum_charts", "Rankings", name)))
+        for name in RANKING_CHART_FILENAMES
+    ]
     message_blocks = _build_telegram_blocks(
         message_text,
         image_markers=[
             ("index_price_charts.png", _existing_path(index_price_path)),
-            ("drop_counts_bar.png", _existing_path(drop_counts_chart_path)),
-            ("top_25.png", _existing_path(os.path.join(log_dir, "momentum_charts", "top_25.png"))),
-            ("top_25to50.png", _existing_path(os.path.join(log_dir, "momentum_charts", "top_25to50.png"))),
-            ("top50to75.png", _existing_path(os.path.join(log_dir, "momentum_charts", "top50to75.png"))),
-            ("top75to100.png", _existing_path(os.path.join(log_dir, "momentum_charts", "top75to100.png"))),
+            ("dropCountsBarChart.png", _existing_path(drop_counts_chart_path)),
+            *ranking_markers,
             ("pre_rebalance_pie_chart.png", _existing_path(os.path.join(log_dir, "momentum_charts", "pre_rebalance_pie_chart.png"))),
             ("holdings_pie.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_pie.png"))),
             ("index_exposure_bar.png", _existing_path(index_exposure_path)),

@@ -27,9 +27,15 @@ _DARK_STYLE_SET = False
 _CHART_DPI = 220
 
 
-def _configure_chart_font() -> None:
-    font_family = os.getenv("CHART_FONT", "Montserrat").strip()
-    font_path = os.getenv("CHART_FONT_PATH", "").strip()
+def _configure_chart_font(
+    *,
+    font_family: Optional[str] = None,
+    font_path: Optional[str] = None,
+) -> None:
+    if font_family is None:
+        font_family = os.getenv("CHART_FONT", "Cascadia Code").strip()
+    if font_path is None:
+        font_path = os.getenv("CHART_FONT_PATH", "").strip()
     if font_path and os.path.isfile(font_path):
         try:
             font_manager.fontManager.addfont(font_path)
@@ -125,10 +131,10 @@ def plot_momentum_buckets(
         return
 
     buckets = [
-        (0, bucket_size, "top_25"),
-        (bucket_size, bucket_size * 2, "top_25to50"),
-        (bucket_size * 2, bucket_size * 3, "top50to75"),
-        (bucket_size * 3, bucket_size * 4, "top75to100"),
+        (0, bucket_size, "top1to25momentum.png"),
+        (bucket_size, bucket_size * 2, "top26to50momentum.png"),
+        (bucket_size * 2, bucket_size * 3, "top51to75momentum.png"),
+        (bucket_size * 3, bucket_size * 4, "top76to100momentum.png"),
     ]
     color_maps = [
         plt.cm.Greens,
@@ -137,13 +143,13 @@ def plot_momentum_buckets(
         plt.cm.Reds,
     ]
 
-    charts_dir = os.path.join(output_dir, "momentum_charts")
+    charts_dir = os.path.join(output_dir, "momentum_charts", "Rankings")
     os.makedirs(charts_dir, exist_ok=True)
 
-    for idx, (start, end, label) in enumerate(buckets):
+    for idx, (start, end, filename) in enumerate(buckets):
         segment = ranked[start:end]
         if not segment:
-            logger.info("No stocks available for chart bucket %s", label)
+            logger.info("No stocks available for chart bucket %s", filename)
             continue
 
         tickers = [stock.base_symbol for stock in segment]
@@ -166,10 +172,150 @@ def plot_momentum_buckets(
         ax.grid(axis="y", linestyle="--", alpha=0.3, color="#2a2f3a")
         fig.tight_layout()
 
-        filename = os.path.join(charts_dir, f"{label}.png")
-        _save_figure(fig, filename)
+        output_path = os.path.join(charts_dir, filename)
+        _save_figure(fig, output_path)
         plt.close(fig)
-        logger.info("Saved momentum chart: %s", filename)
+        logger.info("Saved momentum chart: %s", output_path)
+
+
+def plot_momentum_extremes_summary(
+    ranked: List[AnalyzedStock],
+    *,
+    output_dir: str,
+    filename: str = "momentum_stats.png",
+    count: int = 5,
+) -> Optional[str]:
+    _apply_dark_style()
+    _configure_chart_font(font_family="Cascadia Code")
+    if not ranked:
+        logger.warning("No ranked stocks available for momentum extremes charting")
+        return None
+
+    def _select_extremes(values: List[tuple[str, float]]) -> tuple[List[tuple[str, float]], List[tuple[str, float]]]:
+        if not values:
+            return [], []
+        sorted_values = sorted(values, key=lambda item: item[1])
+        bottom = sorted_values[:count]
+        top = list(reversed(sorted_values[-count:]))
+        return top, bottom
+
+    def _plot_panel(
+        ax: plt.Axes,
+        items: List[tuple[str, float]],
+        *,
+        title: str,
+        color: str,
+        value_format: str,
+    ) -> None:
+        if not items:
+            ax.set_visible(False)
+            return
+        labels = [item[0] for item in items]
+        values = [item[1] for item in items]
+        positions = np.arange(len(labels))
+        ax.barh(positions, values, color=color, alpha=0.85)
+        ax.set_yticks(positions)
+        ax.set_yticklabels(labels, fontsize=9)
+        ax.set_title(title, fontsize=11)
+        ax.grid(axis="x", linestyle="--", alpha=0.3, color="#2a2f3a")
+        ax.axvline(0, color="#2a2f3a", linewidth=1)
+        span = (max(values) - min(values)) if values else 0
+        pad = span * 0.04 if span else (abs(max(values)) or 1.0) * 0.06
+        for idx, value in enumerate(values):
+            if value >= 0:
+                ax.text(value + pad, idx, value_format.format(value), va="center", ha="left", fontsize=8)
+            else:
+                ax.text(value - pad, idx, value_format.format(value), va="center", ha="right", fontsize=8)
+        ax.invert_yaxis()
+
+    score_values = [(stock.base_symbol, stock.score) for stock in ranked]
+    slope_values = [(stock.base_symbol, stock.slope) for stock in ranked]
+    r2_values = [(stock.base_symbol, stock.r_squared) for stock in ranked]
+
+    score_top, score_bottom = _select_extremes(score_values)
+    slope_top, slope_bottom = _select_extremes(slope_values)
+    r2_top, r2_bottom = _select_extremes(r2_values)
+
+    charts_dir = os.path.join(output_dir, "momentum_charts", "regressionMetrics")
+    os.makedirs(charts_dir, exist_ok=True)
+
+    fig, axes = plt.subplots(3, 2, figsize=(14, 10))
+    color_map = {
+        "score_top": "#22c55e",
+        "score_bottom": "#ef4444",
+        "slope_top": "#38bdf8",
+        "slope_bottom": "#f97316",
+        "r2_top": "#a3e635",
+        "r2_bottom": "#f43f5e",
+    }
+
+    _plot_panel(
+        axes[0, 0],
+        score_top,
+        title="Top 5 Scores",
+        color=color_map["score_top"],
+        value_format="{:.4f}",
+    )
+    _plot_panel(
+        axes[0, 1],
+        score_bottom,
+        title="Bottom 5 Scores",
+        color=color_map["score_bottom"],
+        value_format="{:.4f}",
+    )
+    _plot_panel(
+        axes[1, 0],
+        slope_top,
+        title="Top 5 Slopes",
+        color=color_map["slope_top"],
+        value_format="{:.6f}",
+    )
+    _plot_panel(
+        axes[1, 1],
+        slope_bottom,
+        title="Bottom 5 Slopes",
+        color=color_map["slope_bottom"],
+        value_format="{:.6f}",
+    )
+    _plot_panel(
+        axes[2, 0],
+        r2_top,
+        title="Top 5 R^2",
+        color=color_map["r2_top"],
+        value_format="{:.4f}",
+    )
+    _plot_panel(
+        axes[2, 1],
+        r2_bottom,
+        title="Bottom 5 R^2",
+        color=color_map["r2_bottom"],
+        value_format="{:.4f}",
+    )
+
+    scores = [value for _, value in score_values]
+    slopes = [value for _, value in slope_values]
+    r2s = [value for _, value in r2_values]
+    score_mean = float(np.mean(scores)) if scores else 0.0
+    score_median = float(np.median(scores)) if scores else 0.0
+    slope_mean = float(np.mean(slopes)) if slopes else 0.0
+    slope_median = float(np.median(slopes)) if slopes else 0.0
+    r2_mean = float(np.mean(r2s)) if r2s else 0.0
+    r2_median = float(np.median(r2s)) if r2s else 0.0
+
+    summary_line = (
+        f"Score mean/median: {score_mean:.4f} / {score_median:.4f}   "
+        f"Slope mean/median: {slope_mean:.6f} / {slope_median:.6f}   "
+        f"R^2 mean/median: {r2_mean:.4f} / {r2_median:.4f}"
+    )
+    fig.text(0.5, 0.02, summary_line, ha="center", va="bottom", fontsize=9, color="#e5e7eb")
+    fig.suptitle("Momentum Extremes Summary", fontsize=13, y=0.99)
+    fig.tight_layout(rect=[0.02, 0.06, 0.98, 0.95])
+
+    output_path = os.path.join(charts_dir, filename)
+    _save_figure(fig, output_path)
+    plt.close(fig)
+    logger.info("Saved momentum extremes chart: %s", output_path)
+    return output_path
 
 
 def plot_holdings_pie(
@@ -482,15 +628,63 @@ def plot_index_price_charts(
     return output_path
 
 
+def plot_summary_counts(
+    summary_counts: Dict[str, float],
+    *,
+    output_dir: str,
+    filename: str = "summary_counts.png",
+) -> Optional[str]:
+    _apply_dark_style()
+    _configure_chart_font(font_family="Cascadia Code")
+    charts_dir = os.path.join(output_dir, "momentum_charts", "errorsAndDropouts")
+    os.makedirs(charts_dir, exist_ok=True)
+
+    if not summary_counts:
+        logger.info("No summary counts available for charting")
+        return None
+
+    labels = list(summary_counts.keys())
+    values = [float(summary_counts.get(label, 0)) for label in labels]
+    if not any(values):
+        logger.info("Summary counts chart skipped due to zero values")
+        return None
+
+    fig, ax = plt.subplots(figsize=(9.5, 4.6))
+    if len(values) > 1:
+        normalized = (np.array(values) - min(values)) / (max(values) - min(values) or 1)
+    else:
+        normalized = np.array([0.5])
+    colors = plt.cm.PuBu(0.25 + 0.7 * normalized)
+    ax.barh(range(len(labels)), values, color=colors, alpha=0.9)
+    ax.set_title("Summary counts")
+    ax.set_yticks(range(len(labels)))
+    ax.set_yticklabels(labels, fontsize=9)
+    ax.grid(axis="x", linestyle="--", alpha=0.3, color="#2a2f3a")
+    ax.invert_yaxis()
+
+    max_value = max(values) if values else 0
+    pad = max_value * 0.03 if max_value else 0.5
+    for idx, value in enumerate(values):
+        text = f"{value:.0f}" if value.is_integer() else f"{value:.2f}"
+        ax.text(value + pad, idx, text, va="center", ha="left", fontsize=9)
+
+    fig.tight_layout()
+    output_path = os.path.join(charts_dir, filename)
+    _save_figure(fig, output_path)
+    plt.close(fig)
+    logger.info("Saved summary counts chart: %s", output_path)
+    return output_path
+
+
 def plot_drop_counts_bar(
     drop_counts: Dict[str, int],
     *,
     output_dir: str,
-    filename: str = "drop_counts_bar.png",
+    filename: str = "dropCountsBarChart.png",
 ) -> Optional[str]:
     _apply_dark_style()
     _configure_chart_font()
-    charts_dir = os.path.join(output_dir, "momentum_charts")
+    charts_dir = os.path.join(output_dir, "momentum_charts", "errorsAndDropouts")
     os.makedirs(charts_dir, exist_ok=True)
 
     if not drop_counts:
