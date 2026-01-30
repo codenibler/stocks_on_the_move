@@ -14,6 +14,9 @@ logger = logging.getLogger(__name__)
 
 _USER_AGENT: Optional[UserAgent] = None
 _YF_CACHE_APPLIED = False
+_EURUSD_RATE: Optional[float] = None
+_EURUSD_RATE_FETCHED = False
+_EURUSD_RATE_ATTEMPTED = False
 
 def _get_env_bool(name: str, default: bool) -> bool:
     raw = os.getenv(name)
@@ -86,6 +89,76 @@ def _prepare_yfinance_session() -> None:
     _apply_yfinance_user_agent()
 
 
+def get_eur_usd_rate(
+    *,
+    retries: int = 3,
+    retry_sleep_seconds: float = 1.0,
+    force: bool = False,
+) -> Optional[float]:
+    global _EURUSD_RATE, _EURUSD_RATE_FETCHED, _EURUSD_RATE_ATTEMPTED
+    if _EURUSD_RATE_FETCHED and _EURUSD_RATE is not None:
+        return _EURUSD_RATE
+    if _EURUSD_RATE_ATTEMPTED and not force:
+        return _EURUSD_RATE
+
+    _EURUSD_RATE_ATTEMPTED = True
+    ticker = os.getenv("EURUSD_TICKER", "EURUSD=X")
+    period = os.getenv("EURUSD_LOOKBACK", "10d")
+    interval = os.getenv("EURUSD_INTERVAL", "1d")
+
+    for attempt in range(1, retries + 1):
+        try:
+            logger.info(
+                "Fetching EUR/USD rate via yfinance: ticker=%s period=%s interval=%s attempt=%s",
+                ticker,
+                period,
+                interval,
+                attempt,
+            )
+            _prepare_yfinance_session()
+            df = yf.download(
+                ticker,
+                period=period,
+                interval=interval,
+                progress=False,
+                auto_adjust=False,
+                threads=_yfinance_threads_enabled(),
+            )
+            if df is None or df.empty:
+                logger.warning("Empty EUR/USD data for %s (attempt %s)", ticker, attempt)
+                continue
+            df = df.dropna(how="all")
+            if df.empty:
+                logger.warning("All-NaN EUR/USD data for %s (attempt %s)", ticker, attempt)
+                continue
+            df = normalize_price_frame(df)
+            series = select_price_series(df)
+            if series is None or series.dropna().empty:
+                logger.warning("EUR/USD data missing Close values for %s (attempt %s)", ticker, attempt)
+                continue
+            rate = float(series.dropna().iloc[-1])
+            if rate <= 0:
+                logger.warning("Invalid EUR/USD rate %.6f from %s", rate, ticker)
+                continue
+            _EURUSD_RATE = rate
+            _EURUSD_RATE_FETCHED = True
+            logger.info("Fetched EUR/USD rate %.6f from %s", rate, ticker)
+            logger.info("Received EUR/USD exchange rate %.6f and stored it", rate)
+            return rate
+        except Exception as exc:
+            logger.warning("Error fetching EUR/USD rate from %s attempt %s: %s", ticker, attempt, exc)
+        time.sleep(retry_sleep_seconds)
+
+    logger.warning("Failed to fetch EUR/USD rate from yfinance after %s attempts", retries)
+    return _EURUSD_RATE
+
+
+def _ensure_eur_usd_rate_fetched() -> None:
+    if _EURUSD_RATE_FETCHED:
+        return
+    get_eur_usd_rate()
+
+
 def _yfinance_threads_enabled() -> bool:
     return _get_env_bool("YFINANCE_THREADS", default=False)
 
@@ -140,6 +213,7 @@ def fetch_history_with_retries(
     retries: int,
     retry_sleep_seconds: float,
 ) -> Optional[pd.DataFrame]:
+    _ensure_eur_usd_rate_fetched()
     for attempt in range(1, retries + 1):
         try:
             logger.debug(
@@ -226,6 +300,7 @@ def fetch_history_batch(
     retry_sleep_seconds: float,
     batch_size: int,
 ) -> Dict[str, Tuple[str, pd.DataFrame]]:
+    _ensure_eur_usd_rate_fetched()
     results: Dict[str, Tuple[str, pd.DataFrame]] = {}
     sorted_tickers = sorted(tickers)
     chunks = list(_chunked(sorted_tickers, batch_size))

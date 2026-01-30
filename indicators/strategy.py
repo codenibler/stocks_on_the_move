@@ -54,6 +54,22 @@ def analyze_universe(
     drop_counts: Dict[str, int] = {}
     symbol_entries: List[tuple[dict, str]] = []
 
+    eurusd_rate = market_data.get_eur_usd_rate(
+        retries=config.retries,
+        retry_sleep_seconds=config.retry_sleep_seconds,
+        force=True,
+    )
+    usd_to_eur: Optional[float] = None
+    if eurusd_rate is not None and eurusd_rate > 0:
+        usd_to_eur = 1.0 / eurusd_rate
+        logger.info(
+            "Using EUR/USD rate %.6f (USD per EUR). USD->EUR factor %.6f for momentum pricing",
+            eurusd_rate,
+            usd_to_eur,
+        )
+    else:
+        logger.warning("EUR/USD rate unavailable; momentum will remain in USD")
+
     for inst in instruments:
         ticker = inst.get("ticker")
         if not ticker:
@@ -99,6 +115,16 @@ def analyze_universe(
             logger.info("Dropping %s: NaN price series", base_symbol)
             drop_counts["nan_close"] = drop_counts.get("nan_close", 0) + 1
             continue
+        if usd_to_eur is not None:
+            sample_price_usd = float(price_series.dropna().iloc[-1])
+            price_series = price_series * usd_to_eur
+            sample_price_eur = float(sample_price_usd * usd_to_eur)
+            logger.debug(
+                "Converted %s price series to EUR for momentum calculation (sample %.4f USD -> %.4f EUR)",
+                base_symbol,
+                sample_price_usd,
+                sample_price_eur,
+            )
 
         momentum = analytics.calculate_momentum_score(
             price_series,

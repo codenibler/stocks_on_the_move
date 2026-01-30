@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import json
 import logging
 import os
 import time
@@ -664,7 +665,11 @@ def main() -> None:
 
     _sleep_for_summary_rate_limit()
     summary = client.get_account_summary()
-    logger.info("Trading212 account summary response: %s", summary)
+    if isinstance(summary, dict):
+        formatted_summary = json.dumps(summary, indent=2, sort_keys=True)
+    else:
+        formatted_summary = summary
+    logger.info("Trading212 account summary response:\n%s", formatted_summary)
     cash = None
     if isinstance(summary, dict):
         cash = summary.get("cash", {}).get("availableToTrade")
