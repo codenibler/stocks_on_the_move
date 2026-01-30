@@ -671,9 +671,25 @@ def main() -> None:
     if cash is None:
         raise RuntimeError("Account summary missing cash.availableToTrade")
 
+    investments_value = None
+    if isinstance(summary, dict):
+        investments_value = summary.get("investments", {}).get("currentValue")
+
     holdings_value = portfolio.calculate_holdings_value(positions, keep_tickers=top_tickers)
-    total_equity = float(cash) + holdings_value
-    logger.info("Cash available=%.2f holdings value=%.2f total equity=%.2f", cash, holdings_value, total_equity)
+    if investments_value is None:
+        total_equity = float(cash) + holdings_value
+        logger.warning(
+            "Account summary missing investments.currentValue; using holdings value fallback for total equity."
+        )
+    else:
+        total_equity = float(cash) + float(investments_value)
+    logger.info(
+        "Cash available=%.2f investments value=%s holdings value=%.2f total equity=%.2f",
+        cash,
+        f"{float(investments_value):.2f}" if investments_value is not None else "n/a",
+        holdings_value,
+        total_equity,
+    )
 
     positions_map = portfolio.extract_position_map(positions, allowed_tickers=top_tickers)
     new_buy_orders, rebalance_buy_orders, rebalance_sell_orders, remaining_cash = portfolio.build_rebalance_orders(
