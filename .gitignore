@@ -12,5 +12,7 @@ venv/
 
 logs/
 tests/
+yf-cache/
 
 .DS_Store
+
