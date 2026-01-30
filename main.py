@@ -664,6 +664,7 @@ def main() -> None:
 
     _sleep_for_summary_rate_limit()
     summary = client.get_account_summary()
+    logger.info("Trading212 account summary response: %s", summary)
     cash = None
     if isinstance(summary, dict):
         cash = summary.get("cash", {}).get("availableToTrade")

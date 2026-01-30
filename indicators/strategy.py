@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import ast
 import logging
+import os
+import re
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
@@ -175,6 +178,7 @@ def analyze_universe(
             unique_by_ticker[stock.ticker] = stock
 
     ranked = sorted(unique_by_ticker.values(), key=lambda stock: stock.score, reverse=True)
+    ranked = _apply_share_class_exclusions(ranked)
     logger.info("Momentum ranking complete. Kept %s stocks", len(ranked))
     if duplicate_count:
         logger.info("Removed %s duplicate tickers from rankings", duplicate_count)
@@ -221,3 +225,93 @@ def analyze_universe(
     }
     return ranked, duplicates, summary
 
+
+def _parse_share_class_exclusions(raw: str) -> List[tuple[str, ...]]:
+    text = (raw or "").strip()
+    if not text:
+        return []
+    tuples: List[tuple[str, ...]] = []
+
+    try:
+        parsed = ast.literal_eval(text)
+    except (SyntaxError, ValueError):
+        parsed = None
+
+    def _normalize_parts(parts: List[str]) -> List[str]:
+        cleaned: List[str] = []
+        for part in parts:
+            value = part.strip().strip("'\"").strip()
+            if value:
+                cleaned.append(value.upper())
+        return cleaned
+
+    if parsed is not None:
+        if isinstance(parsed, (list, tuple)):
+            items = parsed
+        else:
+            items = [parsed]
+        for item in items:
+            if isinstance(item, (list, tuple)):
+                parts = _normalize_parts([str(p) for p in item])
+            elif isinstance(item, str):
+                parts = _normalize_parts(item.split(","))
+            else:
+                parts = []
+            if parts:
+                tuples.append(tuple(parts))
+
+    if tuples:
+        return tuples
+
+    groups = re.findall(r"\(([^)]*)\)", text)
+    if not groups:
+        groups = [text]
+    for group in groups:
+        parts = _normalize_parts(group.split(","))
+        if parts:
+            tuples.append(tuple(parts))
+    return tuples
+
+
+def _load_share_class_exclusions() -> List[tuple[str, ...]]:
+    raw = os.getenv("SHARE_CLASS_EXCLUSIONS", "")
+    exclusions = _parse_share_class_exclusions(raw)
+    if exclusions:
+        logger.info("Share class exclusions configured: %s", exclusions)
+    return exclusions
+
+
+def _apply_share_class_exclusions(ranked: List[AnalyzedStock]) -> List[AnalyzedStock]:
+    exclusions = _load_share_class_exclusions()
+    if not exclusions:
+        return ranked
+
+    by_base: Dict[str, List[AnalyzedStock]] = {}
+    for stock in ranked:
+        by_base.setdefault(stock.base_symbol, []).append(stock)
+
+    drop_symbols: set[str] = set()
+    for group in exclusions:
+        preferred = None
+        for symbol in group:
+            if symbol in by_base and by_base[symbol]:
+                preferred = symbol
+                break
+        if not preferred:
+            continue
+        for symbol in group:
+            if symbol != preferred and symbol in by_base:
+                drop_symbols.add(symbol)
+
+    if not drop_symbols:
+        return ranked
+
+    filtered = [stock for stock in ranked if stock.base_symbol not in drop_symbols]
+    removed = len(ranked) - len(filtered)
+    if removed:
+        logger.info(
+            "Dropped %s share-class entries due to exclusions: %s",
+            removed,
+            sorted(drop_symbols),
+        )
+    return filtered

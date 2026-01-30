@@ -224,8 +224,8 @@ def plot_momentum_extremes_summary(
         max_val = max(values)
         span = max_val - min_val
         scale = max(abs(max_val), abs(min_val), 1e-6)
-        pad = max(span * 0.35, scale * 0.35, 0.05)
-        text_pad = pad * 0.4
+        pad = max(span * 0.1, scale * 0.1, 0.05)
+        text_pad = pad * 0.3
         ax.set_xlim(min_val - pad, max_val + pad)
         for idx, value in enumerate(values):
             text = value_strings[idx]
