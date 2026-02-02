@@ -45,6 +45,9 @@ class Trading212Client:
     def get_account_summary(self) -> Any:
         return self._request("GET", "/api/v0/equity/account/summary")
 
+    def get_pies(self) -> Any:
+        return self._request("GET", "/api/v0/equity/pies")
+
     def place_market_order(
         self,
         *,

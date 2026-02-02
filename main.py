@@ -143,6 +143,76 @@ def _sleep_for_summary_rate_limit() -> None:
     time.sleep(delay)
 
 
+def _fetch_pie_instrument_value_total(client: Trading212Client) -> float:
+    try:
+        pies = client.get_pies()
+    except Trading212Error as exc:
+        logger.error("Trading212 pies request failed: %s", exc)
+        return 0.0
+    if not isinstance(pies, list):
+        logger.warning("Trading212 pies response unexpected: %s", pies)
+        return 0.0
+    if not pies:
+        logger.info("No pies found on the account.")
+        return 0.0
+    total_value = 0.0
+    missing_value = 0
+    logger.info("Trading212 pies summary (%s pie(s)):", len(pies))
+    for pie in pies:
+        if not isinstance(pie, dict):
+            missing_value += 1
+            logger.warning("Skipping invalid pie entry: %s", pie)
+            continue
+        pie_id = pie.get("id")
+        result = pie.get("result") or {}
+        value = result.get("priceAvgValue")
+        invested = result.get("priceAvgInvestedValue")
+        pnl = result.get("priceAvgResult")
+        cash_value = pie.get("cash")
+        status = pie.get("status")
+        if value is None:
+            missing_value += 1
+            logger.info(
+                "Pie id=%s value=n/a invested=%s pnl=%s cash=%s status=%s",
+                pie_id,
+                invested,
+                pnl,
+                cash_value,
+                status,
+            )
+            continue
+        try:
+            value_float = float(value)
+        except (TypeError, ValueError):
+            missing_value += 1
+            logger.info(
+                "Pie id=%s value=invalid invested=%s pnl=%s cash=%s status=%s",
+                pie_id,
+                invested,
+                pnl,
+                cash_value,
+                status,
+            )
+            continue
+        total_value += value_float
+        logger.info(
+            "Pie id=%s value=%.2f invested=%s pnl=%s cash=%s status=%s",
+            pie_id,
+            value_float,
+            invested,
+            pnl,
+            cash_value,
+            status,
+        )
+
+    logger.info(
+        "Total pie equity (sum of priceAvgValue) = %.2f (missing priceAvgValue=%s)",
+        total_value,
+        missing_value,
+    )
+    return total_value
+
+
 def _format_telegram_message(
     *,
     universe_summary: Dict[str, Any],
@@ -267,6 +337,34 @@ def _format_telegram_message(
     )
 
     return "\n".join(lines)
+
+
+def _log_account_summary(summary: Any, *, label: str = "Trading212 account summary") -> None:
+    if not isinstance(summary, dict):
+        logger.info("%s response: %s", label, summary)
+        return
+    cash = summary.get("cash") or {}
+    investments = summary.get("investments") or {}
+    logger.info(
+        "%s: id=%s currency=%s totalValue=%s",
+        label,
+        summary.get("id"),
+        summary.get("currency"),
+        summary.get("totalValue"),
+    )
+    logger.info(
+        "  cash: availableToTrade=%s inPies=%s reservedForOrders=%s",
+        cash.get("availableToTrade"),
+        cash.get("inPies"),
+        cash.get("reservedForOrders"),
+    )
+    logger.info(
+        "  investments: currentValue=%s totalCost=%s unrealizedProfitLoss=%s realizedProfitLoss=%s",
+        investments.get("currentValue"),
+        investments.get("totalCost"),
+        investments.get("unrealizedProfitLoss"),
+        investments.get("realizedProfitLoss"),
+    )
 
 
 def _build_telegram_blocks(
@@ -665,11 +763,7 @@ def main() -> None:
 
     _sleep_for_summary_rate_limit()
     summary = client.get_account_summary()
-    if isinstance(summary, dict):
-        formatted_summary = json.dumps(summary, indent=2, sort_keys=True)
-    else:
-        formatted_summary = summary
-    logger.info("Trading212 account summary response:\n%s", formatted_summary)
+    _log_account_summary(summary)
     cash = None
     if isinstance(summary, dict):
         cash = summary.get("cash", {}).get("availableToTrade")
@@ -695,6 +789,26 @@ def main() -> None:
         holdings_value,
         total_equity,
     )
+
+    pie_instrument_value = _fetch_pie_instrument_value_total(client)
+    if pie_instrument_value > 0:
+        adjusted_total_equity = total_equity - pie_instrument_value
+        if adjusted_total_equity < 0:
+            logger.warning(
+                "Pie instrument value %.2f exceeds total equity %.2f; capping at 0.00",
+                pie_instrument_value,
+                total_equity,
+            )
+            adjusted_total_equity = 0.0
+        logger.info(
+            "Adjusted total equity after subtracting pie instruments: %.2f (raw %.2f - pies %.2f)",
+            adjusted_total_equity,
+            total_equity,
+            pie_instrument_value,
+        )
+        total_equity = adjusted_total_equity
+    else:
+        logger.info("No pie instrument value deducted from total equity.")
 
     positions_map = portfolio.extract_position_map(positions, allowed_tickers=top_tickers)
     new_buy_orders, rebalance_buy_orders, rebalance_sell_orders, remaining_cash = portfolio.build_rebalance_orders(
