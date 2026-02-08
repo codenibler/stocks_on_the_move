@@ -621,13 +621,27 @@ def main() -> None:
     trading_config = get_trading212_config()
     telegram_config = get_telegram_config()
 
-    logger.info("Run configuration: base_url=%s top_n=%s risk_fraction=%.2f", trading_config.base_url, strategy_config.top_n, strategy_config.risk_fraction)
+    logger.info(
+        "Run configuration: data_fetch_base_url=%s order_send_base_url=%s top_n=%s risk_fraction=%.2f",
+        trading_config.data_fetch_base_url,
+        trading_config.order_send_base_url,
+        strategy_config.top_n,
+        strategy_config.risk_fraction,
+    )
     logger.info("Lookbacks: history=%s momentum=%s sp500=%s", strategy_config.history_lookback, strategy_config.momentum_lookback, strategy_config.sp500_lookback)
 
-    client = Trading212Client(
-        api_key=trading_config.api_key,
-        api_secret=trading_config.api_secret,
-        base_url=trading_config.base_url,
+    data_client = Trading212Client(
+        api_key=trading_config.data_fetch_api_key,
+        api_secret=trading_config.data_fetch_api_secret,
+        base_url=trading_config.data_fetch_base_url,
+        timeout_seconds=trading_config.timeout_seconds,
+        retries=trading_config.retries,
+        retry_sleep_seconds=trading_config.retry_sleep_seconds,
+    )
+    order_client = Trading212Client(
+        api_key=trading_config.order_send_api_key,
+        api_secret=trading_config.order_send_api_secret,
+        base_url=trading_config.order_send_base_url,
         timeout_seconds=trading_config.timeout_seconds,
         retries=trading_config.retries,
         retry_sleep_seconds=trading_config.retry_sleep_seconds,
@@ -647,7 +661,7 @@ def main() -> None:
             else:
                 index_counts["UNIDENTIFIED"] += 1
 
-    instruments = constituents.fetch_trading212_instruments(client)
+    instruments = constituents.fetch_trading212_instruments(data_client)
     tradable = constituents.filter_tradable_instruments(instruments)
     matched_result = constituents.cross_reference_constituents(wiki_symbols, tradable, return_stats=True)
     if isinstance(matched_result, tuple):
@@ -730,14 +744,14 @@ def main() -> None:
 
     risk_on, sp500_price, sp500_sma = check_sp500_trend(strategy_config)
 
-    positions = client.get_positions()
+    positions = data_client.get_positions()
     if not isinstance(positions, list):
         raise Trading212Error("Positions response was not a list.")
     logger.info("Retrieved %s open positions", len(positions))
     ticker_name_map = _build_ticker_name_map(matched, ranked, positions)
     pre_cash = None
     _sleep_for_summary_rate_limit()
-    summary_pre = client.get_account_summary()
+    summary_pre = data_client.get_account_summary()
     if isinstance(summary_pre, dict):
         pre_cash = summary_pre.get("cash", {}).get("availableToTrade")
     charts.plot_holdings_pie(
@@ -752,7 +766,7 @@ def main() -> None:
     if sell_orders:
         order_results.extend(
             execute_orders(
-                client,
+                order_client,
                 sell_orders,
                 extended_hours=trading_config.extended_hours,
                 stage="initial_sell",
@@ -762,7 +776,7 @@ def main() -> None:
         logger.info("No sell orders required")
 
     _sleep_for_summary_rate_limit()
-    summary = client.get_account_summary()
+    summary = data_client.get_account_summary()
     _log_account_summary(summary)
     cash = None
     if isinstance(summary, dict):
@@ -790,7 +804,7 @@ def main() -> None:
         total_equity,
     )
 
-    pie_instrument_value = _fetch_pie_instrument_value_total(client)
+    pie_instrument_value = _fetch_pie_instrument_value_total(data_client)
     if pie_instrument_value > 0:
         adjusted_total_equity = total_equity - pie_instrument_value
         if adjusted_total_equity < 0:
@@ -826,7 +840,7 @@ def main() -> None:
     if rebalance_sell_orders:
         order_results.extend(
             execute_orders(
-                client,
+                order_client,
                 rebalance_sell_orders,
                 extended_hours=trading_config.extended_hours,
                 stage="rebalance_sell",
@@ -842,10 +856,10 @@ def main() -> None:
             runtime_config.holdings_pie_delay_seconds,
         )
         _sleep_with_progress(runtime_config.holdings_pie_delay_seconds, label="Waiting for fills")
-        updated_positions = client.get_positions()
+        updated_positions = data_client.get_positions()
         cash_for_chart = None
         _sleep_for_summary_rate_limit()
-        summary_after = client.get_account_summary()
+        summary_after = data_client.get_account_summary()
         if isinstance(summary_after, dict):
             cash_for_chart = summary_after.get("cash", {}).get("availableToTrade")
         if isinstance(updated_positions, list):
@@ -944,7 +958,7 @@ def main() -> None:
     if rebalance_buy_orders:
         order_results.extend(
             execute_orders(
-                client,
+                order_client,
                 rebalance_buy_orders,
                 extended_hours=trading_config.extended_hours,
                 stage="rebalance_buy",
@@ -956,7 +970,7 @@ def main() -> None:
     if new_buy_orders:
         order_results.extend(
             execute_orders(
-                client,
+                order_client,
                 new_buy_orders,
                 extended_hours=trading_config.extended_hours,
                 stage="new_buy",
@@ -970,10 +984,10 @@ def main() -> None:
         runtime_config.holdings_pie_delay_seconds,
     )
     _sleep_with_progress(runtime_config.holdings_pie_delay_seconds, label="Waiting for fills")
-    updated_positions = client.get_positions()
+    updated_positions = data_client.get_positions()
     cash_for_chart = None
     _sleep_for_summary_rate_limit()
-    summary_after = client.get_account_summary()
+    summary_after = data_client.get_account_summary()
     if isinstance(summary_after, dict):
         cash_for_chart = summary_after.get("cash", {}).get("availableToTrade")
     if isinstance(updated_positions, list):
