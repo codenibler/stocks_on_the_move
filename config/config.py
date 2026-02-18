@@ -13,12 +13,8 @@ load_dotenv(override=True)
 class Trading212Config:
     data_fetch_api_key: str
     data_fetch_api_secret: str
-    order_send_api_key: str
-    order_send_api_secret: str
     data_fetch_base_url: str
-    order_send_base_url: str
     timeout_seconds: float
-    extended_hours: bool
     retries: int
     retry_sleep_seconds: float
 
@@ -97,38 +93,26 @@ def _resolve_base_url() -> str:
 def get_trading212_config() -> Trading212Config:
     data_fetch_api_key = os.getenv("TRADING212_DATA_FETCH_API_KEY")
     data_fetch_api_secret = os.getenv("TRADING212_DATA_FETCH_API_SECRET")
-    order_send_api_key = os.getenv("TRADING212_ORDER_SEND_API_KEY")
-    order_send_api_secret = os.getenv("TRADING212_ORDER_SEND_API_SECRET")
     if (
         not data_fetch_api_key
         or not data_fetch_api_secret
-        or not order_send_api_key
-        or not order_send_api_secret
     ):
         missing = [name for name, value in {
             "TRADING212_DATA_FETCH_API_KEY": data_fetch_api_key,
             "TRADING212_DATA_FETCH_API_SECRET": data_fetch_api_secret,
-            "TRADING212_ORDER_SEND_API_KEY": order_send_api_key,
-            "TRADING212_ORDER_SEND_API_SECRET": order_send_api_secret,
         }.items() if not value]
         raise ValueError(f"Missing Trading212 credentials: {', '.join(missing)}")
 
     timeout_seconds = float(os.getenv("TRADING212_TIMEOUT_SECONDS", "30"))
-    extended_hours = _env_bool("TRADING212_EXTENDED_HOURS", default=False)
     retries = int(os.getenv("TRADING212_RETRIES", "3"))
     retry_sleep_seconds = float(os.getenv("TRADING212_RETRY_SLEEP", "1"))
     fallback_base_url = _resolve_base_url()
     data_fetch_base_url = _normalize_base_url(os.getenv("TRADING212_DATA_FETCH_BASE_URL")) or fallback_base_url
-    order_send_base_url = _normalize_base_url(os.getenv("TRADING212_ORDER_SEND_BASE_URL")) or fallback_base_url
     return Trading212Config(
         data_fetch_api_key=data_fetch_api_key,
         data_fetch_api_secret=data_fetch_api_secret,
-        order_send_api_key=order_send_api_key,
-        order_send_api_secret=order_send_api_secret,
         data_fetch_base_url=data_fetch_base_url,
-        order_send_base_url=order_send_base_url,
         timeout_seconds=timeout_seconds,
-        extended_hours=extended_hours,
         retries=retries,
         retry_sleep_seconds=retry_sleep_seconds,
     )

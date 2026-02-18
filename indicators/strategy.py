@@ -48,10 +48,11 @@ def analyze_universe(
     *,
     config: StrategyConfig,
     log_dir: str,
-) -> Tuple[List[AnalyzedStock], List[str], Dict[str, object]]:
+) -> Tuple[List[AnalyzedStock], List[str], Dict[str, object], Dict[str, str]]:
     logger.info("Analyzing %s instruments for momentum", len(instruments))
     results: List[AnalyzedStock] = []
     drop_counts: Dict[str, int] = {}
+    drop_reasons: Dict[str, str] = {}
     symbol_entries: List[tuple[dict, str]] = []
 
     eurusd_rate = market_data.get_eur_usd_rate(
@@ -78,6 +79,7 @@ def analyze_universe(
         base_symbol = extract_trading212_base_symbol(ticker)
         if not base_symbol:
             drop_counts["missing_base_symbol"] = drop_counts.get("missing_base_symbol", 0) + 1
+            drop_reasons[ticker] = "missing_base_symbol"
             continue
         symbol_entries.append((inst, base_symbol))
 
@@ -96,11 +98,13 @@ def analyze_universe(
         if not resolved:
             logger.info("Dropping %s: no yfinance data", base_symbol)
             drop_counts["no_data"] = drop_counts.get("no_data", 0) + 1
+            drop_reasons[ticker] = "no_data"
             continue
         yfinance_symbol, df_full = resolved
         if df_full is None or df_full.empty:
             logger.info("Dropping %s: no yfinance data", base_symbol)
             drop_counts["no_data"] = drop_counts.get("no_data", 0) + 1
+            drop_reasons[ticker] = "no_data"
             continue
         df_full = market_data.normalize_price_frame(df_full.sort_index())
 
@@ -108,12 +112,14 @@ def analyze_universe(
         if momentum_df is None or momentum_df.empty:
             logger.info("Dropping %s: no momentum data", base_symbol)
             drop_counts["no_momentum_data"] = drop_counts.get("no_momentum_data", 0) + 1
+            drop_reasons[ticker] = "no_momentum_data"
             continue
 
         price_series = market_data.select_price_series(momentum_df)
         if price_series is None or price_series.dropna().empty:
             logger.info("Dropping %s: NaN price series", base_symbol)
             drop_counts["nan_close"] = drop_counts.get("nan_close", 0) + 1
+            drop_reasons[ticker] = "nan_close"
             continue
         if usd_to_eur is not None:
             sample_price_usd = float(price_series.dropna().iloc[-1])
@@ -133,6 +139,7 @@ def analyze_universe(
         if not momentum:
             logger.info("Dropping %s: momentum regression failed", base_symbol)
             drop_counts["momentum_failed"] = drop_counts.get("momentum_failed", 0) + 1
+            drop_reasons[ticker] = "momentum_failed"
             continue
         score, slope, r_squared = momentum
 
@@ -140,12 +147,14 @@ def analyze_universe(
         if atr20 is None or atr20 <= 0:
             logger.info("Dropping %s: ATR unavailable", base_symbol)
             drop_counts["atr_missing"] = drop_counts.get("atr_missing", 0) + 1
+            drop_reasons[ticker] = "atr_missing"
             continue
 
         full_price = market_data.select_price_series(df_full)
         if full_price is None or full_price.dropna().empty:
             logger.info("Dropping %s: missing price data", base_symbol)
             drop_counts["missing_close"] = drop_counts.get("missing_close", 0) + 1
+            drop_reasons[ticker] = "missing_close"
             continue
 
         current_price = float(full_price.dropna().iloc[-1])
@@ -153,10 +162,12 @@ def analyze_universe(
         if sma100 is None:
             logger.info("Dropping %s: SMA%s unavailable", base_symbol, config.sma_short)
             drop_counts["sma_missing"] = drop_counts.get("sma_missing", 0) + 1
+            drop_reasons[ticker] = "sma_missing"
             continue
         if current_price < sma100:
             logger.info("Dropping %s: price %.2f below SMA%s %.2f", base_symbol, current_price, config.sma_short, sma100)
             drop_counts["below_sma"] = drop_counts.get("below_sma", 0) + 1
+            drop_reasons[ticker] = "below_sma"
             continue
 
         gap_pct = analytics.find_max_gap_percent(
@@ -172,6 +183,7 @@ def analyze_universe(
                 config.gap_lookback_days,
             )
             drop_counts["gap"] = drop_counts.get("gap", 0) + 1
+            drop_reasons[ticker] = "gap_exceeded"
             continue
 
         results.append(
@@ -204,7 +216,7 @@ def analyze_universe(
             unique_by_ticker[stock.ticker] = stock
 
     ranked = sorted(unique_by_ticker.values(), key=lambda stock: stock.score, reverse=True)
-    ranked = _apply_share_class_exclusions(ranked)
+    ranked = _apply_share_class_exclusions(ranked, drop_reasons)
     logger.info("Momentum ranking complete. Kept %s stocks", len(ranked))
     if duplicate_count:
         logger.info("Removed %s duplicate tickers from rankings", duplicate_count)
@@ -249,7 +261,7 @@ def analyze_universe(
             "r_squared": _describe([stock.r_squared for stock in ranked]),
         },
     }
-    return ranked, duplicates, summary
+    return ranked, duplicates, summary, drop_reasons
 
 
 def _parse_share_class_exclusions(raw: str) -> List[tuple[str, ...]]:
@@ -307,7 +319,7 @@ def _load_share_class_exclusions() -> List[tuple[str, ...]]:
     return exclusions
 
 
-def _apply_share_class_exclusions(ranked: List[AnalyzedStock]) -> List[AnalyzedStock]:
+def _apply_share_class_exclusions(ranked: List[AnalyzedStock], drop_reasons: Dict[str, str]) -> List[AnalyzedStock]:
     exclusions = _load_share_class_exclusions()
     if not exclusions:
         return ranked
@@ -333,6 +345,11 @@ def _apply_share_class_exclusions(ranked: List[AnalyzedStock]) -> List[AnalyzedS
         return ranked
 
     filtered = [stock for stock in ranked if stock.base_symbol not in drop_symbols]
+    # Track stocks excluded due to share class exclusions
+    for stock in ranked:
+        if stock.base_symbol in drop_symbols and stock.ticker not in drop_reasons:
+            drop_reasons[stock.ticker] = "share_class_excluded"
+    
     removed = len(ranked) - len(filtered)
     if removed:
         logger.info(

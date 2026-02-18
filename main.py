@@ -92,7 +92,7 @@ def check_sp500_trend(strategy_config) -> tuple[bool, float | None, float | None
     return risk_on, current_price, sma200
 
 
-def execute_orders(client: Trading212Client, orders, *, extended_hours: bool, stage: str) -> List[Dict[str, Any]]:
+def plan_orders(orders, *, stage: str) -> List[Dict[str, Any]]:
     results: List[Dict[str, Any]] = []
     for order in orders:
         side = "BUY" if order.quantity > 0 else "SELL"
@@ -101,28 +101,17 @@ def execute_orders(client: Trading212Client, orders, *, extended_hours: bool, st
             "side": side,
             "ticker": order.ticker,
             "quantity": order.quantity,
-            "order_id": None,
-            "status": None,
+            "order_id": "NOT_SUBMITTED",
+            "status": "PLANNED",
             "error": None,
         }
-        try:
-            response = client.place_market_order(
-                ticker=order.ticker,
-                quantity=order.quantity,
-                extended_hours=extended_hours,
-            )
-            order_id = None
-            status = None
-            if isinstance(response, dict):
-                order_id = response.get("id")
-                status = response.get("status")
-            entry["order_id"] = order_id
-            entry["status"] = status
-            logger.info("Order placed for %s qty=%s id=%s status=%s", order.ticker, order.quantity, order_id, status)
-        except Trading212Error as exc:
-            entry["error"] = str(exc)
-            entry["status"] = "ERROR"
-            logger.error("Order failed for %s qty=%s: %s", order.ticker, order.quantity, exc)
+        logger.info(
+            "Planned order (not submitted): stage=%s side=%s ticker=%s qty=%s",
+            stage,
+            side,
+            order.ticker,
+            order.quantity,
+        )
         results.append(entry)
     return results
 
@@ -324,12 +313,8 @@ def _format_telegram_message(
             "this was your portfolio before today's rebalance:",
             "pre_rebalance_pie_chart.png",
             "",
-            "And these were the orders we sent in:",
+            "And these were the orders we plan to take (not submitted):",
             "order_summary_code",
-            "Order_submission_summary, as png.",
-            "",
-            "This is your portfolio now, after the rebalance:",
-            "holdings_pie.png",
             "",
             "And this is how they're spread out on the indices.",
             "index_exposure_bar.png",
@@ -523,7 +508,7 @@ def _format_order_table(order_results: Sequence[Dict[str, Any]], name_map: Dict[
     separator = "-" * len(header)
     lines = [header, separator]
     if not rows:
-        lines.append("No orders sent.")
+        lines.append("No planned orders.")
         return "\n".join(lines)
 
     for orb, ticker, company, qty in rows:
@@ -563,7 +548,7 @@ def _format_order_code_blocks(
 ) -> list[str]:
     table = _format_order_table(order_results, name_map)
     if not table:
-        return ["<pre>No orders sent.</pre>"]
+        return ["<pre>No planned orders.</pre>"]
     return _split_preformatted_blocks(table, max_chars=max_chars)
 
 
@@ -573,40 +558,26 @@ def _format_pending_positions_blocks(
     *,
     max_chars: int = 3800,
 ) -> list[str]:
-    lines = ["These are the positions still pending:"]
-    pending_rows: list[str] = []
+    lines = ["These are the planned orders (not submitted):"]
+    planned_rows: list[str] = []
     for order in order_results:
         ticker = order.get("ticker")
         qty_raw = order.get("quantity")
-        status = order.get("status")
         if not ticker or qty_raw is None:
-            continue
-        if not _is_pending_status(status):
             continue
         try:
             qty = float(qty_raw)
         except (TypeError, ValueError):
             continue
+        side_icon = "🟢" if qty > 0 else "🔴"
+        stage = str(order.get("stage") or "")
         name = name_map.get(str(ticker), "")
-        pending_rows.append(f"🟡 {ticker}, {name}, {_format_qty(qty)}")
-    if not pending_rows:
+        planned_rows.append(f"{side_icon} {ticker}, {name}, {_format_qty(qty)}, stage={stage}")
+    if not planned_rows:
         lines.append("None.")
     else:
-        lines.extend(pending_rows)
+        lines.extend(planned_rows)
     return _split_preformatted_blocks("\n".join(lines), max_chars=max_chars)
-
-
-def _is_pending_status(status: Optional[str]) -> bool:
-    if status is None:
-        return True
-    if not isinstance(status, str):
-        return True
-    normalized = status.strip().upper()
-    if normalized in {"FILLED", "EXECUTED", "COMPLETED", "SUCCESS", "CLOSED"}:
-        return False
-    if normalized in {"REJECTED", "CANCELLED", "CANCELED", "ERROR", "FAILED", "DECLINED"}:
-        return False
-    return True
 
 
 def main() -> None:
@@ -622,9 +593,8 @@ def main() -> None:
     telegram_config = get_telegram_config()
 
     logger.info(
-        "Run configuration: data_fetch_base_url=%s order_send_base_url=%s top_n=%s risk_fraction=%.2f",
+        "Run configuration: data_fetch_base_url=%s top_n=%s risk_fraction=%.2f",
         trading_config.data_fetch_base_url,
-        trading_config.order_send_base_url,
         strategy_config.top_n,
         strategy_config.risk_fraction,
     )
@@ -638,15 +608,6 @@ def main() -> None:
         retries=trading_config.retries,
         retry_sleep_seconds=trading_config.retry_sleep_seconds,
     )
-    order_client = Trading212Client(
-        api_key=trading_config.order_send_api_key,
-        api_secret=trading_config.order_send_api_secret,
-        base_url=trading_config.order_send_base_url,
-        timeout_seconds=trading_config.timeout_seconds,
-        retries=trading_config.retries,
-        retry_sleep_seconds=trading_config.retry_sleep_seconds,
-    )
-
     links = constituents.load_constituent_links()
     logger.info("Scraping constituents from %s wikipedia pages", len(links))
     wiki_symbols, index_membership = constituents.scrape_wikipedia_constituents_with_sources(links)
@@ -685,7 +646,7 @@ def main() -> None:
     )
     unmatched_symbols = constituents.compute_unmatched_symbols(wiki_symbols, matched)
 
-    ranked, duplicate_tickers, analysis_summary = strategy.analyze_universe(
+    ranked, duplicate_tickers, analysis_summary, drop_reasons = strategy.analyze_universe(
         matched,
         config=strategy_config,
         log_dir=log_dir,
@@ -762,13 +723,15 @@ def main() -> None:
     )
 
     order_results: List[Dict[str, Any]] = []
-    sell_orders = portfolio.build_sell_orders(positions, keep_tickers=top_tickers)
+    sell_orders = portfolio.build_sell_orders(
+        positions,
+        keep_tickers=top_tickers,
+        drop_reasons=drop_reasons,
+    )
     if sell_orders:
         order_results.extend(
-            execute_orders(
-                order_client,
+            plan_orders(
                 sell_orders,
-                extended_hours=trading_config.extended_hours,
                 stage="initial_sell",
             )
         )
@@ -839,10 +802,8 @@ def main() -> None:
 
     if rebalance_sell_orders:
         order_results.extend(
-            execute_orders(
-                order_client,
+            plan_orders(
                 rebalance_sell_orders,
-                extended_hours=trading_config.extended_hours,
                 stage="rebalance_sell",
             )
         )
@@ -850,33 +811,14 @@ def main() -> None:
         logger.info("No rebalance sell orders required")
 
     if not risk_on:
-        logger.info("S&P500 below SMA%s. Exiting after sells/rebalance.", strategy_config.sma_long)
-        logger.info(
-            "Waiting %.1f seconds before fetching positions for holdings pie chart",
-            runtime_config.holdings_pie_delay_seconds,
+        logger.info("S&P500 below SMA%s. Exiting after order plan notification.", strategy_config.sma_long)
+        updated_positions = positions if isinstance(positions, list) else []
+        cash_for_chart = float(cash)
+        index_exposure_path = charts.plot_index_exposure_bar(
+            updated_positions,
+            output_dir=log_dir,
+            cash_value=cash_for_chart,
         )
-        _sleep_with_progress(runtime_config.holdings_pie_delay_seconds, label="Waiting for fills")
-        updated_positions = data_client.get_positions()
-        cash_for_chart = None
-        _sleep_for_summary_rate_limit()
-        summary_after = data_client.get_account_summary()
-        if isinstance(summary_after, dict):
-            cash_for_chart = summary_after.get("cash", {}).get("availableToTrade")
-        if isinstance(updated_positions, list):
-            charts.plot_holdings_pie(
-                updated_positions,
-                output_dir=log_dir,
-                cash_value=float(cash_for_chart) if cash_for_chart is not None else None,
-            )
-            index_exposure_path = charts.plot_index_exposure_bar(
-                updated_positions,
-                output_dir=log_dir,
-                cash_value=float(cash_for_chart) if cash_for_chart is not None else None,
-            )
-        else:
-            logger.warning("Unable to refresh positions for holdings pie chart.")
-            updated_positions = []
-            index_exposure_path = None
 
         index_price_path = charts.plot_index_price_charts(
             {
@@ -915,7 +857,6 @@ def main() -> None:
             regime_summary=regime_summary,
             momentum_chart_paths=momentum_charts,
             pre_pie_path=os.path.join(log_dir, "momentum_charts", "holdings_charts", "pre_rebalance_pie_chart.png"),
-            post_pie_path=os.path.join(log_dir, "momentum_charts", "holdings_charts", "holdings_pie.png"),
             index_exposure_path=index_exposure_path,
             index_price_path=index_price_path,
             drop_counts_chart_path=drop_counts_chart_path,
@@ -942,7 +883,6 @@ def main() -> None:
                 *[(marker, path, "photo") for marker, path in ranking_markers],
                 ("pre_rebalance_pie_chart.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_charts", "pre_rebalance_pie_chart.png")), "photo"),
                 ("order_summary_code", order_summary_blocks, "text"),
-                ("holdings_pie.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_charts", "holdings_pie.png")), "photo"),
                 ("index_exposure_bar.png", _existing_path(index_exposure_path), "photo"),
             ],
         )
@@ -957,10 +897,8 @@ def main() -> None:
 
     if rebalance_buy_orders:
         order_results.extend(
-            execute_orders(
-                order_client,
+            plan_orders(
                 rebalance_buy_orders,
-                extended_hours=trading_config.extended_hours,
                 stage="rebalance_buy",
             )
         )
@@ -969,42 +907,21 @@ def main() -> None:
 
     if new_buy_orders:
         order_results.extend(
-            execute_orders(
-                order_client,
+            plan_orders(
                 new_buy_orders,
-                extended_hours=trading_config.extended_hours,
                 stage="new_buy",
             )
         )
     else:
         logger.info("No new buy orders required")
 
-    logger.info(
-        "Waiting %.1f seconds before fetching positions for holdings pie chart",
-        runtime_config.holdings_pie_delay_seconds,
+    updated_positions = positions if isinstance(positions, list) else []
+    cash_for_chart = float(cash)
+    index_exposure_path = charts.plot_index_exposure_bar(
+        updated_positions,
+        output_dir=log_dir,
+        cash_value=cash_for_chart,
     )
-    _sleep_with_progress(runtime_config.holdings_pie_delay_seconds, label="Waiting for fills")
-    updated_positions = data_client.get_positions()
-    cash_for_chart = None
-    _sleep_for_summary_rate_limit()
-    summary_after = data_client.get_account_summary()
-    if isinstance(summary_after, dict):
-        cash_for_chart = summary_after.get("cash", {}).get("availableToTrade")
-    if isinstance(updated_positions, list):
-        charts.plot_holdings_pie(
-            updated_positions,
-            output_dir=log_dir,
-            cash_value=float(cash_for_chart) if cash_for_chart is not None else None,
-        )
-        index_exposure_path = charts.plot_index_exposure_bar(
-            updated_positions,
-            output_dir=log_dir,
-            cash_value=float(cash_for_chart) if cash_for_chart is not None else None,
-        )
-    else:
-        logger.warning("Unable to refresh positions for holdings pie chart.")
-        updated_positions = []
-        index_exposure_path = None
 
     index_price_path = charts.plot_index_price_charts(
         {
@@ -1043,7 +960,6 @@ def main() -> None:
         regime_summary=regime_summary,
         momentum_chart_paths=momentum_charts,
         pre_pie_path=os.path.join(log_dir, "momentum_charts", "holdings_charts", "pre_rebalance_pie_chart.png"),
-        post_pie_path=os.path.join(log_dir, "momentum_charts", "holdings_charts", "holdings_pie.png"),
         index_exposure_path=index_exposure_path,
         index_price_path=index_price_path,
         drop_counts_chart_path=drop_counts_chart_path,
@@ -1070,7 +986,6 @@ def main() -> None:
             *[(marker, path, "photo") for marker, path in ranking_markers],
             ("pre_rebalance_pie_chart.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_charts", "pre_rebalance_pie_chart.png")), "photo"),
             ("order_summary_code", order_summary_blocks, "text"),
-            ("holdings_pie.png", _existing_path(os.path.join(log_dir, "momentum_charts", "holdings_charts", "holdings_pie.png")), "photo"),
             ("index_exposure_bar.png", _existing_path(index_exposure_path), "photo"),
         ],
     )

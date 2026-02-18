@@ -4,11 +4,7 @@
 TRADING212_DATA_FETCH_API_KEY=      # Trading212 API key used for read-only requests (instruments, positions, summary, pies).
 TRADING212_DATA_FETCH_API_SECRET=   # Trading212 API secret used for read-only requests.
 TRADING212_DATA_FETCH_BASE_URL=https://live.trading212.com  # Base URL for read-only requests.
-TRADING212_ORDER_SEND_API_KEY=      # Trading212 API key used for order placement.
-TRADING212_ORDER_SEND_API_SECRET=   # Trading212 API secret used for order placement.
-TRADING212_ORDER_SEND_BASE_URL=https://demo.trading212.com  # Base URL for order placement.
 TRADING212_TIMEOUT_SECONDS=30 # Request timeout (seconds).
-TRADING212_EXTENDED_HOURS=false  # Trade during extended hours if true.
 TRADING212_RETRIES=3          # Retry count for API requests
 TRADING212_RETRY_SLEEP=1      # Retry wait (seconds)
 

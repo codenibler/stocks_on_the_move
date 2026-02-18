@@ -164,7 +164,6 @@ def generate_rebalance_report(
     regime_summary: Dict[str, object],
     momentum_chart_paths: List[str],
     pre_pie_path: Optional[str],
-    post_pie_path: Optional[str],
     index_exposure_path: Optional[str],
     index_price_path: Optional[str],
     drop_counts_chart_path: Optional[str],
@@ -354,12 +353,12 @@ def generate_rebalance_report(
         orders_per_page = 26
         order_pages = _chunk(order_results, orders_per_page) if order_results else [[]]
         for page_idx, orders in enumerate(order_pages, start=1):
-            fig = _new_page(f"Order Submission Summary {page_idx}")
+            fig = _new_page(f"Order Plan Summary {page_idx}")
             ax = fig.add_axes((0.04, 0.22, 0.92, 0.7))
             ax.set_facecolor(BACKGROUND)
             ax.set_axis_off()
             if not orders:
-                fig.text(0.06, 0.5, "No orders sent.", color=MUTED, fontsize=12)
+                fig.text(0.06, 0.5, "No planned orders.", color=MUTED, fontsize=12)
             else:
                 columns = ["Stage", "Side", "Ticker", "Qty", "Status", "Order ID", "Error"]
                 rows = [_format_order_row(order) for order in orders]
@@ -387,17 +386,15 @@ def generate_rebalance_report(
                 page_paths=page_paths,
             )
 
-        fig = _new_page("Portfolio After Rebalance")
-        slots = [(0.1, 0.54, 0.8, 0.38), (0.16, 0.14, 0.68, 0.3)]
-        for slot, path in zip(slots, [post_pie_path, index_exposure_path]):
-            img = _load_image(path)
-            ax = fig.add_axes(slot)
-            ax.set_facecolor(BACKGROUND)
-            ax.set_axis_off()
-            if img is not None:
-                ax.imshow(img)
-        if post_pie_path is None:
-            fig.text(0.06, 0.5, "Post-rebalance pie chart not available.", color=MUTED, fontsize=12)
+        fig = _new_page("Index Exposure")
+        img = _load_image(index_exposure_path)
+        ax = fig.add_axes((0.1, 0.16, 0.8, 0.7))
+        ax.set_facecolor(BACKGROUND)
+        ax.set_axis_off()
+        if img is not None:
+            ax.imshow(img)
+        else:
+            fig.text(0.06, 0.5, "Index exposure chart not available.", color=MUTED, fontsize=12)
         page_index = _finalize_page(
             fig,
             pdf,

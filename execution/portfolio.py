@@ -33,8 +33,11 @@ def build_sell_orders(
     positions: Iterable[dict],
     *,
     keep_tickers: Iterable[str],
+    drop_reasons: dict[str, str] | None = None,
 ) -> List[OrderRequest]:
     keep = set(keep_tickers)
+    if drop_reasons is None:
+        drop_reasons = {}
     orders: List[OrderRequest] = []
     for position in positions:
         instrument = position.get("instrument", {})
@@ -47,7 +50,9 @@ def build_sell_orders(
         if ticker in keep:
             continue
         orders.append(OrderRequest(ticker=ticker, quantity=-qty))
-        logger.info("Scheduled sell for %s quantity=%s", ticker, qty)
+        reason = drop_reasons.get(ticker, "ranked_position > top_n")
+        logger.debug("Sell reason lookup for %s -> %s", ticker, reason)
+        logger.info("Scheduled sell for %s quantity=%s reason=%s", ticker, qty, reason)
     logger.info("Total sell orders scheduled: %s", len(orders))
     return orders
 

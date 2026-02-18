@@ -60,7 +60,7 @@ Stocks are then ranked by descending momentum, and bar charts are generated with
 Risk gate is executed. If above 200SMA, new positions are considered. Otherwise, only closing of existent positions is. 
 
 ### 9) Snapshot portfolio before rebalance
-We take a snapshot of holdings before any new orders are sent, and save a pre-rebalance pie chart.
+We take a snapshot of holdings before any planned changes are reported, and save a pre-rebalance pie chart.
 
 ### 10) Sell positions not in top 100
 If a holding isn't present in the top 100 momentum list, we sell it. This also implicitly drops names that were incompliant with our SMA100 and gap filters, as they never made the ranking.
@@ -68,11 +68,11 @@ If a holding isn't present in the top 100 momentum list, we sell it. This also i
 ### 11) Compute total_equity and Size Positions
 We pull availableToTrade cash and compute total equity (cash + holdings value). This is the base for position sizing, done with ATR. Orders are built for rebalances (buys/sells) and new positions. Rebalance threshold and max position caps are applied here.
 
-### 13) Submit rebalance orders
-Orders are sent in three waves: sells, rebalance sells/buys, and new buys. Everything is market orders via the Trading212 API.
+### 13) Build rebalance order plan
+Orders are prepared in three waves: sells, rebalance sells/buys, and new buys. The run only reports the plan and does not submit orders.
 
-### 14) Snapshot portfolio after rebalance
-We refresh positions, save a post-rebalance pie chart, and generate the holdings by index bar chart (now including CASH).
+### 14) Snapshot portfolio after plan generation
+We keep current positions and generate the holdings by index bar chart (now including CASH).
 
 ### 15) Generate rebalance report PDF
 Finally, a PDF report is generated with all charts, order summaries, and the index price action section.
