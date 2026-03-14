@@ -1,5 +1,7 @@
 # Stocks on the Move (Trading212 Demo)
 
+
+
 ## DISCLAIMER (READ FIRST)
 Use this at your own discretion. I recommend you to play with the parameters in .env and test on a practice Trading212 account before deploying on your Invest / Stocks ISA account, to make sure that it meets your risk profile and strategy behavior needs. 
 
